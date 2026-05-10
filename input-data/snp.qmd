@@ -1,0 +1,28 @@
+---
+title: "SNP"
+---
+
+## Schema
+
+::: {.callout-note}
+TODO: describe expected columns / structure / encoding.
+:::
+
+## Example (from the demo dataset)
+
+::: {.callout-note}
+TODO: show first few rows. Will be filled after demo data is generated
+in Task 13.
+:::
+
+## Loading
+
+::: {.callout-note}
+TODO: code chunk showing how each package reads the file.
+:::
+
+## Common pitfalls
+
+::: {.callout-warning}
+TODO: missingness encoding, ordering, ID matching across files.
+:::

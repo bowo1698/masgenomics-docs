@@ -1,0 +1,14 @@
+---
+title: "Input Data"
+---
+
+Both packages consume the same four kinds of input. This section documents
+each one's expected schema, with examples drawn from the
+[demo dataset](../demo-data/index.qmd).
+
+| Input | Format | Pages |
+|---|---|---|
+| SNP genotypes | VCF or dosage matrix (CSV) | [SNP](snp.qmd) |
+| Microhaplotype calls | tab-delimited per locus | [Microhaplotypes](microhaplotypes.qmd) |
+| Phenotypes | CSV: id, fixed effects, response(s) | [Phenotype](phenotype.qmd) |
+| Pedigree | CSV: id, sire, dam | [Pedigree](pedigree.qmd) |
