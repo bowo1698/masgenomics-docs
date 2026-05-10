@@ -1,0 +1,44 @@
+---
+title: "masgenomics"
+subtitle: "Genomic prediction with SNP and microhaplotype data"
+---
+
+::: {.callout-tip}
+## Welcome
+
+This site documents two companion R packages with Rust backends:
+
+- [**masreml**](https://github.com/bowo1698/masreml) — REML-based mixed models, BLUP/GBLUP/GWABLUP, GWAS, cross-validation, threshold models for binary traits.
+- [**masbayes**](https://github.com/bowo1698/masbayes) — Bayesian genomic prediction (BayesA, BayesR).
+
+Both packages support **SNP** and **microhaplotype** genotypes natively.
+:::
+
+## Quick start
+
+```r
+# install.packages("devtools")
+devtools::install_github("bowo1698/masreml")
+devtools::install_github("bowo1698/masbayes")
+```
+
+## Where to go next
+
+| You are... | Start here |
+|---|---|
+| New to genomic prediction | [Theory → Mixed Models & BLUP](theory/mixed-models-blup.qmd) |
+| Looking for code examples | [Tasks → Genomic Prediction](tasks/genomic-prediction.qmd) |
+| Choosing between methods | [Choosing the Right Tool](choosing/index.qmd) |
+| Looking for function docs | [Reference → masreml](reference/masreml/index.qmd) · [masbayes](reference/masbayes/index.qmd) |
+| Curious about the Rust internals | [Internals](internals/index.qmd) |
+
+## Data formats
+
+The packages accept **SNP genotypes** (VCF or dosage matrix), **microhaplotype calls**,
+**phenotypes** (continuous and binary), and **pedigree**. See [Input Data](input-data/index.qmd)
+for full schemas, plus a fully-worked [demo dataset](demo-data/index.qmd) you can
+download and reproduce every result on this site with.
+
+## Citation
+
+If you use these packages, please cite — see [CITATION](https://github.com/bowo1698/masgenomics-docs/blob/main/CITATION.bib).
