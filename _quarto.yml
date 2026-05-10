@@ -1,0 +1,124 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+    - "!_scripts/"
+
+website:
+  title: "masgenomics"
+  description: "Genomic prediction with SNP and microhaplotype data using masbayes and masreml"
+  site-url: https://bowo1698.github.io/masgenomics-docs/
+  repo-url: https://github.com/bowo1698/masgenomics-docs
+  repo-actions: [edit, issue]
+  page-navigation: true
+
+  navbar:
+    background: primary
+    pinned: true
+    search: true
+    left:
+      - href: index.qmd
+        text: Home
+      - href: theory/index.qmd
+        text: Theory
+      - href: input-data/index.qmd
+        text: Input Data
+      - href: demo-data/index.qmd
+        text: Demo Data
+      - href: choosing/index.qmd
+        text: Choosing
+      - href: tasks/index.qmd
+        text: Tasks
+      - text: Reference
+        menu:
+          - href: reference/masreml/index.qmd
+            text: masreml
+          - href: reference/masbayes/index.qmd
+            text: masbayes
+      - href: internals/index.qmd
+        text: Internals
+    right:
+      - icon: github
+        href: https://github.com/bowo1698/masgenomics-docs
+        aria-label: GitHub
+
+  sidebar:
+    - title: "Theory"
+      style: docked
+      contents:
+        - theory/index.qmd
+        - theory/mixed-models-blup.qmd
+        - theory/gblup-gwablup.qmd
+        - theory/bayesian-alphabet.qmd
+        - theory/threshold-model.qmd
+        - theory/snp-vs-microhaplotypes.qmd
+    - title: "Input Data"
+      contents:
+        - input-data/index.qmd
+        - input-data/snp.qmd
+        - input-data/microhaplotypes.qmd
+        - input-data/phenotype.qmd
+        - input-data/pedigree.qmd
+    - title: "Choosing"
+      contents:
+        - choosing/index.qmd
+        - choosing/masreml-vs-masbayes.qmd
+        - choosing/snp-vs-mh.qmd
+    - title: "Tasks"
+      contents:
+        - tasks/index.qmd
+        - tasks/genomic-prediction.qmd
+        - tasks/gwas.qmd
+        - tasks/gwablup.qmd
+        - tasks/cross-validation.qmd
+        - tasks/binary-trait.qmd
+    - title: "Internals"
+      contents:
+        - internals/index.qmd
+        - internals/masreml-rust.qmd
+        - internals/masbayes-rust.qmd
+
+  search:
+    location: navbar
+    type: overlay
+    copy-button: true
+
+  page-footer:
+    left: "© 2026 Agus Wibowo · MIT License"
+    right:
+      - icon: github
+        href: https://github.com/bowo1698/masgenomics-docs
+
+format:
+  html:
+    theme:
+      light: [cosmo, assets/custom.scss]
+      dark: [darkly, assets/custom.scss]
+    toc: true
+    toc-depth: 3
+    toc-location: right
+    code-copy: true
+    code-overflow: wrap
+    code-link: true
+    code-tools: false
+    code-fold: false
+    highlight-style:
+      light: github
+      dark: github-dark
+    fig-cap-location: bottom
+    tbl-cap-location: top
+    smooth-scroll: true
+    anchor-sections: true
+    link-external-newwindow: true
+    filters:
+      - _scripts/shortcodes/rust-src.lua
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false
+
+bibliography: CITATION.bib
+csl: https://www.zotero.org/styles/apa

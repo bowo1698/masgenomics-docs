@@ -1,0 +1,30 @@
+/*-- scss:defaults --*/
+$primary: #2c5f7c;
+$link-color: $primary;
+
+/*-- scss:rules --*/
+.navbar-brand {
+  font-weight: 600;
+}
+
+/* always-visible code copy button — Quarto enables hover by default */
+.code-copy-button {
+  opacity: 0.5 !important;
+}
+.code-copy-button:hover {
+  opacity: 1 !important;
+}
+
+/* Rust source link styling */
+.rust-source-link {
+  font-family: var(--bs-font-monospace);
+  font-size: 0.9em;
+  padding: 0.2em 0.5em;
+  background: var(--bs-light-bg-subtle);
+  border-radius: 3px;
+}
+
+/* callout adjustments */
+.callout-note {
+  border-left-color: $primary;
+}
