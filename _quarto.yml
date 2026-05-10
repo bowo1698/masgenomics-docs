@@ -111,9 +111,6 @@ format:
     smooth-scroll: true
     anchor-sections: true
     link-external-newwindow: true
-    filters:
-      - _scripts/shortcodes/rust-src.lua
-
 execute:
   freeze: auto
   echo: true
