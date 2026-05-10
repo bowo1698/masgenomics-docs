@@ -1,0 +1,248 @@
+---
+title: "Demo Datasets"
+---
+
+```{r}
+#| include: false
+library(reactable)
+library(tibble)
+library(dplyr)
+library(readr)
+```
+
+Two pre-generated synthetic datasets accompany this site. **Every code
+example in the [Tasks](../tasks/index.qmd) section uses these**, so the
+numbers you see in tutorials match what you get when you run them locally.
+
+| Dataset | Individuals | SNPs | MH blocks | Hap blocks | Use |
+|---|---:|---:|---:|---:|---|
+| **main** | 1,000 | 5,000 | ~5,000 | ~500 | All standard tutorials |
+| **toy**  | 200   | 500   | ~500   | ~220 | Quick-start (runs in seconds) |
+
+Both are simulated from `generate.R` with `set.seed(42)` —
+re-running produces bit-identical files.
+
+::: {.callout-tip}
+## Layout matches `MicrohapsSel/simulation/model_fitting`
+
+The file structure mirrors what the user's MicrohapsSel pipeline expects.
+You can plug these CSVs into `main-mh-fit-eval.R` or `main-snp-fit-eval.R`
+unchanged.
+:::
+
+## Simulation parameters
+
+- **`set.seed(42)`** at the top of `generate.R`; no other seed calls.
+- **Genetic architecture:** randomly drawn QTL (50 SNPs for `main`, 20 for `toy`) with effects from $N(0, 1)$.
+- **Heritability:** $h^2 = 0.4$.
+- **Phenotypes:** continuous (`pheno_continuous_G1.csv`) and binary (threshold at median, `pheno_binary_G1.csv`).
+- **Pedigree:** 4 generations; ~10% founders (NA sire/dam), random mating among earlier individuals; family lineages traced via the sire.
+- **MH blocks:** built from sliding 3-SNP windows (max 125bp span).
+- **Haplotype blocks:** built from 100kb windows.
+
+## Download
+
+::: {.grid}
+::: {.g-col-6}
+**main dataset (~76 MB uncompressed)**
+
+[📦 Download main as ZIP](main.zip){.btn .btn-primary} &nbsp;
+:::
+::: {.g-col-6}
+**toy dataset (~2 MB uncompressed)**
+
+[📦 Download toy as ZIP](toy.zip){.btn .btn-secondary} &nbsp;
+:::
+:::
+
+## Pedigree
+
+`pedigree_G1.csv` — full table, 1,000 rows. Columns: `individual_id`,
+`family_id`, `population_type`, `sire`, `dam`, `generation`.
+
+```{r}
+#| echo: false
+ped <- read_csv("main/pedigree_G1.csv", show_col_types = FALSE)
+reactable(
+  ped,
+  searchable = TRUE, sortable = TRUE,
+  pagination = TRUE, defaultPageSize = 15,
+  highlight = TRUE, compact = TRUE, bordered = TRUE
+)
+```
+
+[Download pedigree_G1.csv](main/pedigree_G1.csv){.btn .btn-sm .btn-primary}
+
+## Phenotypes
+
+### Continuous trait (`pheno_continuous_G1.csv`)
+
+```{r}
+#| echo: false
+pheno_c <- read_csv("main/pheno_continuous_G1.csv", show_col_types = FALSE)
+reactable(
+  pheno_c,
+  searchable = TRUE, sortable = TRUE,
+  pagination = TRUE, defaultPageSize = 15,
+  highlight = TRUE, compact = TRUE, bordered = TRUE
+)
+```
+
+[Download pheno_continuous_G1.csv](main/pheno_continuous_G1.csv){.btn .btn-sm .btn-primary}
+
+### Binary trait (`pheno_binary_G1.csv`)
+
+```{r}
+#| echo: false
+pheno_b <- read_csv("main/pheno_binary_G1.csv", show_col_types = FALSE)
+reactable(
+  pheno_b,
+  searchable = TRUE, sortable = TRUE,
+  pagination = TRUE, defaultPageSize = 15,
+  highlight = TRUE, compact = TRUE, bordered = TRUE
+)
+```
+
+[Download pheno_binary_G1.csv](main/pheno_binary_G1.csv){.btn .btn-sm .btn-primary}
+
+## SNP genotypes
+
+### `geno_G1.csv` — wide CSV (preview only)
+
+`individual_id`, `generation`, `population_type`, then 5,000 SNP dosage
+columns (0/1/2). The preview below shows the first 50 individuals × first
+20 SNPs.
+
+```{r}
+#| echo: false
+geno_preview <- read_csv("main/geno_G1.csv", n_max = 50, show_col_types = FALSE)
+geno_preview <- geno_preview[, 1:23]   # id + generation + pop_type + first 20 SNPs
+reactable(
+  geno_preview,
+  searchable = TRUE, sortable = TRUE,
+  pagination = TRUE, defaultPageSize = 10,
+  highlight = TRUE, compact = TRUE, bordered = TRUE,
+  defaultColDef = colDef(minWidth = 80)
+)
+```
+
+[Download geno_G1.csv](main/geno_G1.csv){.btn .btn-sm .btn-primary}
+&nbsp;
+[Download salmon_60k.vcf](main/salmon_60k.vcf){.btn .btn-sm .btn-secondary}
+
+### SNP map (`snp_map.txt`)
+
+Tab-delimited; columns `snp_id`, `chr`, `position`. Used by QTL recovery
+analysis and downstream tools.
+
+```{r}
+#| echo: false
+snp_map <- read_tsv("main/snp_map.txt", show_col_types = FALSE)
+reactable(
+  snp_map,
+  searchable = TRUE, sortable = TRUE,
+  pagination = TRUE, defaultPageSize = 15,
+  highlight = TRUE, compact = TRUE, bordered = TRUE
+)
+```
+
+[Download snp_map.txt](main/snp_map.txt){.btn .btn-sm .btn-primary}
+
+## Microhaplotype genotypes
+
+### Per-chromosome MH genotype files
+
+Each chromosome has one file under `mh_genotypes/hap_geno_<chr>`. Tab-delimited.
+Format: first column is `ID`; subsequent columns are 4-per-block
+(`hap_<idx>_1, hap_<idx>_1, hap_<idx>_2, hap_<idx>_2`) — duplicated allele
+columns matching the MicrohapsSel pipeline expectation.
+
+Preview of `hap_geno_1` (first 50 individuals × first 20 columns):
+
+```{r}
+#| echo: false
+mh1 <- read.table("main/mh_genotypes/hap_geno_1",
+                  header = TRUE, sep = "\t", check.names = FALSE,
+                  nrows = 50)
+mh1 <- mh1[, 1:min(21, ncol(mh1))]
+reactable(
+  mh1,
+  searchable = TRUE, sortable = TRUE,
+  pagination = TRUE, defaultPageSize = 10,
+  highlight = TRUE, compact = TRUE, bordered = TRUE,
+  defaultColDef = colDef(minWidth = 80)
+)
+```
+
+Download per-chromosome files (chromosomes 1–10):
+
+[chr1](main/mh_genotypes/hap_geno_1){.btn .btn-sm .btn-outline-primary}
+[chr2](main/mh_genotypes/hap_geno_2){.btn .btn-sm .btn-outline-primary}
+[chr3](main/mh_genotypes/hap_geno_3){.btn .btn-sm .btn-outline-primary}
+[chr4](main/mh_genotypes/hap_geno_4){.btn .btn-sm .btn-outline-primary}
+[chr5](main/mh_genotypes/hap_geno_5){.btn .btn-sm .btn-outline-primary}
+[chr6](main/mh_genotypes/hap_geno_6){.btn .btn-sm .btn-outline-primary}
+[chr7](main/mh_genotypes/hap_geno_7){.btn .btn-sm .btn-outline-primary}
+[chr8](main/mh_genotypes/hap_geno_8){.btn .btn-sm .btn-outline-primary}
+[chr9](main/mh_genotypes/hap_geno_9){.btn .btn-sm .btn-outline-primary}
+[chr10](main/mh_genotypes/hap_geno_10){.btn .btn-sm .btn-outline-primary}
+
+### Microhaplotype coordinates (`mh_info_ld_haploblock_G0/stats/microhaplotype_coordinates.csv`)
+
+```{r}
+#| echo: false
+mh_coords <- read_csv("main/mh_info_ld_haploblock_G0/stats/microhaplotype_coordinates.csv",
+                      show_col_types = FALSE)
+reactable(
+  mh_coords,
+  searchable = TRUE, sortable = TRUE,
+  pagination = TRUE, defaultPageSize = 15,
+  highlight = TRUE, compact = TRUE, bordered = TRUE
+)
+```
+
+[Download mh coordinates](main/mh_info_ld_haploblock_G0/stats/microhaplotype_coordinates.csv){.btn .btn-sm .btn-primary}
+
+## QTL information (true causal variants)
+
+`qtl/` contains RDS files documenting the true causal variants used in
+phenotype simulation. **Do not use these as model input** — they are ground
+truth for QTL recovery analysis only.
+
+```{r}
+#| echo: false
+qtl_snp_ids    <- readRDS("main/qtl/qtl_snp_ids.rds")
+qtl_mh_blocks  <- readRDS("main/qtl/qtl_mh_blocks.rds")
+qtl_hap_blocks <- readRDS("main/qtl/qtl_hap_blocks.rds")
+qtl_summary <- tibble(
+  file        = c("qtl_snp_ids.rds", "qtl_mh_blocks.rds", "qtl_hap_blocks.rds"),
+  description = c("SNP IDs flagged as QTL",
+                  "MH block IDs flagged as QTL",
+                  "Haplotype block IDs flagged as QTL"),
+  n           = c(length(qtl_snp_ids), length(qtl_mh_blocks), length(qtl_hap_blocks))
+)
+reactable(qtl_summary, sortable = FALSE, compact = TRUE, bordered = TRUE)
+```
+
+[Download qtl_snp_ids.rds](main/qtl/qtl_snp_ids.rds){.btn .btn-sm .btn-outline-primary}
+[Download qtl_mh_blocks.rds](main/qtl/qtl_mh_blocks.rds){.btn .btn-sm .btn-outline-primary}
+[Download qtl_hap_blocks.rds](main/qtl/qtl_hap_blocks.rds){.btn .btn-sm .btn-outline-primary}
+[Download snp_meta.rds](main/qtl/snp_meta.rds){.btn .btn-sm .btn-outline-primary}
+
+## Generation script
+
+The full simulation script is committed to the repo. To regenerate locally:
+
+```bash
+Rscript demo-data/generate.R main   # 1000 ind, 10 chr, 500 SNPs/chr
+Rscript demo-data/generate.R toy    # 200  ind, 5  chr, 100 SNPs/chr
+```
+
+::: {.callout-note collapse="true"}
+## Show generate.R
+
+```{r}
+#| eval: false
+#| file: generate.R
+```
+:::
