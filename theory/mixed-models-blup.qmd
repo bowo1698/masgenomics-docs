@@ -1,0 +1,42 @@
+---
+title: "Mixed Models & BLUP"
+---
+
+## TL;DR
+
+::: {.callout-tip}
+The mixed model $\mathbf{y} = \mathbf{Xb} + \mathbf{Zu} + \mathbf{e}$ with
+$\mathbf{u} \sim N(\mathbf{0}, \mathbf{A}\sigma_u^2)$ underpins both packages.
+BLUP is the conditional expectation of $\mathbf{u}$ given $\mathbf{y}$.
+:::
+
+## The model
+
+$$
+\mathbf{y} = \mathbf{Xb} + \mathbf{Zu} + \mathbf{e}
+$$ {#eq-mixed-model}
+
+where:
+
+- $\mathbf{y}$ is the vector of phenotypes
+- $\mathbf{X}, \mathbf{Z}$ are design matrices for fixed and random effects
+- $\mathbf{b}$ is the fixed-effects vector
+- $\mathbf{u}$ is the random additive genetic effects vector
+- $\mathbf{e}$ is the residual
+
+## Assumptions
+
+::: {.callout-note}
+TODO: list normality, independence, homoscedasticity assumptions and what
+violations look like in genomic data.
+:::
+
+## BLUP solution
+
+::: {.callout-note}
+TODO: derive Henderson's mixed-model equations.
+:::
+
+## See it in code
+
+🛠 [Task: Genomic Prediction with BLUP](../tasks/genomic-prediction.qmd)

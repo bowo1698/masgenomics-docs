@@ -1,0 +1,19 @@
+---
+title: "Theory"
+---
+
+This section covers the statistical models implemented across `masreml` and `masbayes`,
+their assumptions, and when each one is appropriate.
+
+## Pages
+
+- [Mixed Models & BLUP](mixed-models-blup.qmd) — the workhorse linear model behind genomic prediction
+- [GBLUP & GWABLUP](gblup-gwablup.qmd) — using genomic relationship matrices
+- [Bayesian Alphabet](bayesian-alphabet.qmd) — BayesA and BayesR
+- [Threshold Model](threshold-model.qmd) — handling binary phenotypes
+- [SNP vs Microhaplotypes](snp-vs-microhaplotypes.qmd) — what the marker choice changes
+
+::: {.callout-note}
+Each theory page ends with a "See it in code" link pointing to a runnable
+[task tutorial](../tasks/index.qmd) using the [demo dataset](../demo-data/index.qmd).
+:::
