@@ -100,9 +100,7 @@ website:
 
 format:
   html:
-    theme:
-      light: [cosmo, assets/custom.scss]
-      dark: [darkly, assets/custom.scss]
+    theme: [superhero, assets/custom.scss]
     toc: true
     toc-depth: 3
     toc-location: right
@@ -111,9 +109,7 @@ format:
     code-link: true
     code-tools: false
     code-fold: false
-    highlight-style:
-      light: github
-      dark: github-dark
+    highlight-style: github-dark
     fig-cap-location: bottom
     tbl-cap-location: top
     smooth-scroll: true
