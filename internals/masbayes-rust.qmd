@@ -1,0 +1,21 @@
+---
+title: "masbayes Rust modules"
+---
+
+## Module map
+
+::: {.callout-note}
+TODO: list of Rust files with one-line description each.
+:::
+
+## Key entry points
+
+- {{< rust-src masbayes lib.rs >}} — extendr export macros
+- {{< rust-src masbayes bayesa.rs >}} — BayesA sampler (TODO verify path)
+- {{< rust-src masbayes bayesr.rs >}} — BayesR sampler (TODO verify path)
+
+## FFI boundary
+
+::: {.callout-note}
+TODO: describe what types cross R↔Rust and why.
+:::

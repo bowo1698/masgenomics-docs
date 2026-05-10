@@ -1,0 +1,10 @@
+---
+title: "Internals (Rust backend)"
+---
+
+Both packages wrap a Rust core via [extendr](https://extendr.github.io/).
+The Rust modules implement the numerically intensive routines (matrix
+construction, MCMC sampling, REML iteration).
+
+- [masreml — Rust modules](masreml-rust.qmd)
+- [masbayes — Rust modules](masbayes-rust.qmd)

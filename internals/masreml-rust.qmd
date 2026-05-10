@@ -1,0 +1,21 @@
+---
+title: "masreml Rust modules"
+---
+
+## Module map
+
+::: {.callout-note}
+TODO: list of Rust files with one-line description each.
+:::
+
+## Key entry points
+
+- {{< rust-src masreml lib.rs >}} — extendr export macros
+- {{< rust-src masreml gblup/mod.rs >}} — GBLUP solver (TODO verify path)
+- {{< rust-src masreml gwas/mod.rs >}} — GWAS implementation (TODO verify path)
+
+## FFI boundary
+
+::: {.callout-note}
+TODO: describe what types cross R↔Rust and why.
+:::

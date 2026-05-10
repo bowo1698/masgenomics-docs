@@ -1,0 +1,15 @@
+---
+title: "Task Tutorials"
+---
+
+Each tutorial is a runnable end-to-end workflow on the
+[demo dataset](../demo-data/index.qmd). Tutorials show **both packages**
+side by side where applicable.
+
+| Task | Methods covered |
+|---|---|
+| [Genomic Prediction](genomic-prediction.qmd) | GBLUP (`masreml`), BayesA / BayesR (`masbayes`) |
+| [GWAS](gwas.qmd) | `masreml::run_gwas`, BayesR variable selection |
+| [GWABLUP](gwablup.qmd) | weight-then-predict using GWAS p-values |
+| [Cross-validation](cross-validation.qmd) | `masreml::cv_masreml` |
+| [Binary trait analysis](binary-trait.qmd) | threshold model with `masreml` |

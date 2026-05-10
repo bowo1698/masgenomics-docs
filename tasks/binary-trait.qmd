@@ -1,0 +1,36 @@
+---
+title: "Binary trait analysis"
+---
+
+📐 **Theory:** TODO link
+
+## Goal
+
+TODO: 1 sentence.
+
+## Setup
+
+```{r}
+#| eval: false
+library(masreml)   # or masbayes, depending on tutorial
+geno  <- read.csv("../demo-data/main/genotype.csv")
+pheno <- read.csv("../demo-data/main/phenotype.csv")
+```
+
+## Walkthrough
+
+::: {.callout-note}
+TODO: stepwise code chunks with explanation.
+:::
+
+## Interpretation
+
+::: {.callout-note}
+TODO: what the output means and how to act on it.
+:::
+
+## Same task in the other package
+
+::: {.callout-note}
+TODO: cross-link to alternative implementation.
+:::
