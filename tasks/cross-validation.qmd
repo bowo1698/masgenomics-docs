@@ -2,7 +2,7 @@
 title: "Cross-validation"
 ---
 
-📐 **Theory:** TODO link
+📐 **Theory:** [Mixed Models & BLUP](../theory/mixed-models-blup.qmd)
 
 ## Goal
 

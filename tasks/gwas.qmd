@@ -2,7 +2,7 @@
 title: "GWAS"
 ---
 
-📐 **Theory:** TODO link
+📐 **Theory:** [GBLUP & GWABLUP](../theory/gblup-gwablup.qmd) · [Bayesian Alphabet](../theory/bayesian-alphabet.qmd) (BayesR variable selection)
 
 ## Goal
 

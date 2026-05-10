@@ -2,7 +2,7 @@
 title: "Binary trait analysis"
 ---
 
-📐 **Theory:** TODO link
+📐 **Theory:** [Threshold Model for Binary Traits](../theory/threshold-model.qmd)
 
 ## Goal
 

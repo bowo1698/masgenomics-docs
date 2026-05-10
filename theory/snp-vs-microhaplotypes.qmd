@@ -28,4 +28,4 @@ TODO: when this method is appropriate vs alternatives.
 
 ## See it in code
 
-🛠 TODO: link to relevant task tutorial.
+🛠 The decision flowchart and trade-off table on [Choosing → SNP vs Microhaplotypes](../choosing/snp-vs-mh.qmd) summarise when each marker type wins.

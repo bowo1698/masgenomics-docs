@@ -28,4 +28,4 @@ TODO: when this method is appropriate vs alternatives.
 
 ## See it in code
 
-🛠 TODO: link to relevant task tutorial.
+🛠 [Binary trait analysis tutorial](../tasks/binary-trait.qmd) — fits the threshold model with `masreml`'s Laplace approximation and reports observed-scale calibration metrics.

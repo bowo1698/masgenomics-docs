@@ -28,3 +28,65 @@ $link-color: $primary;
 .callout-note {
   border-left-color: $primary;
 }
+
+/* ─── reactable: adapt to dark theme ────────────────────────────────────────
+   reactable widgets ship with light-mode defaults baked in, so on a dark
+   page the table background and borders blend into the page. These rules
+   re-bind reactable's inner classes to Bootstrap 5 theme variables that
+   Quarto flips automatically when the user toggles light↔dark. */
+[data-bs-theme="dark"] {
+  .reactable {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+  }
+  .reactable .rt-table {
+    background-color: var(--bs-body-bg);
+  }
+  .reactable .rt-thead,
+  .reactable .rt-tfoot {
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-emphasis-color);
+  }
+  .reactable .rt-th,
+  .reactable .rt-td {
+    background-color: transparent;
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+  }
+  .reactable .rt-tr-striped {
+    background-color: var(--bs-secondary-bg);
+  }
+  .reactable .rt-tr-highlight:hover,
+  .reactable .rt-tr-selectable:hover {
+    background-color: var(--bs-tertiary-bg);
+  }
+  .reactable .rt-search,
+  .reactable input[type="text"],
+  .reactable input[type="search"],
+  .reactable input[type="number"],
+  .reactable select {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+  }
+  .reactable .rt-pagination,
+  .reactable .rt-pagination-nav,
+  .reactable .rt-page-button,
+  .reactable .rt-page-jump,
+  .reactable .rt-page-size-select,
+  .reactable .rt-page-info {
+    color: var(--bs-body-color);
+    background-color: transparent;
+    border-color: var(--bs-border-color);
+  }
+  .reactable .rt-page-button:hover:not(:disabled) {
+    background-color: var(--bs-tertiary-bg);
+  }
+  .reactable .rt-page-button-current {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-emphasis-color);
+  }
+  .reactable .rt-no-data {
+    color: var(--bs-secondary-color);
+  }
+}

@@ -28,4 +28,4 @@ TODO: when this method is appropriate vs alternatives.
 
 ## See it in code
 
-🛠 TODO: link to relevant task tutorial.
+🛠 [Genomic Prediction tutorial](../tasks/genomic-prediction.qmd) (GBLUP via `masreml`) and [GWABLUP tutorial](../tasks/gwablup.qmd) (weighted G via GWAS p-values).

@@ -2,7 +2,7 @@
 title: "GWABLUP"
 ---
 
-📐 **Theory:** TODO link
+📐 **Theory:** [GBLUP & GWABLUP](../theory/gblup-gwablup.qmd)
 
 ## Goal
 

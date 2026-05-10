@@ -2,7 +2,7 @@
 title: "Genomic Prediction"
 ---
 
-📐 **Theory:** TODO link
+📐 **Theory:** [Mixed Models & BLUP](../theory/mixed-models-blup.qmd) · [GBLUP & GWABLUP](../theory/gblup-gwablup.qmd) · [Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
 
 ## Goal
 

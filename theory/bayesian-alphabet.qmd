@@ -28,4 +28,4 @@ TODO: when this method is appropriate vs alternatives.
 
 ## See it in code
 
-🛠 TODO: link to relevant task tutorial.
+🛠 [Genomic Prediction tutorial](../tasks/genomic-prediction.qmd) — runs BayesA and BayesR side-by-side with GBLUP on the demo dataset.
