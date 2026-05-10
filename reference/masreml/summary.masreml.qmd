@@ -1,0 +1,44 @@
+---
+title: "Summarize Genomic Prediction Results"
+---
+
+## Summarize Genomic Prediction Results {.unnumbered}
+
+
+### Description
+
+Detailed summary of a fitted <code>masreml</code> object including model
+information, variance components table, heritability, and GEBV
+distribution per component. For binary traits, also reports AUC
+and heritability on liability and observed scales.
+
+
+
+### Usage
+
+<pre><code class='language-R'>## S3 method for class 'masreml'
+summary(object, ...)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="object">object</code></td>
+<td>
+object of class <code>"masreml"</code> from <code>masreml()</code>
+or <code>gwablup()</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="...">...</code></td>
+<td>
+ignored.
+</td></tr>
+</table>
+
+
+### See Also
+
+<code>print.masreml</code>, <code>varcomp</code>,
+<code>masreml</code>
+
+

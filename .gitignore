@@ -16,3 +16,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+/.quarto/
+**/*.quarto_ipynb

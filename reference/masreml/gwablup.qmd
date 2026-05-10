@@ -1,0 +1,206 @@
+---
+title: "GWAS-Assisted Best Linear Unbiased Prediction (GWABLUP)"
+---
+
+## GWAS-Assisted Best Linear Unbiased Prediction (GWABLUP) {.unnumbered}
+
+
+### Description
+
+Genomic prediction using GWAS-weighted relationship matrix.
+Implements Meuwissen et al. (2024) GWABLUP: weights all markers
+by their posterior probability of having non-zero effects,
+derived from EMMAX GWAS results.
+
+
+
+### Usage
+
+<pre><code class='language-R'>gwablup(
+  y,
+  markers,
+  gwas_result,
+  X = NULL,
+  method = "auto",
+  solver = "auto",
+  max_iter = 100L,
+  tol = 1e-06,
+  n_threads = NULL,
+  min_weight = 1e-04,
+  ref_markers = NULL,
+  trait = "continuous",
+  link = "logit"
+)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y">y</code></td>
+<td>
+numeric named vector of phenotypes (length n)
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="markers">markers</code></td>
+<td>
+list of raw marker inputs:
+
+
+<ul>
+<li> <code>snp_add</code>: matrix (n x m), raw genotype 0/1/2
+
+</li>
+<li> <code>mh_add</code>: list of chr data.frames
+
+</li></ul>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="gwas_result">gwas_result</code></td>
+<td>
+object of class <code>"gwas_result"</code> from
+<code>run_gwas()</code>. Must be run with the same markers and individuals.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="X">X</code></td>
+<td>
+fixed effects design matrix (n x c). If NULL, intercept only
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="method">method</code></td>
+<td>
+character, REML algorithm (default &quot;auto&quot;).
+Passed to <code>masreml()</code>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="solver">solver</code></td>
+<td>
+character, EBV solver (default &quot;auto&quot;).
+Passed to <code>masreml()</code>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="max_iter">max_iter</code></td>
+<td>
+integer, maximum REML iterations (default 100)
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="tol">tol</code></td>
+<td>
+numeric, convergence tolerance (default 1e-6)
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="n_threads">n_threads</code></td>
+<td>
+integer, number of threads (default: all cores)
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="ref_markers">ref_markers</code></td>
+<td>
+list of raw marker data for training individuals only,
+same format as <code>markers</code>. If provided, allele frequencies for
+building G_wa are computed from <code>ref_markers</code> instead of
+<code>markers</code>. Use in train/test context to avoid data leakage.
+If NULL (default), allele frequencies computed from <code>markers</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="trait">trait</code></td>
+<td>
+character, trait distribution: <code>"continuous"</code> (default)
+or <code>"binary"</code>. Passed to <code>masreml()</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="link">link</code></td>
+<td>
+character, link function for binary trait: <code>"logit"</code>
+(default) or <code>"probit"</code>. Passed to <code>masreml()</code>.
+</td></tr>
+</table>
+
+
+### Details
+
+User workflow:
+
+
+<ol>
+<li> Fit standard GBLUP: <code>fit &lt;- masreml(y, markers)</code>
+
+</li>
+<li> Run GWAS: <code>gwas &lt;- run_gwas(markers, y, fit)</code>
+
+</li>
+<li> Inspect GWAS results (optional): <code>summary(gwas)</code>
+
+</li>
+<li> Run GWABLUP: <code>fit_wa &lt;- gwablup(y, markers, gwas)</code>
+
+</li></ol>
+
+
+
+### Value
+
+Object of class <code>c("gwablup", "masreml")</code> —
+identical structure to <code>masreml()</code> output, with
+additional <code>\$gwas</code> slot containing the gwas_result.
+All S3 methods from masreml (summary, print, plot) work directly.
+
+
+
+### References
+
+Meuwissen et al. (2024) GWABLUP: genome-wide association
+assisted BLUP. <em>Genet Sel Evol.</em> 56:17.
+
+
+
+### See Also
+
+<code>masreml</code>, <code>run_gwas</code>,
+<code>compute_accuracy</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masreml")
+
+# ── SNP GWABLUP ───────────────────────────────────────────
+fit    <- masreml(y, markers = list(snp_add = W))
+gwas   <- run_gwas(markers = list(snp_add = W), y = y, masreml_fit = fit)
+fit_wa <- gwablup(y, markers = list(snp_add = W), gwas_result = gwas)
+summary(fit_wa)
+
+# ── MH GWABLUP ────────────────────────────────────────────
+fit    <- masreml(y, markers = list(mh_add = mh_list))
+gwas   <- run_gwas(markers = list(mh_add = mh_list), y = y, masreml_fit = fit)
+fit_wa <- gwablup(y, markers = list(mh_add = mh_list), gwas_result = gwas)
+summary(fit_wa)
+
+# ── Compare GBLUP vs GWABLUP ──────────────────────────────
+fit_gblup   <- masreml(y, markers = list(snp_add = W))
+gwas        <- run_gwas(list(snp_add = W), y, fit_gblup)
+fit_gwablup <- gwablup(y, list(snp_add = W), gwas)
+cor(fit_gblup$total_gebv, fit_gwablup$total_gebv)
+
+# ── Train/test workflow (no data leakage) ─────────────────
+fit_tr  <- masreml(y_train, markers = list(snp_add = W_train))
+gwas_tr <- run_gwas(
+  markers     = list(snp_add = W_train),
+  y           = y_train,
+  masreml_fit = fit_tr,
+  ref_markers = list(snp_add = W_train)
+)
+fit_wa_tr <- gwablup(
+  y           = y_train,
+  markers     = list(snp_add = W_train),
+  gwas_result = gwas_tr,
+  ref_markers = list(snp_add = W_train)
+)
+
+# ── Binary trait GWABLUP ──────────────────────────────────
+fit_tr_bin <- masreml(y_bin_train, markers = list(snp_add = W_train),
+                      trait = "binary")
+gwas_bin   <- run_gwas(list(snp_add = W_train), y_bin_train, fit_tr_bin,
+                       ref_markers = list(snp_add = W_train))
+fit_wa_bin <- gwablup(y_bin_train, list(snp_add = W_train), gwas_bin,
+                      trait = "binary", ref_markers = list(snp_add = W_train))
+G_full <- build_G_snp(W_all, ref_W = W_train)
+pred   <- predict(fit_wa_tr,
+                  G_full    = list(snp_add = G_full),
+                  train_ids = rownames(W_train),
+                  test_ids  = rownames(W_test))
+
+
+
+
+```

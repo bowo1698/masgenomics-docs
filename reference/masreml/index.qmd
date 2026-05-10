@@ -1,0 +1,24 @@
+---
+title: "masreml Reference"
+---
+
+Reference documentation for the `masreml` package.
+
+## Functions
+
+- [build_A_ped](build_A_ped.qmd)
+- [build_D_snp](build_D_snp.qmd)
+- [build_G_mh](build_G_mh.qmd)
+- [build_G_snp](build_G_snp.qmd)
+- [compute_accuracy](compute_accuracy.qmd)
+- [cv_masreml](cv_masreml.qmd)
+- [evaluate_prediction](evaluate_prediction.qmd)
+- [gwablup](gwablup.qmd)
+- [masreml](masreml.qmd)
+- [predict.masreml](predict.masreml.qmd)
+- [print.masreml_cv](print.masreml_cv.qmd)
+- [print.masreml_pred](print.masreml_pred.qmd)
+- [run_gwas](run_gwas.qmd)
+- [summary.masreml_cv](summary.masreml_cv.qmd)
+- [summary.masreml](summary.masreml.qmd)
+- [varcomp](varcomp.qmd)

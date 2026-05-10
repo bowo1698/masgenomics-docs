@@ -1,0 +1,372 @@
+---
+title: "Universal REML-BLUP for SNP and Microhaplotype Genomic Prediction"
+---
+
+## Universal REML-BLUP for SNP and Microhaplotype Genomic Prediction {.unnumbered}
+
+
+### Description
+
+BLUP-based model for genomic prediction using SNP or microhaplotype (MH)
+markers. Estimates variance components via REML and predicts genomic
+estimated breeding values (GEBV) via BLUP. Supports SNP additive,
+SNP dominance, and MH additive relationship matrices, for both
+continuous and binary traits. For GWAS-assisted prediction, see
+<code>run_gwas</code> and <code>gwablup</code>.
+
+
+
+### Usage
+
+<pre><code class='language-R'>masreml(
+  y,
+  X = NULL,
+  markers = NULL,
+  G = NULL,
+  method = "auto",
+  solver = "auto",
+  max_iter = 100L,
+  tol = 1e-06,
+  n_threads = NULL,
+  trait = "continuous",
+  link = "logit",
+  verbose = TRUE,
+  save_rds = FALSE,
+  save_path = NULL
+)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y">y</code></td>
+<td>
+numeric vector of phenotypes (length n). Named vector
+recommended for ID alignment. For binary trait, must contain
+only 0 and 1.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="X">X</code></td>
+<td>
+fixed effects design matrix (n x c). If NULL, intercept
+only is used.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="markers">markers</code></td>
+<td>
+list of raw marker inputs (optional):
+
+
+<ul>
+<li> <code>snp_add</code>: matrix (n x m), raw genotype 0/1/2
+
+</li>
+<li> <code>snp_dom</code>: matrix (n x m), raw genotype 0/1/2
+
+</li>
+<li> <code>mh_add</code>: list of data.frames, one per chromosome.
+First column = individual ID, remaining columns = paired
+haplotype allele codes per block (strand1, strand2, strand1, ...)
+
+</li></ul>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="G">G</code></td>
+<td>
+list of pre-built relationship matrices (optional):
+
+
+<ul>
+<li> <code>snp_add</code>: numeric matrix (n x n), SNP additive G
+
+</li>
+<li> <code>snp_dom</code>: numeric matrix (n x n), SNP dominance D
+
+</li>
+<li> <code>mh_add</code>: numeric matrix (n x n), MH additive Agh
+
+</li>
+<li> <code>pedigree</code>: numeric matrix (n x n), pedigree A
+
+</li></ul>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="method">method</code></td>
+<td>
+character, REML algorithm for variance component estimation:
+
+
+<ul>
+<li> <code>"auto"</code> (default): AI-REML for continuous,
+HE regression for binary
+
+</li>
+<li> <code>"HE"</code>: Haseman-Elston regression (fast, one-step)
+
+</li>
+<li> <code>"AI"</code>: Average Information REML (accurate, iterative)
+
+</li>
+<li> <code>"EM"</code>: Expectation-Maximization REML (stable, slower)
+
+</li>
+<li> <code>"HI"</code>: HE-initialized AI-REML
+
+</li></ul>
+
+For binary trait, <code>"HE"</code> is recommended for speed.
+Any method can be used but <code>"AI"</code> may be slow on working response.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="solver">solver</code></td>
+<td>
+character, EBV solver:
+
+
+<ul>
+<li> <code>"auto"</code> (default): Cholesky for n &lt; 10,000, PCG otherwise
+
+</li>
+<li> <code>"cholesky"</code>: direct Cholesky factorization
+
+</li>
+<li> <code>"pcg"</code>: preconditioned conjugate gradient (large n)
+
+</li></ul>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="max_iter">max_iter</code></td>
+<td>
+integer, maximum REML iterations (default 100)
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="tol">tol</code></td>
+<td>
+numeric, convergence tolerance (default 1e-6)
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="n_threads">n_threads</code></td>
+<td>
+integer, number of threads (default: all physical cores)
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="trait">trait</code></td>
+<td>
+character, trait distribution:
+
+
+<ul>
+<li> <code>"continuous"</code> (default): Gaussian REML-BLUP
+
+</li>
+<li> <code>"binary"</code>: 0/1 phenotype, single-step Laplace
+approximation on liability scale
+
+</li></ul>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="link">link</code></td>
+<td>
+character, link function for binary trait:
+
+
+<ul>
+<li> <code>"logit"</code> (default): logistic link, sigma2_e = pi^2/3
+
+</li>
+<li> <code>"probit"</code>: probit link, sigma2_e = 1
+
+</li></ul>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="verbose">verbose</code></td>
+<td>
+logical, if <code>TRUE</code> (default) prints a brief
+post-fit summary banner (algorithm, runtime, convergence, variance
+components, h2, GEBV summary) when <code>masreml()</code> returns. The
+existing progress messages (<code>"Building..."</code>, <code>"Running
+  REML..."</code>, <code>"Solving EBV..."</code>) are unaffected by this flag.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="save_rds">save_rds</code></td>
+<td>
+logical, if <code>TRUE</code> the fit is also written to
+disk as an RDS file. Default <code>FALSE</code> <em>(differs from
+<code>masbayes::run_bayesr()</code>)</em> because <code>masreml()</code> is often
+called inside <code>cv_masreml</code> loops where auto-saving
+would clobber per-fold output. Set to <code>TRUE</code> for one-off
+full-data fits you want to persist.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="save_path">save_path</code></td>
+<td>
+optional explicit RDS path. If <code>NULL</code> (default),
+defaults to <code>"results_masreml.Rds"</code> in the current working
+directory. Ignored unless <code>save_rds = TRUE</code>.
+</td></tr>
+</table>
+
+
+### Details
+
+<strong>Auto-summary.</strong> On completion, <code>masreml()</code> prints a brief
+banner mirroring <code>masbayes::run_bayesr()</code>/
+<code>masbayes::run_bayesa()</code>. Set <code>verbose = FALSE</code> to suppress.
+The full <code>summary.masreml</code> method is unchanged and is
+still the canonical detailed report.
+
+<strong>Runtime field.</strong> The returned object now contains a
+<code>runtime</code> field (elapsed seconds for REML + BLUP), populated
+even when <code>verbose = FALSE</code>.
+
+
+
+### Value
+
+Object of class <code>"masreml"</code> with elements:
+
+
+<ul>
+<li> <code>gebv</code>: named list of GEBV vectors per component
+
+</li>
+<li> <code>total_gebv</code>: total GEBV (sum across components)
+
+</li>
+<li> <code>fixed_effects</code>: fixed effect estimates
+
+</li>
+<li> <code>varcomp</code>: list with <code>sigma2</code> and <code>h2</code>
+
+</li>
+<li> <code>loglik</code>: restricted log-likelihood
+
+</li>
+<li> <code>algorithm</code>: REML algorithm used
+
+</li>
+<li> <code>solver</code>: EBV solver used
+
+</li>
+<li> <code>converged</code>: logical, convergence status
+
+</li>
+<li> <code>n_iter</code>: number of REML iterations
+
+</li>
+<li> <code>n</code>: number of individuals
+
+</li>
+<li> <code>runtime</code>: elapsed seconds for REML + BLUP
+
+</li>
+<li> <code>rds_path</code>: path of saved RDS file, or <code>NULL</code>
+when <code>save_rds = FALSE</code>
+
+</li>
+<li> <code>training_metrics</code>: list of training-set fit metrics.
+Continuous: <code>R2</code>, <code>RMSE</code>, <code>accuracy</code> (Pearson
+<em>r</em>), <code>bias</code> (slope of $y \sim \hat{y}$). Binary:
+same fields plus <code>AUC</code>, computed on the observed
+(probability) scale (<code>y_01</code> vs <code>mu_hat</code>) so that
+<code>bias</code> is the <em>calibration slope</em> (1.0 = perfectly
+calibrated) and <code>RMSE\^2</code> approximates the Brier score.
+<code>AUC</code> is rank-invariant under inverse-link transformation.
+
+</li>
+<li> <code>call</code>: matched call
+
+</li></ul>
+
+For binary trait (<code>trait = "binary"</code>), additional
+<code>binary</code> slot contains:
+
+
+<ul>
+<li> <code>link</code>: link function used
+
+</li>
+<li> <code>prevalence</code>: proportion of y = 1
+
+</li>
+<li> <code>h2_liability</code>: h2 on liability scale
+
+</li>
+<li> <code>h2_observed</code>: h2 on observed (0/1) scale
+via Dempster-Falconer transformation
+
+</li>
+<li> <code>auc</code>: Area Under ROC Curve (Wilcoxon-MWW)
+
+</li>
+<li> <code>fitted</code>: fitted probabilities P(y = 1)
+
+</li>
+<li> <code>converged</code>: always TRUE for single-step
+
+</li></ul>
+
+
+
+### References
+
+VanRaden (2008) Efficient methods to compute genomic predictions.
+<em>J. Dairy Sci.</em> 91:4414-4423.
+
+Da (2015) Multi-allelic haplotype model for genomic prediction.
+<em>BMC Genet.</em> 16:144.
+
+Dempster &amp; Falconer (1950) Interpretation of high and low liability.
+<em>Ann. Hum. Genet.</em> 31:195-203.
+
+Johnson &amp; Thompson (1995) Restricted maximum likelihood estimation
+of variance components. <em>J. Dairy Sci.</em> 78:449-456.
+
+
+
+### See Also
+
+<code>run_gwas</code>, <code>gwablup</code>,
+<code>cv_masreml</code>, <code>compute_accuracy</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masreml")
+
+# ── Continuous trait ─────────────────────────────────────
+# SNP additive GBLUP
+fit <- masreml(y = y, markers = list(snp_add = W))
+summary(fit)
+
+# MH additive only
+fit <- masreml(y = y, markers = list(mh_add = mh_list))
+
+# Combined SNP additive + dominance
+fit <- masreml(
+  y       = y,
+  markers = list(snp_add = W, snp_dom = W),
+  method  = "AI"
+)
+
+# Pre-built G matrix
+fit <- masreml(y = y, G = list(snp_add = G))
+
+# ── Binary trait ─────────────────────────────────────────
+# Binary GBLUP (logit link, default HE)
+fit <- masreml(
+  y     = y_binary,
+  markers = list(snp_add = W),
+  trait = "binary"
+)
+summary(fit)
+
+# Binary with probit link
+fit <- masreml(
+  y     = y_binary,
+  markers = list(snp_add = W),
+  trait = "binary",
+  link  = "probit"
+)
+
+# Binary with EM-REML for variance components
+fit <- masreml(
+  y      = y_binary,
+  markers = list(snp_add = W),
+  trait  = "binary",
+  method = "EM"
+)
+
+
+
+
+```

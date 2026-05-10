@@ -1,0 +1,93 @@
+---
+title: "Compute Genomic Prediction Accuracy and Bias"
+---
+
+## Compute Genomic Prediction Accuracy and Bias {.unnumbered}
+
+
+### Description
+
+Evaluates prediction accuracy and bias of genomic estimated breeding
+values (GEBV) against observed phenotypes. Returns three metrics
+commonly used.
+
+
+
+### Usage
+
+<pre><code class='language-R'>compute_accuracy(gebv, y, h2 = NULL)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="gebv">gebv</code></td>
+<td>
+numeric vector of genomic estimated breeding values,
+typically <code>fit\$total_gebv</code> from a <code>masreml()</code> or
+<code>gwablup()</code> object.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y">y</code></td>
+<td>
+numeric vector of observed phenotypes (same length as
+<code>gebv</code>).
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="h2">h2</code></td>
+<td>
+numeric, heritability estimate for computing the
+marker-genetic correlation (r_MG). If NULL, r_MG is returned
+as NA. Typically <code>fit\$varcomp\$h2</code> from the fitted model.
+</td></tr>
+</table>
+
+
+### Value
+
+data.frame with columns:
+
+
+<ul>
+<li> <code>r</code>: Pearson correlation between GEBV and phenotype.
+Ranges from -1 to 1; higher is better.
+
+</li>
+<li> <code>slope</code>: regression coefficient of phenotype on GEBV
+(<code>lm(y ~ gebv)</code>). Value of 1 indicates unbiased prediction;
+&lt; 1 indicates inflation; &gt; 1 indicates deflation.
+
+</li>
+<li> <code>r_MG</code>: marker-genetic correlation, computed as
+<code>r / sqrt(h2)</code>. Approximates correlation between GEBV
+and true breeding value.
+
+</li></ul>
+
+
+
+### See Also
+
+<code>masreml</code>, <code>gwablup</code>,
+<code>cv_masreml</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masreml")
+
+fit <- masreml(y, markers = list(snp_add = W))
+
+acc <- compute_accuracy(
+  gebv = fit$total_gebv,
+  y    = y,
+  h2   = fit$varcomp$h2["snp_add"]
+)
+print(acc)
+#      r  slope   r_MG
+# 0.823  0.991  0.914
+
+
+
+
+```

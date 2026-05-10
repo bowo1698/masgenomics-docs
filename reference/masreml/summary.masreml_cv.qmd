@@ -1,0 +1,42 @@
+---
+title: "Summarize Cross-Validation Results"
+---
+
+## Summarize Cross-Validation Results {.unnumbered}
+
+
+### Description
+
+Detailed summary of cross-validation results from <code>cv_masreml()</code>,
+including accuracy statistics across folds, regression slope (bias),
+and GEBV distribution for all individuals.
+
+
+
+### Usage
+
+<pre><code class='language-R'>## S3 method for class 'masreml_cv'
+summary(object, ...)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="object">object</code></td>
+<td>
+object of class <code>"masreml_cv"</code> from
+<code>cv_masreml()</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="...">...</code></td>
+<td>
+ignored.
+</td></tr>
+</table>
+
+
+### See Also
+
+<code>print.masreml_cv</code>, <code>cv_masreml</code>
+
+

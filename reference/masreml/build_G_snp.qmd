@@ -1,0 +1,93 @@
+---
+title: "Build SNP Additive Genomic Relationship Matrix"
+---
+
+## Build SNP Additive Genomic Relationship Matrix {.unnumbered}
+
+
+### Description
+
+Constructs the SNP additive genomic relationship matrix (G) following
+VanRaden (2008) Method 1. The resulting matrix captures additive genetic
+relationships among individuals based on SNP marker data, and can be
+used directly in <code>masreml()</code> or <code>gwablup()</code> via the <code>G</code>
+argument.
+
+
+
+### Usage
+
+<pre><code class='language-R'>build_G_snp(W, ref_W = NULL)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="W">W</code></td>
+<td>
+numeric matrix (n x m) of raw genotype codes, where n is the
+number of individuals and m is the number of SNP markers. Values must
+be 0, 1, or 2 representing the number of copies of the reference
+allele. Row names are used as individual IDs. Example format:
+
+<pre>
+       SNP1 SNP2 SNP3
+  ind1    0    1    2
+  ind2    1    0    1
+  ind3    2    1    0
+  </pre></td></tr>
+</table>
+
+
+### Value
+
+numeric matrix (n x n) of genomic relationships. Diagonal
+elements approximate 1 + inbreeding coefficient. Off-diagonal
+elements represent genomic relationships between pairs of individuals.
+
+
+
+### References
+
+VanRaden (2008) Efficient methods to compute genomic predictions.
+<em>J. Dairy Sci.</em> 91:4414-4423.
+
+
+
+### See Also
+
+<code>build_G_mh</code>, <code>build_D_snp</code>,
+<code>masreml</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masreml")
+
+# Create example genotype matrix (5 individuals, 4 SNPs)
+W <- matrix(
+  c(0, 1, 2, 1,
+    1, 0, 1, 2,
+    2, 1, 0, 1,
+    0, 2, 1, 0,
+    1, 1, 2, 1),
+  nrow = 5, ncol = 4, byrow = TRUE
+)
+rownames(W) <- paste0("ind", 1:5)
+colnames(W) <- paste0("SNP", 1:4)
+
+# Build G matrix
+G <- build_G_snp(W)
+
+# Check diagonal — should be ~1
+round(diag(G), 3)
+
+# Use pre-built G in masreml
+fit <- masreml(y, G = list(snp_add = G))
+
+
+
+
+```

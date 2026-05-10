@@ -1,0 +1,196 @@
+---
+title: "Run GWAS for SNP or Microhaplotype Markers"
+---
+
+## Run GWAS for SNP or Microhaplotype Markers {.unnumbered}
+
+
+### Description
+
+Performs genome-wide association study (GWAS) for SNP or microhaplotype
+(MH) markers. Uses EMMAX (Efficient Mixed-Model Association eXpedited)
+to control for population structure and relatedness, preventing spurious
+associations. Results can be inspected for QTL detection or passed
+directly to <code>gwablup()</code> for GWAS-assisted genomic prediction.
+
+
+
+### Usage
+
+<pre><code class='language-R'>run_gwas(
+  markers,
+  y,
+  masreml_fit,
+  X = NULL,
+  pi = 0.001,
+  window = 5L,
+  ref_markers = NULL
+)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="markers">markers</code></td>
+<td>
+list of raw marker inputs. Provide one of:
+
+
+<ul>
+<li> <code>snp_add</code>: numeric matrix (n x m), genotype coded 0/1/2
+
+</li>
+<li> <code>mh_add</code>: list of data.frames, one per chromosome,
+with paired haplotype columns per block
+
+</li></ul>
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y">y</code></td>
+<td>
+numeric named vector of phenotypes (length n). Names must
+match row names of marker matrix.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="masreml_fit">masreml_fit</code></td>
+<td>
+fitted <code>masreml</code> object from <code>masreml()</code>.
+Used to account for population structure in the GWAS model.
+Must be fitted with the same markers and individuals.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="X">X</code></td>
+<td>
+fixed effects design matrix (n x c). If NULL, intercept only.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="pi">pi</code></td>
+<td>
+numeric, prior probability that a marker has a non-zero
+effect (default 0.001). Lower values make posterior probabilities
+more conservative.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="window">window</code></td>
+<td>
+integer, number of adjacent markers used in moving
+average smoothing of likelihood ratios (default 5). Larger values
+produce smoother posterior probabilities.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="ref_markers">ref_markers</code></td>
+<td>
+list of raw marker data for training individuals only,
+in the same format as <code>markers</code>. If provided, allele frequencies
+for building G_u (used in EMMAX) are computed from <code>ref_markers</code>
+instead of <code>markers</code>. Use this when running GWAS in a train/test
+context to avoid data leakage from test individuals into the
+population structure correction matrix.
+Supported elements: <code>snp_add</code> (matrix) or <code>mh_add</code> (list).
+If NULL (default), allele frequencies are computed from <code>markers</code>.
+</td></tr>
+</table>
+
+
+### Value
+
+Object of class <code>"gwas_result"</code> with elements:
+
+
+<ul>
+<li> <code>lr</code>: log-likelihood ratio per marker/block
+
+</li>
+<li> <code>beta</code>: effect estimate per marker/block
+
+</li>
+<li> <code>se</code>: standard error per marker/block
+
+</li>
+<li> <code>pval</code>: p-value per marker/block
+
+</li>
+<li> <code>smoothed_lr</code>: smoothed LR after moving average
+
+</li>
+<li> <code>pp</code>: posterior probability of non-zero effect per
+marker/block — use this as input to <code>gwablup()</code>
+
+</li>
+<li> <code>marker_type</code>: <code>"snp"</code> or <code>"mh"</code>
+
+</li>
+<li> <code>n_markers</code>: number of markers or MH blocks
+
+</li>
+<li> <code>pi</code>: prior probability used
+
+</li>
+<li> <code>window</code>: smoothing window size used
+
+</li></ul>
+
+
+
+### References
+
+Kang et al. (2010) Variance component model to account for
+sample structure in GWAS. <em>Nat Genet.</em> 42:348-354.
+
+Meuwissen et al. (2024) GWABLUP: genome-wide association
+assisted BLUP. <em>Genet Sel Evol.</em> 56:17.
+
+
+
+### See Also
+
+<code>masreml</code>, <code>gwablup</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masreml")
+
+# ── Standard workflow (all individuals) ───────────────────
+# Step 1: fit standard GBLUP
+fit <- masreml(y, markers = list(snp_add = W))
+
+# Step 2: run GWAS — inspect QTL signals
+gwas <- run_gwas(
+  markers     = list(snp_add = W),
+  y           = y,
+  masreml_fit = fit
+)
+summary(gwas)
+
+# Step 3: run GWABLUP using GWAS weights
+fit_wa <- gwablup(y, markers = list(snp_add = W), gwas_result = gwas)
+summary(fit_wa)
+
+# ── Train/test workflow (no data leakage) ─────────────────
+# Step 1: fit GBLUP on training only
+fit_tr <- masreml(y_train, markers = list(snp_add = W_train))
+
+# Step 2: run GWAS on training — ref_markers = training markers
+gwas_tr <- run_gwas(
+  markers     = list(snp_add = W_train),
+  y           = y_train,
+  masreml_fit = fit_tr,
+  ref_markers = list(snp_add = W_train)
+)
+
+# Step 3: GWABLUP on training with training-based freq
+fit_wa_tr <- gwablup(
+  y           = y_train,
+  markers     = list(snp_add = W_train),
+  gwas_result = gwas_tr,
+  ref_markers = list(snp_add = W_train)
+)
+
+# Step 4: predict test set
+G_full <- build_G_snp(W_all, ref_W = W_train)
+pred   <- predict(fit_wa_tr,
+                  G_full    = list(snp_add = G_full),
+                  train_ids = rownames(W_train),
+                  test_ids  = rownames(W_test))
+
+
+
+
+```

@@ -1,0 +1,212 @@
+---
+title: "masbayes: Bayesian Genomic Prediction Models for SNPs and Microhaplotypes"
+---
+
+## masbayes: Bayesian Genomic Prediction Models for SNPs and Microhaplotypes {.unnumbered}
+
+
+### Description
+
+Bayesian methods for genomic prediction using SNP or microhaplotype
+markers. Implements BayesR (four-class mixture) and
+BayesA (marker-specific variance), each available as full MCMC or
+stochastic EM. Continuous (Gaussian) and binary (Albert-Chib data
+augmentation) traits are supported.
+
+
+
+### Workflow
+
+The standard pipeline is three steps:
+
+
+<ol>
+<li> <code>construct_wah_matrix()</code> — build the
+$W_{\alpha h}$ design matrix from phased haplotypes.
+
+</li>
+<li> <code>run_bayesr()</code> or <code>run_bayesa()</code> — fit
+the Bayesian model. The fit object is auto-saved to
+<code>results_bayesr.Rds</code> / <code>results_bayesa.Rds</code> by default.
+
+</li>
+<li> <code>summary(fit)</code> — full report (heritability, MCMC ESS /
+Geweke, variance components, training metrics, top alleles).
+
+</li>
+<li> <code>predict(fit, newdata, y_new)</code> — evaluate the model on
+any data: in-sample, test split, or k-fold CV held-out fold.
+
+</li></ol>
+
+
+
+### Three usage scenarios
+
+<code>summary()</code> and <code>predict()</code> are scheme-agnostic — the same
+methods cover all three of:
+
+
+<ul>
+<li> <strong>Full-data fit:</strong> train on everything;
+<code>predict(fit)</code> returns in-sample metrics.
+
+</li>
+<li> <strong>Train/test split:</strong> train on a subset; evaluate via
+<code>predict(fit, W_test, y_test)</code>.
+
+</li>
+<li> <strong>k-fold CV:</strong> the user loops over folds (typically with
+<code>save_rds = FALSE</code>, <code>verbose = FALSE</code>), then
+<code>predict()</code> on each held-out fold.
+
+</li></ul>
+
+Cross-validation orchestration is intentionally left to the caller —
+the package does not ship a built-in <code>cv_*()</code> helper.
+
+
+
+### Quick start
+
+<pre>
+library(masbayes)
+
+# 1. Design matrix
+train &lt;- construct_wah_matrix(hap, colnames(hap), allele_freq)
+W     &lt;- train\$W_ah
+
+# 2. Sufficient statistics
+wtw &lt;- colSums(W^2)
+
+# 3. Fit
+fit &lt;- run_bayesr(W, y, wtw,
+                  sigma2_e_init = var(y) * 0.5,
+                  sigma2_ah     = var(y) * 0.5,
+                  method        = "mcmc")
+
+# 4. Report and evaluate
+summary(fit)
+pred &lt;- predict(fit, W_test, y_test)   # train/test mode
+pred\$metrics\$accuracy
+</pre>
+
+
+### Main functions
+
+
+<dl>
+<dt><code>construct_wah_matrix</code></dt><dd>Build the
+$W_{\alpha h}$ design matrix.
+</dd>
+<dt><code>run_bayesr</code></dt><dd>Fit BayesR (4-class mixture).
+</dd>
+<dt><code>run_bayesa</code></dt><dd>Fit BayesA (marker-specific
+variance).
+</dd>
+<dt><code>summary.masbayes_bayesr</code>,
+<code>summary.masbayes_bayesa</code></dt><dd>Full-fit reports
+(S3 methods).
+</dd>
+<dt><code>predict.masbayes_bayesr</code>,
+<code>predict.masbayes_bayesa</code></dt><dd>GEBV + metrics, scheme-
+agnostic (S3 methods).
+</dd>
+</dl>
+
+
+
+### Output of run_bayesr() / run_bayesa()
+
+The returned S3 object (class <code>masbayes_bayesr</code> or
+<code>masbayes_bayesa</code>) contains:
+
+
+<ul>
+<li> <code>GEBV</code>, <code>beta_hat</code>, <code>beta_samples</code> (and
+<code>sigma2_j_samples</code> for BayesA)
+
+</li>
+<li> <code>sigma2_e_samples</code>, <code>mu_samples</code>, <code>runtime</code>
+(seconds)
+
+</li>
+<li> <code>h2</code>, <code>sigma2_g</code>, <code>sigma2_e</code>
+
+</li>
+<li> <code>training_metrics</code>: <code>R2</code>, <code>RMSE</code>,
+<code>accuracy</code>/<code>AUC</code>, <code>bias</code>
+
+</li>
+<li> <code>diagnostics</code>: ESS, Geweke Z (MCMC only)
+
+</li>
+<li> <code>variance_components</code>: small / medium / large + <code>pi</code>
+(BayesR), or tertile bins of marker variances (BayesA)
+
+</li>
+<li> <code>rds_path</code>: where the fit was auto-saved
+
+</li></ul>
+
+Disable auto-save with <code>save_rds = FALSE</code> — recommended for CV
+loops.
+
+
+
+### Low-level bindings
+
+<code>run_bayesr_mcmc()</code>, <code>run_bayesr_em()</code>,
+<code>run_bayesa_mcmc()</code>, and <code>run_bayesa_em()</code> are the direct
+Rust bindings. They are exported but undocumented; prefer
+<code>run_bayesr()</code> / <code>run_bayesa()</code> for routine use.
+
+
+
+### References
+
+
+<ul>
+<li> Meuwissen, T. H. E., Hayes, B. J., \&amp; Goddard, M. E. (2001).
+Prediction of total genetic value using genome-wide dense marker
+maps. <em>Genetics</em>, 157(4), 1819-1829.
+[doi:10.1093/genetics/157.4.1819](https://doi.org/10.1093/genetics/157.4.1819)
+
+</li>
+<li> Erbe, M., Hayes, B. J., Matukumalli, L. K., Goswami, S.,
+Bowman, P. J., Reich, C. M., Mason, B. A., \&amp; Goddard, M. E.
+(2012). Improving accuracy of genomic predictions within and
+between dairy cattle breeds with imputed high-density single
+nucleotide polymorphism panels. <em>Journal of Dairy Science</em>,
+95(7), 4114-4129. [doi:10.3168/jds.2011-5019](https://doi.org/10.3168/jds.2011-5019)
+
+</li>
+<li> Da, Y. (2015). Multi-allelic haplotype model based on
+genetic partition for genomic prediction and variance component
+estimation using SNP markers. <em>BMC Genetics</em>, 16(1), 144.
+[doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1)
+
+</li></ul>
+
+
+
+### Author(s)
+
+<strong>Maintainer</strong>: Wibowo Agus <a href="mailto:aguswibowo1698@gmail.com">aguswibowo1698@gmail.com</a>
+
+
+
+### See Also
+
+Useful links:
+
+
+<ul>
+<li> <a href="https://github.com/bowo1698/masbayes">https://github.com/bowo1698/masbayes</a>
+
+</li>
+<li> Report bugs at <a href="https://github.com/bowo1698/masbayes/issues">https://github.com/bowo1698/masbayes/issues</a>
+
+</li></ul>
+
+

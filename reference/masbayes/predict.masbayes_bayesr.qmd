@@ -1,0 +1,116 @@
+---
+title: "Predict from a BayesR Fit"
+---
+
+## Predict from a BayesR Fit {.unnumbered}
+
+
+### Description
+
+Computes genomic estimated breeding values (GEBVs) and prediction
+metrics. Works identically for full-fit, train/test split, and k-fold
+CV — the caller is responsible for data partitioning; <code>predict()</code>
+only evaluates the trained model on whatever data it receives.
+
+
+
+### Usage
+
+<pre><code class='language-R'>## S3 method for class 'masbayes_bayesr'
+predict(object, newdata = NULL, y_new = NULL, X_new = NULL, ...)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="object">object</code></td>
+<td>
+An object of class <code>masbayes_bayesr</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="newdata">newdata</code></td>
+<td>
+Optional numeric design matrix. If <code>NULL</code>, the
+training GEBVs (<code>object\$pred_train</code>) are returned.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y_new">y_new</code></td>
+<td>
+Optional response vector for <code>newdata</code>. When supplied,
+prediction metrics are computed.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="...">...</code></td>
+<td>
+Unused.
+</td></tr>
+</table>
+
+
+### Details
+
+Three usage modes:
+
+
+<dl>
+<dt><strong>In-sample (full-fit)</strong></dt><dd>Call <code>predict(fit)</code>. Returns
+training GEBVs and the in-sample metrics already stored in the fit
+object.
+</dd>
+<dt><strong>Forecast only</strong></dt><dd>Call <code>predict(fit, W_new)</code> without
+<code>y_new</code>. Returns GEBVs for the new design matrix; metrics are
+skipped.
+</dd>
+<dt><strong>Test evaluation</strong></dt><dd>Call <code>predict(fit, W_test,
+    y_test)</code>. Returns test-set GEBVs plus <code>R2, RMSE, accuracy/AUC,
+    bias</code>.
+</dd>
+</dl>
+
+For test sets built with <code>construct_wah_matrix</code>, pass the
+training matrix structure as <code>reference_structure</code> so that
+<code>newdata</code> has identical columns to the training matrix.
+
+
+
+### Value
+
+An object of class <code>masbayes_prediction</code>: a list with
+<code>GEBV</code> (liability scale for binary), <code>prob</code> (binary only:
+<code>P(y = 1) = pnorm(GEBV)</code>, otherwise <code>NULL</code>),
+<code>metrics</code> (<code>R2, RMSE, accuracy/AUC, bias</code> or
+<code>NULL</code>; for binary, computed on the observed/probability
+scale so <code>bias</code> is the calibration slope), <code>h2, sigma2_g,
+  sigma2_e</code>, <code>variance_components</code>, <code>response_type</code>,
+<code>model_type</code>, <code>eval_scope</code>, and <code>has_truth</code>.
+
+
+
+### See Also
+
+<code>run_bayesr</code>,
+<code>summary.masbayes_bayesr</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masbayes")
+
+# Train/test split
+fit  <- run_bayesr(W_train, y_train, wtw_train, wty_train,
+                   sigma2_e_init = var(y_train)/2,
+                   sigma2_ah     = var(y_train)/2)
+
+pred <- predict(fit, W_test, y_test)   # test-set evaluation
+pred$metrics$accuracy
+pred$metrics$RMSE
+
+fc   <- predict(fit, W_unknown)        # forecast only, no y
+fc$GEBV
+
+insamp <- predict(fit)                 # in-sample reference
+insamp$metrics$R2
+
+
+
+
+```

@@ -1,0 +1,125 @@
+---
+title: "Evaluate Out-of-Sample Genomic Prediction"
+---
+
+## Evaluate Out-of-Sample Genomic Prediction {.unnumbered}
+
+
+### Description
+
+Computes prediction accuracy metrics for test individuals. Designed
+to complement <code>predict.masreml()</code> for out-of-sample evaluation.
+Works with any GEBV source (masreml, masbayes, or other models).
+
+
+
+### Usage
+
+<pre><code class='language-R'>evaluate_prediction(gebv, y, h2 = NULL, tbv = NULL, fitted_prob = NULL)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="gebv">gebv</code></td>
+<td>
+numeric vector of predicted GEBV for test individuals
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y">y</code></td>
+<td>
+numeric vector of observed phenotypes for test individuals
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="h2">h2</code></td>
+<td>
+numeric, heritability from fitted model for r_MG computation.
+Typically <code>fit\$varcomp\$h2</code> (single component) or a specific
+component. If NULL, r_MG is returned as NA.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="tbv">tbv</code></td>
+<td>
+numeric vector of true breeding values (simulation only).
+If provided, <code>r_MG_true = cor(gebv, tbv)</code> is computed directly
+without requiring h2. If NULL, r_MG_true is NA.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="fitted_prob">fitted_prob</code></td>
+<td>
+numeric vector of fitted probabilities P(y=1) for
+binary trait, typically <code>pred\$fitted</code> from <code>predict.masreml()</code>.
+If NULL, AUC is returned as NA.
+</td></tr>
+</table>
+
+
+### Value
+
+data.frame with columns:
+
+
+<ul>
+<li> <code>r_test_y</code>: predictive ability. Continuous: <code>cor(gebv, y)</code>.
+Binary: <code>cor(fitted_prob, y)</code> on the observed (probability) scale.
+
+</li>
+<li> <code>r_test_g</code>: <code>cor(gebv, tbv)</code> — accuracy vs true BV
+on the genetic-value scale (uses <code>gebv</code> for both continuous
+and binary). NA if <code>tbv</code> NULL.
+
+</li>
+<li> <code>bias</code>: regression slope. Continuous: <code>lm(y ~ gebv)</code>;
+binary: <code>lm(y ~ fitted_prob)</code> = <em>calibration slope</em>.
+Both interpret 1.0 = unbiased / well-calibrated, &lt;1 over-dispersion,
+&gt;1 under-dispersion.
+
+</li>
+<li> <code>r_MG</code>: <code>cor(gebv, y) / sqrt(h2)</code> — heritability-adjusted
+accuracy on the GEBV scale (uses <code>gebv</code> not <code>fitted_prob</code>
+even for binary, so <code>h2</code> is on the same scale). NA if <code>h2</code>
+NULL.
+
+</li>
+<li> <code>AUC</code>: area under ROC curve, computed from <code>fitted_prob</code>.
+Rank-invariant so unaffected by inverse-link transformation. NA if
+<code>fitted_prob</code> NULL.
+
+</li>
+<li> <code>RMSE</code>: continuous: <code>sqrt(mean((gebv - y)^2))</code>; binary:
+<code>sqrt(mean((fitted_prob - y)^2))</code> $\approx$ <code>sqrt(Brier)</code>.
+
+</li></ul>
+
+
+
+### See Also
+
+<code>predict.masreml</code>, <code>compute_accuracy</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masreml")
+
+pred <- predict(fit, G_full = list(g = G_full),
+                train_ids = train_ids, test_ids = test_ids)
+
+# Continuous trait
+evaluate_prediction(
+  gebv = pred$total_gebv,
+  y    = y_test,
+  h2   = fit$varcomp$h2["g"],
+  tbv  = tbv_test
+)
+
+# Binary trait
+evaluate_prediction(
+  gebv        = pred$total_gebv,
+  y           = y_test,
+  h2          = fit$varcomp$h2["g"],
+  fitted_prob = pred$fitted
+)
+
+
+
+
+```

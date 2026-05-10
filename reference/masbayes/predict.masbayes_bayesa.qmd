@@ -1,0 +1,73 @@
+---
+title: "Predict from a BayesA Fit"
+---
+
+## Predict from a BayesA Fit {.unnumbered}
+
+
+### Description
+
+Computes GEBVs and prediction metrics from a <code>run_bayesa</code>
+fit. Behaviour and return value are identical to
+<code>predict.masbayes_bayesr</code>; see that page for usage modes
+and examples.
+
+
+
+### Usage
+
+<pre><code class='language-R'>## S3 method for class 'masbayes_bayesa'
+predict(object, newdata = NULL, y_new = NULL, X_new = NULL, ...)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="object">object</code></td>
+<td>
+An object of class <code>masbayes_bayesa</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="newdata">newdata</code></td>
+<td>
+Optional numeric design matrix.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y_new">y_new</code></td>
+<td>
+Optional response vector for <code>newdata</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="...">...</code></td>
+<td>
+Unused.
+</td></tr>
+</table>
+
+
+### Value
+
+An object of class <code>masbayes_prediction</code>.
+
+
+
+### See Also
+
+<code>run_bayesa</code>,
+<code>summary.masbayes_bayesa</code>,
+<code>predict.masbayes_bayesr</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masbayes")
+
+fit  <- run_bayesa(W_train, y_train, wtw_train, wty_train,
+                   sigma2_g      = var(y_train)/2,
+                   sigma2_e_init = var(y_train)/2)
+pred <- predict(fit, W_test, y_test)
+pred$metrics$AUC      # for binary traits
+
+
+
+
+```

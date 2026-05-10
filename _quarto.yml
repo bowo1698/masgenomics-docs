@@ -78,6 +78,14 @@ website:
         - internals/index.qmd
         - internals/masreml-rust.qmd
         - internals/masbayes-rust.qmd
+    - title: "Reference: masreml"
+      contents:
+        - reference/masreml/index.qmd
+        - auto: reference/masreml/*.qmd
+    - title: "Reference: masbayes"
+      contents:
+        - reference/masbayes/index.qmd
+        - auto: reference/masbayes/*.qmd
 
   search:
     location: navbar

@@ -1,0 +1,168 @@
+---
+title: "Construct the W_ah Design Matrix from Phased Haplotype Genotypes"
+---
+
+## Construct the W_ah Design Matrix from Phased Haplotype Genotypes {.unnumbered}
+
+
+### Description
+
+Build the multi-allelic design matrix $W_{\alpha h}$ (Da, 2015) from
+phased haplotype calls. The matrix is the input expected by
+<code>run_bayesr</code> and <code>run_bayesa</code>.
+
+
+
+### Usage
+
+<pre><code class='language-R'>construct_wah_matrix(
+  hap_matrix,
+  colnames,
+  allele_freq_filtered = NULL,
+  reference_structure = NULL,
+  drop_baseline = TRUE
+)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="hap_matrix">hap_matrix</code></td>
+<td>
+Integer matrix of phased haplotype allele codes, with
+dimensions <code>n x 2*blocks</code>. Coerced to integer storage internally.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="colnames">colnames</code></td>
+<td>
+Column names of <code>hap_matrix</code> (length <code>2*blocks</code>).
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="allele_freq_filtered">allele_freq_filtered</code></td>
+<td>
+A <code>data.frame</code> with columns
+<code>haplotype</code>, <code>allele</code>, and <code>freq</code>. Required for the
+training set; pass <code>NULL</code> for the test set.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="reference_structure">reference_structure</code></td>
+<td>
+The full return value of a prior training-set
+call. Required for the test set; pass <code>NULL</code> for the training set.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="drop_baseline">drop_baseline</code></td>
+<td>
+If <code>TRUE</code> (default) the most-frequent allele per
+block is dropped to ensure full rank.
+</td></tr>
+</table>
+
+
+### Details
+
+The haplotype matrix has dimensions <code>n x 2*blocks</code>: each individual
+contributes two phased copies per block. Column names encode block
+identity (e.g. <code>hap_1_1</code> and <code>hap_1_1_1</code> are the two copies of
+block 1).
+
+For each block, the most-frequent allele (the baseline, dropped when
+<code>drop_baseline = TRUE</code>) is removed for identifiability; the remaining
+alleles become columns of $W_{\alpha h}$ encoded with the Da (2015)
+rule. A frequency-weighted projection enforces the sum-to-zero
+constraint $E[W_k] = 0$.
+
+<strong>Cross-validation / train-test split workflow:</strong>
+
+
+<ol>
+<li> Build the matrix on the <em>training</em> set: pass
+<code>allele_freq_filtered = &lt;freq_table&gt;</code> and
+<code>reference_structure = NULL</code>.
+
+</li>
+<li> Build the matrix on the <em>test</em> set with the training
+structure: pass the entire training-set return value as
+<code>reference_structure</code> and leave <code>allele_freq_filtered = NULL</code>.
+This guarantees the test matrix has identical columns and the same
+baseline alleles as the training matrix.
+
+</li></ol>
+
+
+
+### Value
+
+A list with three elements:
+
+
+<dl>
+<dt><code>W_ah</code></dt><dd>Numeric matrix <code>n x p</code> with named columns
+<code>&lt;block&gt;_allele&lt;k&gt;</code>.
+</dd>
+<dt><code>allele_info</code></dt><dd>Data frame describing each retained column
+(<code>allele_id, block, allele, freq</code>).
+</dd>
+<dt><code>dropped_alleles</code></dt><dd>Data frame of baseline alleles that were
+removed; empty if <code>drop_baseline = FALSE</code>.
+</dd>
+</dl>
+
+
+
+### References
+
+Da, Y. (2015). Multi-allelic haplotype model based on genetic
+partition for genomic prediction and variance component estimation
+using SNP markers. <em>BMC Genetics</em>, 16(1), 144.
+[doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1)
+
+
+
+### See Also
+
+<code>run_bayesr</code>, <code>run_bayesa</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masbayes")
+
+set.seed(1)
+n_ind              <- 30
+n_block            <- 10
+n_allele_per_block <- 3
+
+# Simulate a phased haplotype matrix (n x 2*blocks).
+# Each pair of columns holds the two phased copies of one block.
+hap <- matrix(
+  sample.int(n_allele_per_block, n_ind * n_block * 2, replace = TRUE),
+  nrow = n_ind
+)
+colnames(hap) <- paste0("hap_", rep(seq_len(n_block), each = 2))
+
+# Allele frequency table for the training set
+freq <- data.frame(
+  haplotype = paste0("hap_",
+                     rep(seq_len(n_block), each = n_allele_per_block)),
+  allele    = rep(seq_len(n_allele_per_block), n_block),
+  freq      = rep(c(0.5, 0.3, 0.2), n_block)
+)
+
+# Training set
+train   <- construct_wah_matrix(hap, colnames(hap), freq)
+W_train <- train$W_ah
+
+# Test set: reuse the training allele structure
+hap_te <- matrix(
+  sample.int(n_allele_per_block, 10 * n_block * 2, replace = TRUE),
+  nrow = 10
+)
+colnames(hap_te) <- colnames(hap)
+test   <- construct_wah_matrix(hap_te, colnames(hap_te),
+                               reference_structure = train)
+W_test <- test$W_ah
+stopifnot(ncol(W_train) == ncol(W_test))
+
+
+
+
+```

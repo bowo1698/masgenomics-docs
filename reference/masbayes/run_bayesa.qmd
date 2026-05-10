@@ -1,0 +1,283 @@
+---
+title: "Fit a BayesA Marker-Specific Variance Model (MCMC or stochastic EM)"
+---
+
+## Fit a BayesA Marker-Specific Variance Model (MCMC or stochastic EM) {.unnumbered}
+
+
+### Description
+
+BayesA (Meuwissen et al., 2001) places a scaled inverse chi-squared
+prior on each allele's effect variance, allowing heavier-tailed
+effect-size distributions than ridge regression. Use <code>method =
+"mcmc"</code> for full posterior inference or <code>method = "em"</code> for fast
+stochastic-EM point estimates (Gaussian only).
+
+
+
+### Usage
+
+<pre><code class='language-R'>run_bayesa(
+  w,
+  y,
+  wtw_diag,
+  X = NULL,
+  nu = 4.5,
+  sigma2_g,
+  sigma2_e_init,
+  prior_params = NULL,
+  mcmc_params = NULL,
+  em_params = NULL,
+  method = c("mcmc", "em"),
+  response_type = c("gaussian", "binary"),
+  fold_id = 0L,
+  save_rds = FALSE,
+  save_path = NULL,
+  verbose = FALSE
+)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="w">w</code></td>
+<td>
+Numeric design matrix (<code>n x p</code>). Typically the
+<code>\$W_ah</code> element returned by <code>construct_wah_matrix</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y">y</code></td>
+<td>
+Phenotype vector (length <code>n</code>). Use 0/1 for binary traits.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="wtw_diag">wtw_diag</code></td>
+<td>
+Pre-computed <code>colSums(w^2)</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="X">X</code></td>
+<td>
+Optional fixed-effects design matrix (<code>n x q</code>). When
+supplied, the model is $y = X\alpha + W\beta + \mu + \epsilon$
+with a flat prior on $\alpha$. Do <strong>not</strong> include a column
+of ones for the intercept; $\mu$ is sampled separately.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="nu">nu</code></td>
+<td>
+Degrees of freedom for the scaled inverse chi-squared prior on
+marker variances. Smaller values allow heavier tails. Must be &gt; 2.
+Default <code>4.5</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="sigma2_g">sigma2_g</code></td>
+<td>
+Prior total genetic variance. Typically
+<code>var(y) * 0.5</code>; for binary traits use <code>1.0</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="sigma2_e_init">sigma2_e_init</code></td>
+<td>
+Initial residual variance. For binary traits fix
+at <code>1.0</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="prior_params">prior_params</code></td>
+<td>
+Optional named list. Only <code>a0_e</code> (default 10)
+is used; <code>b0_e</code> is derived as <code>sigma2_e_init * (a0_e - 1)</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="mcmc_params">mcmc_params</code></td>
+<td>
+Optional named list: <code>n_iter</code> (40000),
+<code>n_burn</code> (20000), <code>n_thin</code> (10), <code>seed</code> (123).
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="em_params">em_params</code></td>
+<td>
+Optional named list: <code>max_iter</code> (500), <code>tol</code>
+(<code>1e-6</code>).
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="method">method</code></td>
+<td>
+Either <code>"mcmc"</code> (default) or <code>"em"</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="response_type">response_type</code></td>
+<td>
+<code>"gaussian"</code> (default) or <code>"binary"</code>.
+Binary requires <code>method = "mcmc"</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="fold_id">fold_id</code></td>
+<td>
+Integer label for progress messages.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="save_rds">save_rds</code></td>
+<td>
+If <code>TRUE</code>, the fit object is saved to
+disk as an RDS file. Set <code>FALSE</code> (default) for CV loops.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="save_path">save_path</code></td>
+<td>
+Optional explicit RDS path. If <code>NULL</code> (default),
+defaults to <code>"results_bayesa.Rds"</code> in the current working
+directory.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="verbose">verbose</code></td>
+<td>
+If <code>TRUE</code>, the Rust engine streams per-iteration
+progress (start banner, Iter X/Y diagnostics, ESS / Geweke,
+completion) to stderr. Default <code>FALSE</code> keeps the Rust side
+silent. The brief R post-fit summary prints regardless.
+</td></tr>
+</table>
+
+
+### Details
+
+<strong>Algorithm choice.</strong> MCMC uses marginalised Gibbs sampling and
+returns full posterior chains. EM is much faster but provides no
+uncertainty quantification and does not support <code>response_type =
+"binary"</code>.
+
+<strong>Auto-save.</strong> By default the returned fit is saved to
+<code>results_bayesa.Rds</code> in <code>getwd()</code>. Set <code>save_rds = FALSE</code>
+for CV loops.
+
+<strong>Three usage scenarios.</strong> <code>run_bayesa()</code> +
+<code>summary()</code> + <code>predict()</code> support full-data fits,
+train-test splits, and k-fold CV uniformly. See
+<code>run_bayesr</code> for example loops.
+
+<strong>Derived parameter.</strong> The wrapper computes
+<code>s_squared = sigma2_g * (nu - 2) / (nu * sum(apply(w, 2, var)))</code>
+so the prior expectation of each marker variance equals
+<code>sigma2_g / sum_2pq</code>.
+
+
+
+### Value
+
+An object of class <code>c("masbayes_bayesa", "masbayes")</code> — a
+list with the following key fields:
+
+
+<dl>
+<dt><code>beta_hat, mu_hat, sigma2_e_hat, sigma2_j_hat</code></dt><dd>Posterior
+point estimates (intercept, allele effects, residual variance,
+per-marker variances).
+</dd>
+<dt><code>beta_samples, sigma2_j_samples, sigma2_e_samples,
+    mu_samples</code></dt><dd>Posterior chains (single-row matrices for EM).
+</dd>
+<dt><code>GEBV / pred_train, h2, sigma2_g, sigma2_e</code></dt><dd>Training
+GEBVs (liability scale for binary), heritability, and total
+variance components.
+</dd>
+<dt><code>prob_train</code></dt><dd>Binary only: training-set predicted
+probabilities <code>P(y = 1) = pnorm(pred_train)</code> (probit
+inverse link from Albert-Chib augmentation).
+</dd>
+<dt><code>runtime</code></dt><dd>Elapsed seconds.
+</dd>
+<dt><code>training_metrics</code></dt><dd><code>R2</code>, <code>RMSE</code>,
+<code>accuracy</code> (or <code>AUC</code> for binary), <code>bias</code>. For
+binary, all metrics are on the observed (probability) scale —
+<code>bias</code> is the calibration slope (1.0 = perfectly
+calibrated) and <code>RMSE\^2</code> approximates the Brier score.
+AUC is rank-invariant so unaffected.
+</dd>
+<dt><code>diagnostics</code></dt><dd>ESS / Geweke Z (MCMC only).
+</dd>
+<dt><code>variance_components</code></dt><dd>Per-marker variances binned into
+tertiles (small / medium / large) reporting mean, range, and
+marker count.
+</dd>
+<dt><code>rds_path</code></dt><dd>Path of the saved RDS file, or <code>NULL</code>.
+</dd>
+</dl>
+
+
+
+### References
+
+Meuwissen, T. H. E., Hayes, B. J., \&amp; Goddard, M. E. (2001).
+Prediction of total genetic value using genome-wide dense marker
+maps. <em>Genetics</em>, 157(4), 1819-1829.
+[doi:10.1093/genetics/157.4.1819](https://doi.org/10.1093/genetics/157.4.1819)
+
+
+
+### See Also
+
+<code>run_bayesr</code>, <code>construct_wah_matrix</code>,
+<code>summary.masbayes_bayesa</code>,
+<code>predict.masbayes_bayesa</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masbayes")
+
+set.seed(42)
+n     <- 200
+mcmc  <- list(n_iter = 2000L, n_burn = 1000L, n_thin = 5L, seed = 123L)
+X_cov <- cbind(sex = rbinom(n, 1, 0.5), batch = rnorm(n))  # optional
+
+# ---- (A) SNP path ------------------------------------------------------
+n_snp <- 100
+X     <- matrix(rbinom(n * n_snp, 2, prob = runif(n_snp, 0.1, 0.5)),
+                n, n_snp)
+W_snp <- construct_snp_matrix(X)$W
+y     <- W_snp[, 1:5] %*% rnorm(5, 0, 0.5) + rnorm(n, 0, 1)
+
+fit_snp <- run_bayesa(
+  w             = W_snp,
+  y             = y,
+  wtw_diag      = colSums(W_snp^2),
+  X             = X_cov,           # optional
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  mcmc_params   = mcmc
+)
+summary(fit_snp)
+
+# ---- (B) Microhaplotype path ------------------------------------------
+n_block <- 50
+hap <- matrix(sample.int(3, n * n_block * 2, replace = TRUE), nrow = n)
+colnames(hap) <- paste0("hap_", rep(seq_len(n_block), each = 2))
+freq <- data.frame(
+  haplotype = paste0("hap_", rep(seq_len(n_block), each = 3)),
+  allele    = rep(1:3, n_block),
+  freq      = rep(c(0.5, 0.3, 0.2), n_block)
+)
+W_mh <- construct_wah_matrix(hap, colnames(hap), freq)$W_ah
+y_mh <- W_mh[, 1:5] %*% rnorm(5, 0, 0.5) + rnorm(n, 0, 1)
+
+fit_mh <- run_bayesa(
+  w             = W_mh,
+  y             = y_mh,
+  wtw_diag      = colSums(W_mh^2),
+  X             = X_cov,           # optional
+  nu            = 4.5,
+  sigma2_g      = var(y_mh) * 0.5,
+  sigma2_e_init = var(y_mh) * 0.5,
+  mcmc_params   = mcmc
+)
+summary(fit_mh)
+
+# ---- Predict on a held-out test set -----------------------------------
+idx  <- sample(n, 0.8 * n)
+W_tr <- W_snp[idx, ]
+y_tr <- y[idx]
+fit  <- run_bayesa(
+  w             = W_tr,
+  y             = y_tr,
+  wtw_diag      = colSums(W_tr^2),
+  nu            = 4.5,
+  sigma2_g      = var(y_tr) * 0.5,
+  sigma2_e_init = var(y_tr) * 0.5,
+  mcmc_params   = mcmc
+)
+pred <- predict(fit, W_snp[-idx, ], y[-idx])
+pred$metrics$accuracy
+
+
+
+
+```

@@ -1,0 +1,138 @@
+---
+title: "Build Multi-allelic Additive Genomic Relationship Matrix"
+---
+
+## Build Multi-allelic Additive Genomic Relationship Matrix {.unnumbered}
+
+
+### Description
+
+Constructs the multi-allelic (MH) additive genomic relationship matrix
+(Wgh) following Da (2015). Uses multi-allelic haplotype block coding
+(W_ah) that captures haplotype diversity beyond what bi-allelic SNPs
+can represent. The resulting matrix can be used in <code>masreml()</code> or
+<code>gwablup()</code> via the <code>G</code> argument.
+
+
+
+### Usage
+
+<pre><code class='language-R'>build_G_mh(mh_list, ref_mh = NULL, ids = NULL)
+</code></pre>
+
+
+### Arguments
+
+<table>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="mh_list">mh_list</code></td>
+<td>
+list of data.frames (one per chromosome) or integer matrix
+(n x n_blocks<em>2). Two input modes are supported:
+
+
+<ul>
+<li> <strong>List of data.frames</strong>: First column = individual IDs,
+remaining columns = paired haplotype allele codes per block
+(strand1_block1, strand2_block1, ...). Allele codes must be
+0-based sequential integers.
+
+</li>
+<li> <strong>Haplotype matrix</strong>: integer matrix (n x n_blocks
+</li></ul>
+2),
+columns alternate strand1/strand2 per block. Allele codes can be
+any integer (sparse, non-sequential) — re-encoded internally to
+sequential 0-based using training reference (<code>ref_mh</code>).
+</em>
+Example matrix format (50 blocks → 100 columns):
+
+<pre>
+  hap_block_all  # n x (n_blocks*2), cols: s1_b1, s2_b1, s1_b2, s2_b2, ...
+  </pre></td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="ref_mh">ref_mh</code></td>
+<td>
+reference haplotype data for training-based allele frequencies.
+Same format as <code>mh_list</code>. If provided, allele frequencies and
+dropped allele (most frequent) are estimated from <code>ref_mh</code> only,
+avoiding data leakage from test individuals. If NULL, frequencies are
+computed from all individuals in <code>mh_list</code>.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="ids">ids</code></td>
+<td>
+character vector of individual IDs for alignment. Required
+when <code>mh_list</code> is a haplotype matrix without rownames.
+</td></tr>
+</table>
+
+
+### Value
+
+numeric matrix (n x n) of microhaplotype-based genomic
+relationships. Same interpretation as SNP additive G matrix but
+based on haplotype block diversity.
+
+
+
+### References
+
+Da et al. (2015) Multi-allelic haplotype model based on genetic partition for genomic prediction
+and variance component estimation using SNP markers. <em>BMC Genet.</em> 15:100.
+
+
+
+### See Also
+
+<code>build_G_snp</code>, <code>masreml</code>,
+<code>run_gwas</code>
+
+
+
+### Examples
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library("masreml")
+
+# mh_list: one data.frame per chromosome
+# Each row = one individual
+# Columns: ID, then paired strand columns per haplotype block
+chr1 <- data.frame(
+  ID    = paste0("ind", 1:5),
+  B1_s1 = c(0, 1, 0, 2, 1),   # block 1 strand 1
+  B1_s2 = c(1, 1, 2, 0, 0),   # block 1 strand 2
+  B2_s1 = c(2, 0, 1, 1, 0),   # block 2 strand 1
+  B2_s2 = c(0, 1, 2, 0, 1)    # block 2 strand 2
+)
+mh_list <- list(chr1 = chr1)
+
+# Build Agh matrix from mh_list
+G_mh <- build_G_mh(mh_list)
+
+# Build Agh matrix from haplotype matrix (train/test split)
+# hap_block_all: n x (n_blocks*2), any integer allele codes
+G_mh_full <- build_G_mh(
+  mh_list = hap_block_all,
+  ref_mh  = hap_block_all[idx_train, ],
+  ids     = as.character(1:n_total)
+)
+
+# Use in masreml
+fit <- masreml(y, G = list(mh_add = G_mh))
+
+# Use in run_gwas + gwablup (hap_matrix mode)
+fit_tr  <- masreml(y_train, markers = list(mh_add = hap_block_train))
+gwas_tr <- run_gwas(
+  markers     = list(mh_add = hap_block_train),
+  y           = y_train,
+  masreml_fit = fit_tr,
+  ref_markers = list(mh_add = hap_block_train)
+)
+fit_wa <- gwablup(
+  y           = y_train,
+  markers     = list(mh_add = hap_block_train),
+  gwas_result = gwas_tr,
+  ref_markers = list(mh_add = hap_block_train)
+)
+
+
+
+
+```

@@ -1,0 +1,19 @@
+---
+title: "Print method for masreml_pred"
+---
+
+## Print method for masreml_pred {.unnumbered}
+
+
+### Description
+
+Print method for masreml_pred
+
+
+
+### Usage
+
+<pre><code class='language-R'>## S3 method for class 'masreml_pred'
+print(x, ...)
+</code></pre>
+
