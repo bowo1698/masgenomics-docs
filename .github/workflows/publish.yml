@@ -42,7 +42,7 @@ jobs:
       - name: Install R deps
         run: |
           install.packages(c(
-            "tidyverse", "reactable", "gt", "knitr", "rmarkdown", "data.table"
+            "tidyverse", "DT", "gt", "knitr", "rmarkdown", "data.table"
           ), repos = "https://packagemanager.posit.co/cran/__linux__/jammy/latest")
         shell: Rscript {0}
 

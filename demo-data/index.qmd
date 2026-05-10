@@ -4,10 +4,25 @@ title: "Demo Datasets"
 
 ```{r}
 #| include: false
-library(reactable)
+library(DT)
 library(tibble)
 library(dplyr)
 library(readr)
+
+dt_table <- function(data, page = 15, scrollX = FALSE) {
+  DT::datatable(
+    data,
+    rownames = FALSE,
+    class    = "cell-border compact stripe hover",
+    options  = list(
+      pageLength = page,
+      lengthMenu = c(10, 15, 25, 50, 100),
+      scrollX    = scrollX,
+      autoWidth  = FALSE,
+      dom        = "frtip"
+    )
+  )
+}
 ```
 
 Two pre-generated synthetic datasets accompany this site. **Every code
@@ -63,12 +78,7 @@ unchanged.
 ```{r}
 #| echo: false
 ped <- read_csv("main/pedigree_G1.csv", show_col_types = FALSE)
-reactable(
-  ped,
-  searchable = TRUE, sortable = TRUE,
-  pagination = TRUE, defaultPageSize = 15,
-  highlight = TRUE, compact = TRUE, bordered = TRUE
-)
+dt_table(ped, page = 15)
 ```
 
 [Download pedigree_G1.csv](main/pedigree_G1.csv){.btn .btn-sm .btn-primary}
@@ -80,12 +90,7 @@ reactable(
 ```{r}
 #| echo: false
 pheno_c <- read_csv("main/pheno_continuous_G1.csv", show_col_types = FALSE)
-reactable(
-  pheno_c,
-  searchable = TRUE, sortable = TRUE,
-  pagination = TRUE, defaultPageSize = 15,
-  highlight = TRUE, compact = TRUE, bordered = TRUE
-)
+dt_table(pheno_c, page = 15)
 ```
 
 [Download pheno_continuous_G1.csv](main/pheno_continuous_G1.csv){.btn .btn-sm .btn-primary}
@@ -95,12 +100,7 @@ reactable(
 ```{r}
 #| echo: false
 pheno_b <- read_csv("main/pheno_binary_G1.csv", show_col_types = FALSE)
-reactable(
-  pheno_b,
-  searchable = TRUE, sortable = TRUE,
-  pagination = TRUE, defaultPageSize = 15,
-  highlight = TRUE, compact = TRUE, bordered = TRUE
-)
+dt_table(pheno_b, page = 15)
 ```
 
 [Download pheno_binary_G1.csv](main/pheno_binary_G1.csv){.btn .btn-sm .btn-primary}
@@ -117,13 +117,7 @@ columns (0/1/2). The preview below shows the first 50 individuals × first
 #| echo: false
 geno_preview <- read_csv("main/geno_G1.csv", n_max = 50, show_col_types = FALSE)
 geno_preview <- geno_preview[, 1:23]   # id + generation + pop_type + first 20 SNPs
-reactable(
-  geno_preview,
-  searchable = TRUE, sortable = TRUE,
-  pagination = TRUE, defaultPageSize = 10,
-  highlight = TRUE, compact = TRUE, bordered = TRUE,
-  defaultColDef = colDef(minWidth = 80)
-)
+dt_table(geno_preview, page = 10, scrollX = TRUE)
 ```
 
 [Download geno_G1.csv](main/geno_G1.csv){.btn .btn-sm .btn-primary}
@@ -138,12 +132,7 @@ analysis and downstream tools.
 ```{r}
 #| echo: false
 snp_map <- read_tsv("main/snp_map.txt", show_col_types = FALSE)
-reactable(
-  snp_map,
-  searchable = TRUE, sortable = TRUE,
-  pagination = TRUE, defaultPageSize = 15,
-  highlight = TRUE, compact = TRUE, bordered = TRUE
-)
+dt_table(snp_map, page = 15)
 ```
 
 [Download snp_map.txt](main/snp_map.txt){.btn .btn-sm .btn-primary}
@@ -165,13 +154,7 @@ mh1 <- read.table("main/mh_genotypes/hap_geno_1",
                   header = TRUE, sep = "\t", check.names = FALSE,
                   nrows = 50)
 mh1 <- mh1[, 1:min(21, ncol(mh1))]
-reactable(
-  mh1,
-  searchable = TRUE, sortable = TRUE,
-  pagination = TRUE, defaultPageSize = 10,
-  highlight = TRUE, compact = TRUE, bordered = TRUE,
-  defaultColDef = colDef(minWidth = 80)
-)
+dt_table(mh1, page = 10, scrollX = TRUE)
 ```
 
 Download per-chromosome files (chromosomes 1–10):
@@ -193,12 +176,7 @@ Download per-chromosome files (chromosomes 1–10):
 #| echo: false
 mh_coords <- read_csv("main/mh_info_ld_haploblock_G0/stats/microhaplotype_coordinates.csv",
                       show_col_types = FALSE)
-reactable(
-  mh_coords,
-  searchable = TRUE, sortable = TRUE,
-  pagination = TRUE, defaultPageSize = 15,
-  highlight = TRUE, compact = TRUE, bordered = TRUE
-)
+dt_table(mh_coords, page = 15)
 ```
 
 [Download mh coordinates](main/mh_info_ld_haploblock_G0/stats/microhaplotype_coordinates.csv){.btn .btn-sm .btn-primary}
@@ -221,7 +199,12 @@ qtl_summary <- tibble(
                   "Haplotype block IDs flagged as QTL"),
   n           = c(length(qtl_snp_ids), length(qtl_mh_blocks), length(qtl_hap_blocks))
 )
-reactable(qtl_summary, sortable = FALSE, compact = TRUE, bordered = TRUE)
+DT::datatable(
+  qtl_summary,
+  rownames = FALSE,
+  class    = "cell-border compact stripe hover",
+  options  = list(dom = "t", paging = FALSE, ordering = FALSE)
+)
 ```
 
 [Download qtl_snp_ids.rds](main/qtl/qtl_snp_ids.rds){.btn .btn-sm .btn-outline-primary}

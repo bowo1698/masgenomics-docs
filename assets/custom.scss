@@ -29,88 +29,61 @@ $link-color: $primary;
   border-left-color: $primary;
 }
 
-/* ─── reactable: adapt to dark theme ────────────────────────────────────────
-   reactable widgets ship JavaScript that inlines light-mode colors at runtime
-   with high specificity, so we have to use !important to win the cascade.
-   Bootstrap 5 theme vars flip automatically when Quarto toggles light↔dark.
-   Palette below is keyed off `[data-bs-theme="dark"]` so light mode is
-   untouched. */
-[data-bs-theme="dark"] .reactable,
-[data-bs-theme="dark"] .reactable * {
+/* ─── DT (DataTables): adapt to dark theme ──────────────────────────────────
+   DT renders standard <table class="dataTable"> HTML, so Bootstrap 5's dark
+   theme styles already cover most of it. These rules just polish the parts
+   DataTables.js styles itself (search box, pagination, info text). */
+[data-bs-theme="dark"] table.dataTable {
+  color: var(--bs-body-color) !important;
+}
+
+[data-bs-theme="dark"] table.dataTable thead th,
+[data-bs-theme="dark"] table.dataTable thead td {
+  background-color: var(--bs-tertiary-bg) !important;
+  color: var(--bs-emphasis-color) !important;
   border-color: var(--bs-border-color) !important;
 }
 
-[data-bs-theme="dark"] .reactable {
+[data-bs-theme="dark"] table.dataTable tbody tr {
   background-color: var(--bs-body-bg) !important;
   color: var(--bs-body-color) !important;
 }
 
-[data-bs-theme="dark"] .reactable .rt-table,
-[data-bs-theme="dark"] .reactable .rt-tbody,
-[data-bs-theme="dark"] .reactable .rt-tr,
-[data-bs-theme="dark"] .reactable .rt-tr-group {
-  background-color: var(--bs-body-bg) !important;
-  color: var(--bs-body-color) !important;
-}
-
-[data-bs-theme="dark"] .reactable .rt-th,
-[data-bs-theme="dark"] .reactable .rt-td {
-  background-color: var(--bs-body-bg) !important;
-  color: var(--bs-body-color) !important;
-}
-
-[data-bs-theme="dark"] .reactable .rt-thead,
-[data-bs-theme="dark"] .reactable .rt-thead .rt-th,
-[data-bs-theme="dark"] .reactable .rt-tfoot,
-[data-bs-theme="dark"] .reactable .rt-tfoot .rt-td {
-  background-color: var(--bs-tertiary-bg) !important;
-  color: var(--bs-emphasis-color) !important;
-}
-
-[data-bs-theme="dark"] .reactable .rt-tr-striped,
-[data-bs-theme="dark"] .reactable .rt-tr-striped .rt-td {
+[data-bs-theme="dark"] table.dataTable.stripe tbody tr.odd,
+[data-bs-theme="dark"] table.dataTable tbody tr:nth-child(odd) {
   background-color: var(--bs-secondary-bg) !important;
 }
 
-[data-bs-theme="dark"] .reactable .rt-tr-highlight:hover,
-[data-bs-theme="dark"] .reactable .rt-tr-highlight:hover .rt-td,
-[data-bs-theme="dark"] .reactable .rt-tr-selectable:hover,
-[data-bs-theme="dark"] .reactable .rt-tr-selectable:hover .rt-td {
+[data-bs-theme="dark"] table.dataTable.hover tbody tr:hover {
   background-color: var(--bs-tertiary-bg) !important;
 }
 
-[data-bs-theme="dark"] .reactable .rt-search,
-[data-bs-theme="dark"] .reactable input,
-[data-bs-theme="dark"] .reactable select,
-[data-bs-theme="dark"] .reactable textarea {
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_filter input,
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_length select {
   background-color: var(--bs-body-bg) !important;
   color: var(--bs-body-color) !important;
   border: 1px solid var(--bs-border-color) !important;
 }
 
-[data-bs-theme="dark"] .reactable .rt-pagination {
-  background-color: var(--bs-tertiary-bg) !important;
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_info,
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_filter,
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_length,
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_paginate {
   color: var(--bs-body-color) !important;
 }
 
-[data-bs-theme="dark"] .reactable .rt-page-button,
-[data-bs-theme="dark"] .reactable .rt-page-jump,
-[data-bs-theme="dark"] .reactable .rt-page-size-select,
-[data-bs-theme="dark"] .reactable .rt-page-info,
-[data-bs-theme="dark"] .reactable .rt-pagination-nav {
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button {
   color: var(--bs-body-color) !important;
-  background-color: transparent !important;
 }
 
-[data-bs-theme="dark"] .reactable .rt-page-button:hover:not(:disabled) {
-  background-color: var(--bs-secondary-bg) !important;
-}
-
-[data-bs-theme="dark"] .reactable .rt-page-button-current {
-  background-color: var(--bs-primary) !important;
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: var(--bs-primary) !important;
   color: var(--bs-emphasis-color) !important;
+  border-color: var(--bs-primary) !important;
 }
 
-[data-bs-theme="dark"] .reactable .rt-no-data {
-  color: var(--bs-secondary-color) !important;
+[data-bs-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: var(--bs-tertiary-bg) !important;
+  color: var(--bs-emphasis-color) !important;
 }
