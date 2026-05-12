@@ -5,27 +5,150 @@ title: "Bayesian Alphabet (BayesA, BayesR)"
 ## TL;DR
 
 ::: {.callout-tip}
-TODO: 2-3 sentences summarising the method.
+The "Bayesian alphabet" is a family of regression models with
+**marker-specific shrinkage priors** on the additive-effects vector
+$\boldsymbol{\beta}$. `masbayes` exposes two members:
+
+- **BayesA** — each $\beta_j$ has its own variance with a scaled
+  inverse-$\chi^2$ prior; effects are shrunk individually, never to
+  exact zero. Default $\nu = 4.5$, $\sigma_g^2$ supplied by the user.
+- **BayesR** — $\beta_j$ comes from a **discrete 4-component mixture**
+  with variances $\{0, 0.001, 0.01, 0.1\} \cdot \sigma_g^2$ and prior
+  mixture proportions $\boldsymbol{\pi} = (0.95, 0.02, 0.02, 0.01)$.
+  Effects can be exactly zero; the posterior of $\boldsymbol{\pi}$
+  identifies how sparse the architecture is.
+
+Both differ from [GBLUP](gblup-gwablup.qmd) by *not* assuming the
+infinitesimal model — they let per-marker variance vary, which matters
+when the genetic architecture is sparse.
 :::
 
 ## The model
 
-::: {.callout-note}
-TODO: write out the formal equations and notation.
-:::
+All Bayesian-alphabet members share the marker-effects regression
+
+$$
+\mathbf{y} = \mathbf{X}\boldsymbol{\alpha} + \mathbf{W}\boldsymbol{\beta} + \boldsymbol{\epsilon},
+\qquad \boldsymbol{\epsilon} \sim N(\mathbf{0}, \mathbf{I}\sigma_e^2),
+$$ {#eq-bayes-regression}
+
+with $\mathbf{X}\boldsymbol{\alpha}$ the fixed effects and $\mathbf{W}$
+the $n \times p$ design matrix of standardised SNP dosages (or
+$W_{\alpha h}$ columns for MH alleles, see
+[Microhaplotypes](../input-data/microhaplotypes.qmd)). What changes
+between BayesA and BayesR is the prior on $\boldsymbol{\beta}$.
+
+### BayesA prior
+
+Per-marker variance gets a scaled inverse-$\chi^2$ prior:
+
+$$
+\beta_j \mid \sigma_{\beta_j}^2 \sim N\bigl(0,\, \sigma_{\beta_j}^2\bigr),
+\qquad
+\sigma_{\beta_j}^2 \sim \chi^{-2}(\nu, S),
+$$ {#eq-bayesa-prior}
+
+where $\nu$ is the prior degrees of freedom (default $\nu = 4.5$) and
+the scale $S$ is derived from the total genetic variance hyperparameter
+via
+$$
+S \;=\; \frac{\sigma_g^2\,(\nu - 2)}{\nu \cdot \sum_j \mathrm{Var}(w_j)},
+$$ {#eq-bayesa-scale}
+so the prior expectation of each per-marker variance equals
+$\sigma_g^2 / \sum_j \mathrm{Var}(w_j)$. Integrating $\sigma_{\beta_j}^2$
+out gives a Student-$t$ marginal on $\beta_j$ — heavier tails than a
+normal, hence resistance to over-shrinking large effects.
+
+### BayesR prior
+
+$\beta_j$ is drawn from a **4-component mixture** with variances scaled
+by $\sigma_g^2$ (Erbe et al. 2012):
+
+$$
+\beta_j \mid \boldsymbol{\pi}, \sigma_g^2
+\sim \pi_0\,\delta_0
+\;+\; \pi_1\,N\bigl(0,\, 0.001\,\sigma_g^2\bigr)
+\;+\; \pi_2\,N\bigl(0,\, 0.01\,\sigma_g^2\bigr)
+\;+\; \pi_3\,N\bigl(0,\, 0.1\,\sigma_g^2\bigr),
+$$ {#eq-bayesr-prior}
+
+with $\boldsymbol{\pi} = (\pi_0, \pi_1, \pi_2, \pi_3)$, $\sum_k \pi_k = 1$,
+and a Dirichlet prior on $\boldsymbol{\pi}$. Default initial mixture
+proportions in `masbayes::run_bayesr(pi_vec = c(0.95, 0.02, 0.02, 0.01))`
+match the Erbe et al. (2012) prior: 95% of SNPs are *a priori* in the
+zero atom, 1% have the largest variance class. The variance-class
+vector is `c(0, 0.001, 0.01, 0.1)` (the zero atom plus three
+exponentially-spaced classes).
+
+The $\delta_0$ atom permits exact zeros — `masbayes` reports each
+marker's **posterior inclusion probability**
+$1 - P(\beta_j = 0 \mid \mathbf{y})$ as a built-in variable-selection
+diagnostic.
+
+## Estimation
+
+`masbayes` provides a high-level wrapper per model plus low-level
+entry points:
+
+| Function | Algorithm | Output |
+|---|---|---|
+| `run_bayesa(w, y, wtw_diag, …, method = "mcmc")` | Gibbs MCMC | Posterior samples of $\boldsymbol{\beta}$, $\sigma_e^2$, $\sigma_{\beta_j}^2$ |
+| `run_bayesa(w, y, wtw_diag, …, method = "em")` | EM MAP | Point estimates (faster, no posterior intervals) |
+| `run_bayesr(w, y, wtw_diag, pi_vec, …, method = "mcmc")` | Gibbs MCMC | Samples of $\boldsymbol{\beta}$, $\sigma_e^2$, $\sigma_g^2$, $\boldsymbol{\pi}$ |
+| `run_bayesr(…, method = "em")` | EM MAP | Point estimates |
+| `run_bayesa_mcmc` / `run_bayesa_em` / `run_bayesr_mcmc` / `run_bayesr_em` | Low-level Rust bindings | Same outputs as the wrappers but no R-level preprocessing |
+
+All take `w` (a pre-built standardised design matrix from
+`construct_snp_matrix()` or `construct_wah_matrix()`), `y` (the
+response), and `wtw_diag = colSums(w^2)` as positional arguments. The
+total genetic-variance hyperparameter `sigma2_g` (typically
+`var(y) * 0.5` for continuous traits; `1.0` for binary on the
+liability scale) and `sigma2_e_init` are required.
+
+The MCMC route is the gold standard; the EM route is useful when
+predictive accuracy is the primary endpoint and full posterior
+uncertainty is unnecessary.
 
 ## Assumptions
 
-::: {.callout-note}
-TODO: enumerate assumptions.
-:::
+1. **Effect distribution matches the prior.** BayesA-style $t$-tailed
+   priors fit oligogenic architectures; BayesR fits explicitly sparse
+   architectures. Truly polygenic data prefers GBLUP.
+2. **Standardised design matrix.** Effects are interpretable on a
+   per-standardised-marker scale; raw dosage matrices lead to scale
+   confounding between MAF and effect. Always pass `w` from
+   `construct_snp_matrix(encoding = "vanRaden")` or the equivalent.
+3. **Conditional independence** of marker effects given variance
+   hyperparameters — the Gibbs sampler updates each $\beta_j$
+   conditionally on all others.
+4. **MCMC convergence.** Check the trace plots and effective sample
+   size reported in `summary()` before trusting posterior intervals.
 
 ## When to use
 
-::: {.callout-note}
-TODO: when this method is appropriate vs alternatives.
-:::
+| Architecture | Choose |
+|---|---|
+| Truly infinitesimal, hundreds of small-effect loci | GBLUP — see [GBLUP & GWABLUP](gblup-gwablup.qmd) |
+| Mixed: most loci small, a handful large | BayesA |
+| Sparse: small number of moderate-to-large QTL on a polygenic background | BayesR — the inclusion probabilities also identify the QTL |
+| Need cross-population prediction | BayesR (the mixture prior is more transferable than the infinitesimal one) |
 
 ## See it in code
 
-🛠 [Genomic Prediction tutorial](../tasks/genomic-prediction.qmd) — runs BayesA and BayesR side-by-side with GBLUP on the demo dataset.
+🛠 [Task: Genomic Prediction](../tasks/genomic-prediction.qmd) runs
+BayesA and BayesR side-by-side with GBLUP on the demo dataset and
+compares predictive accuracy.
+
+## References
+
+::: {.callout-note collapse="true"}
+## Primary references
+
+Meuwissen, T. H. E., Hayes, B. J., & Goddard, M. E. (2001). *Prediction
+of total genetic value using genome-wide dense marker maps.* Genetics,
+157(4), 1819–1829.
+
+Erbe, M. et al. (2012). *Improving accuracy of genomic predictions
+within and between dairy cattle breeds with imputed high-density
+single nucleotide polymorphism panels.* J. Dairy Sci., 95, 4114–4129.
+:::
