@@ -156,12 +156,37 @@ exactly 0.5 by construction.
 
 `n = 200` rows, eight columns: `id`, `sex` (factor F/M), the continuous
 and binary phenotypes under both SNP and MH architectures, and the true
-breeding values used to simulate each one.
+breeding values used to simulate each one. The continuous and binary
+flavours are also written as standalone derived CSVs for tools that
+prefer flat files.
+
+### Continuous trait (`pheno_continuous_G1.csv`)
+
+Columns: `id, sex, y_cont_qtl_snp, y_cont_qtl_mh, tbv_qtl_snp,
+tbv_qtl_mh`.
 
 ```{r}
 #| echo: false
-dt_table(d$pheno, page = 10, scroll_x = TRUE)
+pheno_c <- read.csv("main/pheno_continuous_G1.csv",
+                    stringsAsFactors = FALSE)
+dt_table(pheno_c, page = 10, scroll_x = TRUE)
 ```
+
+[Download pheno_continuous_G1.csv](main/pheno_continuous_G1.csv){.btn .btn-sm .btn-primary}
+
+### Binary trait (`pheno_binary_G1.csv`)
+
+Same schema but with the median-thresholded `y_bin_*` columns in place
+of the continuous ones. Prevalence is 0.5 by construction.
+
+```{r}
+#| echo: false
+pheno_b <- read.csv("main/pheno_binary_G1.csv",
+                    stringsAsFactors = FALSE)
+dt_table(pheno_b, page = 10, scroll_x = TRUE)
+```
+
+[Download pheno_binary_G1.csv](main/pheno_binary_G1.csv){.btn .btn-sm .btn-primary}
 
 ## Pedigree (`d$pedigree`)
 
@@ -173,33 +198,39 @@ dt_table(d$pheno, page = 10, scroll_x = TRUE)
 dt_table(d$pedigree, page = 10)
 ```
 
-## SNP map (`d$map_snp`)
+## SNP map (`d$map_snp` / `snp_map.txt`)
 
 Synthetic but deterministic physical positions; 100 SNPs evenly
 distributed across 5 chromosomes at 100 kb spacing starting from
-1 Mb on each chromosome.
+1 Mb on each chromosome. Also exported as a tab-delimited TXT for
+read.table()-style consumers.
 
 ```{r}
 #| echo: false
 dt_table(d$map_snp, page = 10)
 ```
 
-## MH block map (`d$map_mh`)
+[Download snp_map.txt](main/snp_map.txt){.btn .btn-sm .btn-primary}
+
+## Microhaplotype coordinates (`d$map_mh` / `microhaplotype_coordinates.csv`)
 
 50 blocks, 2 SNPs per block, 10 blocks per chromosome. Schema matches
 the maspipeline `microhaplotype_coordinates.csv` format
 (`block_id / chr / start_pos / end_pos / n_snps`) so production
-pipelines can consume `d$map_mh` without translation.
+pipelines can consume the file without translation.
 
 ```{r}
 #| echo: false
 dt_table(d$map_mh, page = 10)
 ```
 
-## SNP genotypes (`d$snp`)
+[Download microhaplotype_coordinates.csv](main/microhaplotype_coordinates.csv){.btn .btn-sm .btn-primary}
 
-Integer matrix; `0/1/2` dosage. Preview below shows the first 10
-individuals × first 12 SNPs of the `main` dataset.
+## SNP genotypes (`d$snp` / `geno_G1.csv`)
+
+Integer matrix; `0/1/2` dosage. The full matrix (200 × 100) is also
+written as a wide CSV with an `id` column. Preview below shows the
+first 10 individuals × first 12 SNPs of the `main` dataset.
 
 ```{r}
 #| echo: false
@@ -207,6 +238,8 @@ snp_preview <- as.data.frame(d$snp[1:10, 1:12])
 snp_preview <- cbind(id = rownames(snp_preview), snp_preview)
 dt_table(snp_preview, page = 10, scroll_x = TRUE)
 ```
+
+[Download geno_G1.csv](main/geno_G1.csv){.btn .btn-sm .btn-primary}
 
 ## Microhaplotype genotypes (`d$mh`)
 
@@ -286,26 +319,58 @@ af <- tibble(
 dt_table(af, page = 15)
 ```
 
-## QTL ground truth (`d$qtl`)
+## QTL ground truth (`d$qtl` / `qtl/*.rds`)
 
-Ten QTL under each architecture, with unit-length-normalised effects.
-**Use these for QTL recovery analysis only**, not as model input.
+Ten QTL under each architecture, with unit-length-normalised effects
+($\sum \beta_i^2 = 1$). **Use these for QTL recovery analysis only**,
+not as model input. Four standalone `.rds` files mirror the slots of
+`d$qtl` with human-readable identifiers (SNP names and MH block ids
+rather than numeric indices) so downstream tools can join against
+`d$map_snp` / `d$map_mh` directly.
+
+### Causal SNPs (`qtl/qtl_snp_ids.rds`, `qtl/effects_snp.rds`)
 
 ```{r}
 #| echo: false
-qtl_summary <- tibble(
-  architecture = c("SNP", "MH"),
-  positions    = c(paste(d$qtl$snp_idx, collapse = ", "),
-                   paste(d$qtl$mh_idx,  collapse = ", ")),
-  effect_min   = round(c(min(d$qtl$effects_snp),
-                         min(d$qtl$effects_mh)), 4),
-  effect_max   = round(c(max(d$qtl$effects_snp),
-                         max(d$qtl$effects_mh)), 4),
-  sum_sq       = round(c(sum(d$qtl$effects_snp ^ 2),
-                         sum(d$qtl$effects_mh  ^ 2)), 4)
+qtl_snp_ids <- readRDS("main/qtl/qtl_snp_ids.rds")
+effects_snp <- readRDS("main/qtl/effects_snp.rds")
+qtl_snp_tbl <- tibble(
+  rank        = seq_along(qtl_snp_ids),
+  snp_id      = qtl_snp_ids,
+  chrom       = d$map_snp$CHROM[match(qtl_snp_ids, d$map_snp$SNP)],
+  position    = d$map_snp$POS  [match(qtl_snp_ids, d$map_snp$SNP)],
+  effect      = round(effects_snp, 4)
 )
-dt_static(qtl_summary)
+dt_static(qtl_snp_tbl)
 ```
+
+### Causal MH blocks (`qtl/qtl_mh_blocks.rds`, `qtl/effects_mh.rds`)
+
+`d$qtl$mh_idx` indexes columns of $W_{ah}$ rather than the block matrix
+directly, because the causal "allele" within a multi-allelic block is
+itself a free parameter. The derived `qtl_mh_blocks.rds` reduces each
+$W_{ah}$ column to its parent block id; if two QTL fall in the same
+block the block id appears twice in the table below.
+
+```{r}
+#| echo: false
+qtl_mh_blocks <- readRDS("main/qtl/qtl_mh_blocks.rds")
+effects_mh    <- readRDS("main/qtl/effects_mh.rds")
+qtl_mh_tbl <- tibble(
+  rank      = seq_along(qtl_mh_blocks),
+  block_id  = qtl_mh_blocks,
+  chr       = d$map_mh$chr      [match(qtl_mh_blocks, d$map_mh$block_id)],
+  start_pos = d$map_mh$start_pos[match(qtl_mh_blocks, d$map_mh$block_id)],
+  end_pos   = d$map_mh$end_pos  [match(qtl_mh_blocks, d$map_mh$block_id)],
+  effect    = round(effects_mh, 4)
+)
+dt_static(qtl_mh_tbl)
+```
+
+[Download qtl_snp_ids.rds](main/qtl/qtl_snp_ids.rds){.btn .btn-sm .btn-outline-primary}
+[Download qtl_mh_blocks.rds](main/qtl/qtl_mh_blocks.rds){.btn .btn-sm .btn-outline-primary}
+[Download effects_snp.rds](main/qtl/effects_snp.rds){.btn .btn-sm .btn-outline-primary}
+[Download effects_mh.rds](main/qtl/effects_mh.rds){.btn .btn-sm .btn-outline-primary}
 
 ## Within-family train/test split
 

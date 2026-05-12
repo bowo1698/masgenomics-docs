@@ -151,6 +151,89 @@ write_per_chr_mh_files <- function(demo_data, out_dir, n_snp_per_block) {
   }
 }
 
+# Derived flat exports of the canonical .rds. Same one-direction rule
+# as write_per_chr_mh_files: these files are projections of demo_data
+# slots and live ONLY in demo-data/<size>/. They are convenient for
+# users who want plain CSV/TXT inputs (matching the legacy
+# MicrohapsSel-pipeline layout) without having to readRDS() the
+# canonical bundle themselves.
+write_derived_flat_files <- function(demo_data, out_dir) {
+
+  # ── Phenotypes split by trait kind ──────────────────────────────────────
+  # Continuous: SNP- and MH-architecture y plus the true breeding values
+  # used to simulate each. Binary: same but with the median-thresholded
+  # y. tbv columns are repeated in both files so each phenotype CSV is
+  # self-contained for downstream regression / classification tooling.
+  pheno_cont <- data.frame(
+    id             = demo_data$pheno$id,
+    sex            = demo_data$pheno$sex,
+    y_cont_qtl_snp = demo_data$pheno$y_cont_qtl_snp,
+    y_cont_qtl_mh  = demo_data$pheno$y_cont_qtl_mh,
+    tbv_qtl_snp    = demo_data$pheno$tbv_qtl_snp,
+    tbv_qtl_mh     = demo_data$pheno$tbv_qtl_mh,
+    stringsAsFactors = FALSE
+  )
+  pheno_bin <- data.frame(
+    id            = demo_data$pheno$id,
+    sex           = demo_data$pheno$sex,
+    y_bin_qtl_snp = demo_data$pheno$y_bin_qtl_snp,
+    y_bin_qtl_mh  = demo_data$pheno$y_bin_qtl_mh,
+    tbv_qtl_snp   = demo_data$pheno$tbv_qtl_snp,
+    tbv_qtl_mh    = demo_data$pheno$tbv_qtl_mh,
+    stringsAsFactors = FALSE
+  )
+  write.csv(pheno_cont,
+            file.path(out_dir, "pheno_continuous_G1.csv"),
+            row.names = FALSE)
+  write.csv(pheno_bin,
+            file.path(out_dir, "pheno_binary_G1.csv"),
+            row.names = FALSE)
+
+  # ── SNP genotype dosage matrix as wide CSV ──────────────────────────────
+  geno_df <- data.frame(id = rownames(demo_data$snp),
+                        demo_data$snp,
+                        stringsAsFactors = FALSE,
+                        check.names = FALSE)
+  write.csv(geno_df, file.path(out_dir, "geno_G1.csv"), row.names = FALSE)
+
+  # ── SNP map (tab-delimited so it can be read with read.table default) ──
+  write.table(demo_data$map_snp,
+              file.path(out_dir, "snp_map.txt"),
+              sep = "\t", quote = FALSE,
+              row.names = FALSE, col.names = TRUE)
+
+  # ── Microhaplotype coordinates (verbatim d$map_mh, schema matches the
+  # maspipeline microhaplotype_coordinates.csv) ───────────────────────────
+  write.csv(demo_data$map_mh,
+            file.path(out_dir, "microhaplotype_coordinates.csv"),
+            row.names = FALSE)
+
+  # ── QTL info: one RDS per slot, mirroring the legacy `qtl/` directory.
+  # snp_ids and mh_blocks are the human-readable identifiers (SNP names
+  # and block_ids) rather than numeric indices, so downstream QTL
+  # recovery analysis can join against d$map_snp / d$map_mh without an
+  # index lookup.
+  qtl_dir <- file.path(out_dir, "qtl")
+  if (!dir.exists(qtl_dir)) dir.create(qtl_dir, recursive = TRUE)
+
+  snp_ids <- colnames(demo_data$snp)[demo_data$qtl$snp_idx]
+
+  # d$qtl$mh_idx indexes columns of W_ah, which holds (n_alleles_b - 1)
+  # cols per block (one allele is dummy-encoded as reference). The
+  # block label of W_ah column k is reconstructed by repeating each
+  # block_id (n_alleles_b - 1) times in d$allele_freq order.
+  af        <- demo_data$allele_freq
+  blk       <- unique(af$haplotype)
+  counts    <- as.integer(table(factor(af$haplotype, levels = blk))) - 1L
+  wah_blk   <- rep(blk, times = counts)
+  mh_blocks <- wah_blk[demo_data$qtl$mh_idx]
+
+  saveRDS(snp_ids,                   file.path(qtl_dir, "qtl_snp_ids.rds"))
+  saveRDS(mh_blocks,                 file.path(qtl_dir, "qtl_mh_blocks.rds"))
+  saveRDS(demo_data$qtl$effects_snp, file.path(qtl_dir, "effects_snp.rds"))
+  saveRDS(demo_data$qtl$effects_mh,  file.path(qtl_dir, "effects_mh.rds"))
+}
+
 generate_demo <- function(cfg) {
 
   N_SIRES                <- cfg$n_sires
@@ -529,6 +612,10 @@ for (size_label in sizes) {
   # Only into demo-data/<size>/mh_genotypes/ — never into sibling-package
   # inst/extdata/.
   write_per_chr_mh_files(res$demo_data, out_dir, cfg$n_snp_per_block)
+
+  # Derived flat phenotype / genotype / map / QTL files, also only
+  # under demo-data/<size>/. Pure projections of the .rds; no RNG.
+  write_derived_flat_files(res$demo_data, out_dir)
 
   cat(sprintf("  n=%d  n_snp=%d  n_blocks=%d  n_qtl=%d\n",
               cfg$n_sires * cfg$n_offspring_family,
