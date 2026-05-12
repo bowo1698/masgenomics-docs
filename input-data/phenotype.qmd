@@ -92,36 +92,63 @@ pheno_b <- read.csv("demo-data/main/pheno_binary_G1.csv")
 
 ### Passing phenotypes to each package
 
+`masreml::masreml()` takes the response as a named numeric vector `y`,
+the fixed-effects design matrix `X` explicitly (build it with
+`stats::model.matrix()`), and `markers` as a named list
+(`snp_add`, `snp_dom`, `mh_add`). There is no `formula` argument and no
+direct `pedigree` argument — for pedigree-based prediction, precompute
+$\mathbf{A}$ via `build_A_ped()` and pass it through the `G` slot.
+
 ```{r}
 #| eval: false
-# masreml: REML mixed model with sex as fixed effect
+# Continuous trait, SNP-additive GBLUP with sex as fixed effect.
+y <- d$pheno$y_cont_qtl_snp
+names(y) <- d$pheno$id
+
+X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
+
 fit <- masreml::masreml(
-  formula = y_cont_qtl_snp ~ sex,
-  data    = d$pheno,
+  y       = y,
+  X       = X_fixed,
   markers = list(snp_add = d$snp),
-  pedigree = d$pedigree
+  trait   = "continuous"
 )
 
-# masbayes: BayesA / BayesR on a continuous trait
+# masbayes: BayesA on the same trait. The wrapper takes the
+# pre-standardised design matrix `w` plus colSums(w^2) as inputs;
+# sigma2_g and sigma2_e_init are required hyperparameters.
 W   <- masbayes::construct_snp_matrix(d$snp, encoding = "vanRaden")
-fit <- masbayes::run_bayesa(y = d$pheno$y_cont_qtl_snp, X = W)
+fit <- masbayes::run_bayesa(
+  w             = W,
+  y             = y,
+  wtw_diag      = colSums(W^2),
+  X             = X_fixed,
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc"
+)
 
-# Binary trait via threshold model in masreml
+# Binary trait via threshold model in masreml (Laplace approximation).
+y_bin <- d$pheno$y_bin_qtl_snp
+names(y_bin) <- d$pheno$id
 fit_bin <- masreml::masreml(
-  formula = y_bin_qtl_snp ~ sex,
-  data    = d$pheno,
-  family  = "binomial",                    # liability-scale model
-  markers = list(snp_add = d$snp)
+  y       = y_bin,
+  X       = X_fixed,
+  markers = list(snp_add = d$snp),
+  trait   = "binary",
+  link    = "logit"
 )
 ```
 
 ## Common pitfalls
 
 ::: {.callout-warning}
-**Row order must match the genotype matrix.** `masreml` aligns on `id`
-when both `data$id` and `rownames(markers$snp_add)` are present, but
-this is the most common source of silent bugs when ID conventions
-differ. Always verify before fitting:
+**Row order must match the genotype matrix.** `masreml::masreml()`
+aligns on `names(y)` against `rownames(markers$snp_add)` (and rownames
+of `X`). This is the most common source of silent bugs when ID
+conventions differ. Always verify before fitting:
 
 ```{r}
 #| eval: false
@@ -132,16 +159,18 @@ stopifnot(identical(d$pheno$id, rownames(d$snp)))
 ::: {.callout-warning}
 **Factor levels must be consistent across train and test.** If your
 fixed-effect covariate is a factor (e.g. `sex`), make sure both
-train and test splits see all levels — otherwise the design-matrix
-column count diverges and prediction breaks.
+train and test splits see all levels before calling
+`stats::model.matrix()` — otherwise the design-matrix column count
+diverges and prediction breaks.
 :::
 
 ::: {.callout-warning}
 **Binary phenotypes go through a threshold model, not regression on
-0/1.** Use `family = "binomial"` in `masreml::masreml()` so the
-liability-scale variance is identified. Naive Gaussian fitting of
-binary data produces unbiased EBVs in some regimes but distorts
-heritability estimates.
+0/1.** Pass `trait = "binary"` (with `link = "logit"` or `"probit"`) in
+`masreml::masreml()` so the liability-scale variance is identified.
+Naive Gaussian fitting of binary data (`trait = "continuous"`)
+produces unbiased EBVs in some regimes but distorts heritability
+estimates.
 :::
 
 ::: {.callout-tip}

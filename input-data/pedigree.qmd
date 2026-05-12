@@ -99,23 +99,43 @@ str(A)                          # 220 x 220 numeric, rownames = ids
 
 ### Using A inside the mixed model
 
+`masreml::masreml()` does not accept a pedigree argument directly.
+Build $\mathbf{A}$ first with `build_A_ped()`, then pass it through the
+`G` slot under one of the recognised keys (`snp_add`, `snp_dom`, or
+`mh_add` — the key is the random-effect label, not a content check):
+
 ```{r}
 #| eval: false
-# Pedigree-based BLUP (A-BLUP):
-fit_a <- masreml::masreml(
-  formula  = y_cont_qtl_snp ~ sex,
-  data     = d$pheno,
-  pedigree = d$pedigree
-)
+y <- d$pheno$y_cont_qtl_snp
+names(y) <- d$pheno$id
+X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
 
-# Combined (single-step) pedigree + genomic:
-fit_hblup <- masreml::masreml(
-  formula  = y_cont_qtl_snp ~ sex,
-  data     = d$pheno,
-  pedigree = d$pedigree,
-  markers  = list(snp_add = d$snp)
+# Build A on the full pedigree (220 individuals = founders + offspring)
+A_full <- masreml::build_A_ped(ped_int)
+
+# Restrict to the phenotyped offspring before fitting.
+A_pheno <- A_full[d$pheno$id, d$pheno$id]
+
+# A-BLUP: the pedigree-derived relationship matrix as the single
+# random-effect kernel. The slot key here is `snp_add` simply because
+# that is the recognised label for an additive-relationship slot in
+# masreml's G list — its contents are A, not a SNP-derived G.
+fit_a <- masreml::masreml(
+  y     = y,
+  X     = X_fixed,
+  G     = list(snp_add = A_pheno),
+  trait = "continuous"
 )
 ```
+
+::: {.callout-note}
+**Single-step GBLUP (combining $\mathbf{A}$ and $\mathbf{G}$).** masreml's
+`G` slot recognises only the three keys above; it does not provide a
+dedicated pedigree-plus-genomic kernel. For single-step prediction,
+build the combined $\mathbf{H}$ matrix
+([Misztal et al. 2009](https://doi.org/10.3168/jds.2009-2064))
+externally and pass it as `G = list(snp_add = H)`.
+:::
 
 ## Common pitfalls
 
