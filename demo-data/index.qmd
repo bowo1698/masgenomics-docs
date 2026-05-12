@@ -1,24 +1,16 @@
 ---
 title: "Demo Datasets"
-execute:
-  eval: false
 ---
-
-::: {.callout-warning}
-This page is mid-migration — the canonical demo dataset has moved to a
-single `.rds` per size (`main/demo_data.rds`, `toy/demo_data_small.rds`).
-The presentation below still references the previous flat-CSV layout and
-its chunks are disabled until the page is rewritten.
-:::
 
 ```{r}
 #| include: false
 library(DT)
 library(tibble)
-library(dplyr)
-library(readr)
 
-dt_table <- function(data, page = 15, scrollX = FALSE) {
+d       <- readRDS("main/demo_data.rds")
+d_small <- readRDS("toy/demo_data_small.rds")
+
+dt_table <- function(data, page = 15, scroll_x = FALSE) {
   DT::datatable(
     data,
     rownames = FALSE,
@@ -26,208 +18,280 @@ dt_table <- function(data, page = 15, scrollX = FALSE) {
     options  = list(
       pageLength = page,
       lengthMenu = c(10, 15, 25, 50, 100),
-      scrollX    = scrollX,
+      scrollX    = scroll_x,
       autoWidth  = FALSE,
       dom        = "frtip"
     )
+  )
+}
+
+dt_static <- function(data) {
+  DT::datatable(
+    data,
+    rownames = FALSE,
+    class    = "cell-border compact stripe hover",
+    options  = list(dom = "t", paging = FALSE, ordering = FALSE)
   )
 }
 ```
 
 Two pre-generated synthetic datasets accompany this site. **Every code
 example in the [Tasks](../tasks/index.qmd) section uses these**, so the
-numbers you see in tutorials match what you get when you run them locally.
+numbers you see in tutorials match what you get when you run them locally
+or via `system.file("extdata/demo_data.rds", package = "masbayes")`.
 
-| Dataset | Individuals | SNPs | MH blocks | Hap blocks | Use |
-|---|---:|---:|---:|---:|---|
-| **main** | 1,000 | 5,000 | ~5,000 | ~500 | All standard tutorials |
-| **toy**  | 200   | 500   | ~500   | ~220 | Quick-start (runs in seconds) |
+| Dataset | Individuals | SNPs | MH blocks | $W_{ah}$ columns | QTL | Use |
+|---|---:|---:|---:|---:|---:|---|
+| **main** | 200 (10 sires × 20 offspring) | 100 | 50 | ~149 | 10 | All standard tutorials |
+| **toy**  | 100 (10 sires × 10 offspring) | 50  | 25 | ~75  | 5  | Quick-start (runs in seconds) |
 
-Both are simulated from `generate.R` with `set.seed(42)` —
-re-running produces bit-identical files.
+Both are simulated with `set.seed(42)` for the genetic stream and
+`set.seed(41)` for the within-family train/test split; re-running
+`generate.R` produces bit-identical output.
 
 ::: {.callout-tip}
-## Layout matches `MicrohapsSel/simulation/model_fitting`
+## One `.rds` per size, byte-identical to the sibling packages
 
-The file structure mirrors what the user's MicrohapsSel pipeline expects.
-You can plug these CSVs into `main-mh-fit-eval.R` or `main-snp-fit-eval.R`
-unchanged.
+Each dataset is a single named R list serialised as `.rds`. The files at
+`demo-data/main/demo_data.rds` and `demo-data/toy/demo_data_small.rds`
+are **byte-identical** to the same-named files shipped under
+`masbayes/inst/extdata/` and `masreml/inst/extdata/`. The canonical
+generator lives in the workspace as `tools/make_demo_data.R`; the local
+mirror is `demo-data/generate.R` (output routed only into
+`demo-data/<size>/`, never into either sibling-package `inst/extdata/`).
 :::
 
-## Simulation parameters
+## Loading
 
-- **`set.seed(42)`** at the top of `generate.R`; no other seed calls.
-- **Genetic architecture:** randomly drawn QTL (50 SNPs for `main`, 20 for `toy`) with effects from $N(0, 1)$.
-- **Heritability:** $h^2 = 0.4$.
-- **Phenotypes:** continuous (`pheno_continuous_G1.csv`) and binary (threshold at median, `pheno_binary_G1.csv`).
-- **Pedigree:** 4 generations; ~10% founders (NA sire/dam), random mating among earlier individuals; family lineages traced via the sire.
-- **MH blocks:** built from sliding 3-SNP windows (max 125bp span).
-- **Haplotype blocks:** built from 100kb windows.
+```{r}
+#| eval: false
+# From the masgenomics-docs working directory:
+d <- readRDS("demo-data/main/demo_data.rds")
+
+# Or from either installed package (byte-identical):
+d <- readRDS(system.file("extdata", "demo_data.rds", package = "masbayes"))
+d <- readRDS(system.file("extdata", "demo_data.rds", package = "masreml"))
+```
+
+`d` is a named list with the following slots:
+
+```{r}
+#| echo: false
+slots <- tibble(
+  slot          = c("snp", "mh", "allele_freq", "pheno", "pedigree",
+                    "qtl", "meta", "family_id", "train_idx", "test_idx",
+                    "map_snp", "map_mh"),
+  class         = vapply(c("snp", "mh", "allele_freq", "pheno", "pedigree",
+                           "qtl", "meta", "family_id", "train_idx", "test_idx",
+                           "map_snp", "map_mh"),
+                         function(nm) paste(class(d[[nm]]), collapse = "/"),
+                         character(1)),
+  shape_or_size = c(
+    paste(nrow(d$snp),     "x", ncol(d$snp)),
+    paste(nrow(d$mh),      "x", ncol(d$mh)),
+    paste(length(d$allele_freq$haplotype), "rows (long form)"),
+    paste(nrow(d$pheno),   "x", ncol(d$pheno)),
+    paste(nrow(d$pedigree),"x", ncol(d$pedigree)),
+    "4 sub-elements (snp_idx, mh_idx, effects_snp, effects_mh)",
+    paste0(length(d$meta), " entries"),
+    paste("length", length(d$family_id)),
+    paste("length", length(d$train_idx)),
+    paste("length", length(d$test_idx)),
+    paste(nrow(d$map_snp), "x", ncol(d$map_snp)),
+    paste(nrow(d$map_mh),  "x", ncol(d$map_mh))
+  ),
+  description   = c(
+    "Diploid SNP dosage matrix; rownames = individual IDs, colnames = SNP IDs",
+    "Microhaplotype matrix (integer-encoded alleles, 2 cols per block)",
+    "Per-block allele frequency table (long form: haplotype / allele / freq)",
+    "Phenotypes (SNP- and MH-architecture, continuous + binary; plus sex, true breeding values)",
+    "3-column pedigree (id / sire / dam) including founders with NA parents",
+    "True QTL positions and standardised effects under both architectures",
+    "Simulation metadata (sizes, h2 target, seeds, sex effect betas)",
+    "Family label per offspring (length n)",
+    "Within-family training-set indices (16/family in main; 8/family in toy)",
+    "Within-family test-set indices (4/family in main; 2/family in toy)",
+    "Physical-position map for SNPs (SNP / CHROM / POS, synthetic)",
+    "Physical-position map for MH blocks (block_id / chr / start_pos / end_pos / n_snps)"
+  )
+)
+dt_static(slots)
+```
+
+## Simulation metadata (`d$meta`)
+
+```{r}
+#| echo: false
+meta_df <- tibble(
+  key   = names(d$meta),
+  value = vapply(d$meta, function(x) format(x, digits = 4), character(1))
+)
+dt_static(meta_df)
+```
+
+Heritability target is $h^2 = 0.5$; realised values for the canonical
+`main` dataset are $h^2_{SNP} \approx 0.516$ and $h^2_{MH} \approx 0.474$
+(printed by `generate.R` on run). Binary phenotypes are obtained by
+thresholding the continuous trait at its median, so prevalence is
+exactly 0.5 by construction.
 
 ## Download
 
 ::: {.grid}
 ::: {.g-col-6}
-**main dataset (~76 MB uncompressed)**
+**main dataset** (≈ 23 KB compressed)
 
-[📦 Download main as ZIP](main.zip){.btn .btn-primary} &nbsp;
+[📦 demo_data.rds](main/demo_data.rds){.btn .btn-sm .btn-primary} &nbsp;
+[📦 ZIP (whole `main/`)](main.zip){.btn .btn-sm .btn-outline-primary}
 :::
 ::: {.g-col-6}
-**toy dataset (~2 MB uncompressed)**
+**toy dataset** (≈ 9 KB compressed)
 
-[📦 Download toy as ZIP](toy.zip){.btn .btn-secondary} &nbsp;
+[📦 demo_data_small.rds](toy/demo_data_small.rds){.btn .btn-sm .btn-secondary} &nbsp;
+[📦 ZIP (whole `toy/`)](toy.zip){.btn .btn-sm .btn-outline-secondary}
 :::
 :::
 
-## Pedigree
+## Phenotypes (`d$pheno`)
 
-`pedigree_G1.csv` — full table, 1,000 rows. Columns: `individual_id`,
-`family_id`, `population_type`, `sire`, `dam`, `generation`.
+`n = 200` rows, eight columns: `id`, `sex` (factor F/M), the continuous
+and binary phenotypes under both SNP and MH architectures, and the true
+breeding values used to simulate each one.
 
 ```{r}
 #| echo: false
-ped <- read_csv("main/pedigree_G1.csv", show_col_types = FALSE)
-dt_table(ped, page = 15)
+dt_table(d$pheno, page = 10, scroll_x = TRUE)
 ```
 
-[Download pedigree_G1.csv](main/pedigree_G1.csv){.btn .btn-sm .btn-primary}
+## Pedigree (`d$pedigree`)
 
-## Phenotypes
-
-### Continuous trait (`pheno_continuous_G1.csv`)
+220 rows (10 sires + 10 dams + 200 offspring). Sires and dams have
+`NA` parents; offspring carry the engineered sire/dam pairing.
 
 ```{r}
 #| echo: false
-pheno_c <- read_csv("main/pheno_continuous_G1.csv", show_col_types = FALSE)
-dt_table(pheno_c, page = 15)
+dt_table(d$pedigree, page = 10)
 ```
 
-[Download pheno_continuous_G1.csv](main/pheno_continuous_G1.csv){.btn .btn-sm .btn-primary}
+## SNP map (`d$map_snp`)
 
-### Binary trait (`pheno_binary_G1.csv`)
+Synthetic but deterministic physical positions; 100 SNPs evenly
+distributed across 5 chromosomes at 100 kb spacing starting from
+1 Mb on each chromosome.
 
 ```{r}
 #| echo: false
-pheno_b <- read_csv("main/pheno_binary_G1.csv", show_col_types = FALSE)
-dt_table(pheno_b, page = 15)
+dt_table(d$map_snp, page = 10)
 ```
 
-[Download pheno_binary_G1.csv](main/pheno_binary_G1.csv){.btn .btn-sm .btn-primary}
+## MH block map (`d$map_mh`)
 
-## SNP genotypes
-
-### `geno_G1.csv` — wide CSV (preview only)
-
-`individual_id`, `generation`, `population_type`, then 5,000 SNP dosage
-columns (0/1/2). The preview below shows the first 50 individuals × first
-20 SNPs.
+50 blocks, 2 SNPs per block, 10 blocks per chromosome. Schema matches
+the maspipeline `microhaplotype_coordinates.csv` format
+(`block_id / chr / start_pos / end_pos / n_snps`) so production
+pipelines can consume `d$map_mh` without translation.
 
 ```{r}
 #| echo: false
-geno_preview <- read_csv("main/geno_G1.csv", n_max = 50, show_col_types = FALSE)
-geno_preview <- geno_preview[, 1:23]   # id + generation + pop_type + first 20 SNPs
-dt_table(geno_preview, page = 10, scrollX = TRUE)
+dt_table(d$map_mh, page = 10)
 ```
 
-[Download geno_G1.csv](main/geno_G1.csv){.btn .btn-sm .btn-primary}
-&nbsp;
-[Download salmon_60k.vcf](main/salmon_60k.vcf){.btn .btn-sm .btn-secondary}
+## SNP genotypes (`d$snp`)
 
-### SNP map (`snp_map.txt`)
-
-Tab-delimited; columns `snp_id`, `chr`, `position`. Used by QTL recovery
-analysis and downstream tools.
+Integer matrix; `0/1/2` dosage. Preview below shows the first 10
+individuals × first 12 SNPs of the `main` dataset.
 
 ```{r}
 #| echo: false
-snp_map <- read_tsv("main/snp_map.txt", show_col_types = FALSE)
-dt_table(snp_map, page = 15)
+snp_preview <- as.data.frame(d$snp[1:10, 1:12])
+snp_preview <- cbind(id = rownames(snp_preview), snp_preview)
+dt_table(snp_preview, page = 10, scroll_x = TRUE)
 ```
 
-[Download snp_map.txt](main/snp_map.txt){.btn .btn-sm .btn-primary}
+## Microhaplotype genotypes (`d$mh`)
 
-## Microhaplotype genotypes
-
-### Per-chromosome MH genotype files
-
-Each chromosome has one file under `mh_genotypes/hap_geno_<chr>`. Tab-delimited.
-Format: first column is `ID`; subsequent columns are 4-per-block
-(`hap_<idx>_1, hap_<idx>_1, hap_<idx>_2, hap_<idx>_2`) — duplicated allele
-columns matching the MicrohapsSel pipeline expectation.
-
-Preview of `hap_geno_1` (first 50 individuals × first 20 columns):
+Integer matrix; 2 columns per block holding the polynomial-encoded
+allele ids for haplotypes 1 and 2. The `block_id` attribute maps each
+column to its block:
 
 ```{r}
-#| echo: false
-mh1 <- read.table("main/mh_genotypes/hap_geno_1",
-                  header = TRUE, sep = "\t", check.names = FALSE,
-                  nrows = 50)
-mh1 <- mh1[, 1:min(21, ncol(mh1))]
-dt_table(mh1, page = 10, scrollX = TRUE)
+#| eval: false
+attr(d$mh, "block_id")[1:6]
+#> "block_1" "block_1" "block_2" "block_2" "block_3" "block_3"
 ```
 
-Download per-chromosome files (chromosomes 1–10):
-
-[chr1](main/mh_genotypes/hap_geno_1){.btn .btn-sm .btn-outline-primary}
-[chr2](main/mh_genotypes/hap_geno_2){.btn .btn-sm .btn-outline-primary}
-[chr3](main/mh_genotypes/hap_geno_3){.btn .btn-sm .btn-outline-primary}
-[chr4](main/mh_genotypes/hap_geno_4){.btn .btn-sm .btn-outline-primary}
-[chr5](main/mh_genotypes/hap_geno_5){.btn .btn-sm .btn-outline-primary}
-[chr6](main/mh_genotypes/hap_geno_6){.btn .btn-sm .btn-outline-primary}
-[chr7](main/mh_genotypes/hap_geno_7){.btn .btn-sm .btn-outline-primary}
-[chr8](main/mh_genotypes/hap_geno_8){.btn .btn-sm .btn-outline-primary}
-[chr9](main/mh_genotypes/hap_geno_9){.btn .btn-sm .btn-outline-primary}
-[chr10](main/mh_genotypes/hap_geno_10){.btn .btn-sm .btn-outline-primary}
-
-### Microhaplotype coordinates (`mh_info_ld_haploblock_G0/stats/microhaplotype_coordinates.csv`)
+Preview: first 10 individuals × first 6 columns (= blocks 1–3):
 
 ```{r}
 #| echo: false
-mh_coords <- read_csv("main/mh_info_ld_haploblock_G0/stats/microhaplotype_coordinates.csv",
-                      show_col_types = FALSE)
-dt_table(mh_coords, page = 15)
+mh_preview <- as.data.frame(d$mh[1:10, 1:6])
+colnames(mh_preview) <- paste0(rep(c("blk1", "blk2", "blk3"), each = 2),
+                               c("_h1", "_h2"))
+mh_preview <- cbind(id = rownames(mh_preview), mh_preview)
+dt_table(mh_preview, page = 10)
 ```
 
-[Download mh coordinates](main/mh_info_ld_haploblock_G0/stats/microhaplotype_coordinates.csv){.btn .btn-sm .btn-primary}
+## Allele frequencies (`d$allele_freq`)
 
-## QTL information (true causal variants)
-
-`qtl/` contains RDS files documenting the true causal variants used in
-phenotype simulation. **Do not use these as model input** — they are ground
-truth for QTL recovery analysis only.
+Long-form table consumed by `masbayes::construct_wah_matrix()` when no
+reference structure is supplied:
 
 ```{r}
 #| echo: false
-qtl_snp_ids    <- readRDS("main/qtl/qtl_snp_ids.rds")
-qtl_mh_blocks  <- readRDS("main/qtl/qtl_mh_blocks.rds")
-qtl_hap_blocks <- readRDS("main/qtl/qtl_hap_blocks.rds")
+af <- tibble(
+  haplotype = d$allele_freq$haplotype,
+  allele    = d$allele_freq$allele,
+  freq      = round(d$allele_freq$freq, 4)
+)
+dt_table(af, page = 15)
+```
+
+## QTL ground truth (`d$qtl`)
+
+Ten QTL under each architecture, with unit-length-normalised effects.
+**Use these for QTL recovery analysis only**, not as model input.
+
+```{r}
+#| echo: false
 qtl_summary <- tibble(
-  file        = c("qtl_snp_ids.rds", "qtl_mh_blocks.rds", "qtl_hap_blocks.rds"),
-  description = c("SNP IDs flagged as QTL",
-                  "MH block IDs flagged as QTL",
-                  "Haplotype block IDs flagged as QTL"),
-  n           = c(length(qtl_snp_ids), length(qtl_mh_blocks), length(qtl_hap_blocks))
+  architecture = c("SNP", "MH"),
+  positions    = c(paste(d$qtl$snp_idx, collapse = ", "),
+                   paste(d$qtl$mh_idx,  collapse = ", ")),
+  effect_min   = round(c(min(d$qtl$effects_snp),
+                         min(d$qtl$effects_mh)), 4),
+  effect_max   = round(c(max(d$qtl$effects_snp),
+                         max(d$qtl$effects_mh)), 4),
+  sum_sq       = round(c(sum(d$qtl$effects_snp ^ 2),
+                         sum(d$qtl$effects_mh  ^ 2)), 4)
 )
-DT::datatable(
-  qtl_summary,
-  rownames = FALSE,
-  class    = "cell-border compact stripe hover",
-  options  = list(dom = "t", paging = FALSE, ordering = FALSE)
-)
+dt_static(qtl_summary)
 ```
 
-[Download qtl_snp_ids.rds](main/qtl/qtl_snp_ids.rds){.btn .btn-sm .btn-outline-primary}
-[Download qtl_mh_blocks.rds](main/qtl/qtl_mh_blocks.rds){.btn .btn-sm .btn-outline-primary}
-[Download qtl_hap_blocks.rds](main/qtl/qtl_hap_blocks.rds){.btn .btn-sm .btn-outline-primary}
-[Download snp_meta.rds](main/qtl/snp_meta.rds){.btn .btn-sm .btn-outline-primary}
+## Within-family train/test split
 
-## Generation script
+The split is stratified by family: each of the 10 families contributes
+16 offspring to the training set and 4 to the test set (8 / 2 in `toy`).
+This keeps full-sibs out of the test partition's predictor pool without
+losing any family-level relatedness.
 
-The full simulation script is committed to the repo. To regenerate locally:
+```{r}
+#| echo: false
+split_summary <- tibble(
+  set    = c("train", "test"),
+  n      = c(length(d$train_idx), length(d$test_idx)),
+  per_family = c(d$meta$n_per_family - 4L, 4L)
+)
+dt_static(split_summary)
+```
+
+## Regenerating locally
+
+`generate.R` requires `library(masbayes)` (uses `construct_wah_matrix()`).
 
 ```bash
-Rscript demo-data/generate.R main   # 1000 ind, 10 chr, 500 SNPs/chr
-Rscript demo-data/generate.R toy    # 200  ind, 5  chr, 100 SNPs/chr
+Rscript demo-data/generate.R main toy   # both sizes
+Rscript demo-data/generate.R main       # large only
+Rscript demo-data/generate.R toy        # small only
 ```
 
 ::: {.callout-note collapse="true"}
