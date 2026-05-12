@@ -2,13 +2,27 @@
 title: "Input Data"
 ---
 
-Both packages consume the same four kinds of input. This section documents
-each one's expected schema, with examples drawn from the
-[demo dataset](../demo-data/index.qmd).
+Both packages consume the same four kinds of input. This section
+documents each one's expected schema, with worked examples drawn from
+the [demo dataset](../demo-data/index.qmd) and code that uses the real
+`masreml` / `masbayes` API.
 
-| Input | Format | Pages |
-|---|---|---|
-| SNP genotypes | VCF or dosage matrix (CSV) | [SNP](snp.qmd) |
-| Microhaplotype calls | tab-delimited per locus | [Microhaplotypes](microhaplotypes.qmd) |
-| Phenotypes | CSV: id, fixed effects, response(s) | [Phenotype](phenotype.qmd) |
-| Pedigree | CSV: id, sire, dam | [Pedigree](pedigree.qmd) |
+| Input | In-memory shape | Companion file(s) | Page |
+|---|---|---|---|
+| **SNP genotypes** | integer matrix $n \times p$, dosage 0/1/2 | `geno_G1.csv` + `snp_map.txt` | [SNP](snp.qmd) |
+| **Microhaplotype calls** | integer matrix $n \times (2 \cdot n_{blocks})$ (compact) | `mh_genotypes/hap_geno_<chr>` + `microhaplotype_coordinates.csv` | [Microhaplotypes](microhaplotypes.qmd) |
+| **Phenotypes** | data frame: `id`, fixed effects, response(s) | `pheno_continuous_G1.csv`, `pheno_binary_G1.csv` | [Phenotype](phenotype.qmd) |
+| **Pedigree** | data frame: `id`, `sire`, `dam` | `d$pedigree` slot (no standalone file) | [Pedigree](pedigree.qmd) |
+
+The fastest way to obtain all four pre-aligned is to load the bundled
+canonical `.rds`:
+
+```r
+library(masreml)   # or masbayes — load_data() is byte-identical in both
+d <- masreml::load_data("large")    # 200 individuals, 100 SNP, 50 MH blocks
+str(d, max.level = 1)
+```
+
+`d$snp`, `d$mh`, `d$pheno`, `d$pedigree` are already aligned by
+individual id; the four pages below describe each slot's schema and
+common ways to construct it from your own data.

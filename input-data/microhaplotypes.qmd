@@ -2,27 +2,193 @@
 title: "Microhaplotypes"
 ---
 
+```{r}
+#| include: false
+library(DT)
+library(tibble)
+
+d <- readRDS("../demo-data/main/demo_data.rds")
+
+dt_table <- function(data, page = 10, scroll_x = FALSE) {
+  DT::datatable(
+    data,
+    rownames = FALSE,
+    class    = "cell-border compact stripe hover",
+    options  = list(
+      pageLength = page,
+      scrollX    = scroll_x,
+      autoWidth  = FALSE,
+      dom        = "frtip"
+    )
+  )
+}
+```
+
 ## Schema
 
-::: {.callout-note}
-TODO: describe expected columns / structure / encoding.
-:::
+Microhaplotypes (MHs) are short genomic windows in which the **phased
+combination** of SNP alleles defines a multi-allelic locus. Both
+packages consume MHs in **two interchangeable layouts**:
+
+1. **On-disk file layout (maspipeline / MicrohapsSel format)** — one
+   tab-delimited file per chromosome at
+   `mh_genotypes/hap_geno_<chr>`. The header is
+   `ID\thap_<i>_1\thap_<i>_1\thap_<i>_2\thap_<i>_2\t...` (block `<i>`'s
+   two haplotype-strand names repeated, one column per SNP within the
+   block). Values are per-SNP allele codes `1` or `2`. Block coordinates
+   live in a companion `microhaplotype_coordinates.csv`.
+
+2. **In-memory compact layout (`d$mh`)** — an integer matrix
+   $n \times (2 \cdot n_{blocks})$. Two columns per block, one per
+   strand. Each cell is a **base-3 polynomial-encoded** integer
+   identifier of the block's haplotype on that strand
+   (`sum(snp_calls * 3 ^ (seq_len(k) - 1))` for `k` SNPs per block).
+   `attr(d$mh, "block_id")` maps each column to its block label.
+
+`d$allele_freq` carries the parallel vectors `haplotype`, `allele`,
+`freq` used by `masbayes::construct_wah_matrix()` when no reference
+population is supplied.
+
+The companion **MH coordinate map** (`d$map_mh` /
+`microhaplotype_coordinates.csv`):
+
+| Column | Type | Description |
+|---|---|---|
+| `block_id` | character | Block identifier, joins `unique(attr(mh, "block_id"))` |
+| `chr` | integer | Chromosome |
+| `start_pos` / `end_pos` | integer | bp coordinates of the spanned SNPs |
+| `n_snps` | integer | SNPs per block (2 in the demo) |
 
 ## Example (from the demo dataset)
 
-::: {.callout-note}
-TODO: show first few rows. Will be filled after demo data is generated
-in Task 13.
-:::
+`d$mh` is `r nrow(d$mh)` × `r ncol(d$mh)` (main; 50 blocks × 2 strands
+× 200 individuals) and 100 × 50 (toy). Each value is one of `{4, 5, 7,
+8}` because each block has 2 SNPs and each SNP allele is in `{1, 2}` —
+the four possible encoded haplotype ids.
+
+First 8 individuals × first 6 columns (= blocks 1–3) of `d$mh`:
+
+```{r}
+#| echo: false
+mh_prev <- as.data.frame(d$mh[1:8, 1:6])
+colnames(mh_prev) <- paste0(rep(c("blk1", "blk2", "blk3"), each = 2),
+                            c("_h1", "_h2"))
+mh_prev <- cbind(id = rownames(mh_prev), mh_prev)
+dt_table(mh_prev, page = 8)
+```
+
+Block-id attribute (first 6 entries):
+
+```{r}
+#| echo: false
+ba <- tibble(
+  col       = 1:6,
+  block_id  = attr(d$mh, "block_id")[1:6]
+)
+DT::datatable(ba, rownames = FALSE,
+              options = list(dom = "t", paging = FALSE))
+```
+
+The matching coordinate rows:
+
+```{r}
+#| echo: false
+dt_table(d$map_mh[1:5, ], page = 5)
+```
 
 ## Loading
 
-::: {.callout-note}
-TODO: code chunk showing how each package reads the file.
-:::
+### From the bundled demo
+
+```{r}
+#| eval: false
+library(masreml)   # or masbayes
+d <- masreml::load_data("large")
+
+dim(d$mh)                       # 200 100
+attr(d$mh, "block_id")[1:6]     # "block_1" "block_1" "block_2" "block_2" ...
+head(d$map_mh)
+```
+
+### From the per-chromosome file layout (maspipeline output)
+
+```{r}
+#| eval: false
+chr1 <- read.table("demo-data/main/mh_genotypes/hap_geno_1",
+                   header = TRUE, sep = "\t", check.names = FALSE)
+# First column is "ID"; subsequent columns are 4-per-block
+# (hap_<i>_1, hap_<i>_1, hap_<i>_2, hap_<i>_2) with values 1 or 2.
+```
+
+To convert the on-disk per-chr layout into the compact `d$mh` shape,
+collapse each block's 4 columns into 2 base-3 polynomial-encoded ids:
+
+```{r}
+#| eval: false
+# Per block: snp1_h1, snp2_h1, snp1_h2, snp2_h2 -> two encoded ids
+encode_block <- function(s1_h1, s2_h1, s1_h2, s2_h2) {
+  cbind(
+    h1 = as.integer(s1_h1) + 3L * as.integer(s2_h1),
+    h2 = as.integer(s1_h2) + 3L * as.integer(s2_h2)
+  )
+}
+```
+
+### Building model inputs from a MH matrix
+
+```{r}
+#| eval: false
+# masreml: MH-based GRM. build_G_mh auto-detects the compact layout.
+G_mh <- masreml::build_G_mh(mh_list = d$mh, ids = rownames(d$mh))
+
+# masbayes: W_alpha-h design matrix for BayesA / BayesR on MH alleles.
+wah <- masbayes::construct_wah_matrix(
+  hap_matrix             = d$mh,
+  colnames               = attr(d$mh, "block_id"),
+  allele_freq_filtered   = d$allele_freq,
+  reference_structure    = NULL,
+  drop_baseline          = TRUE
+)
+str(wah)            # W_ah is n x (sum(n_alleles_b - 1))
+```
 
 ## Common pitfalls
 
 ::: {.callout-warning}
-TODO: missingness encoding, ordering, ID matching across files.
+**`block_id` length must equal `ncol(mh)`.** The block-id vector is
+repeated **twice per block** (once per strand), so it has length
+$2 \cdot n_{blocks}$, not $n_{blocks}$. `masbayes::construct_wah_matrix()`
+checks this internally; `masreml::build_G_mh()` reads it from
+`attr(mh, "block_id")`.
 :::
+
+::: {.callout-warning}
+**Allele-frequency reference matters for unrelated populations.** If
+the prediction set is genetically distinct from the training set, the
+frequencies bundled in `d$allele_freq` (computed on the bundled
+population) are not representative. Pass an explicit
+`reference_structure` to `construct_wah_matrix()` so the encoding
+matches the population whose effects you want to estimate.
+:::
+
+::: {.callout-warning}
+**Partial blocks / missing strands.** Real maspipeline output may emit
+NA for a block on an individual whose phasing failed. Neither package
+imputes these — drop or impute before fitting. The demo data has no
+missingness.
+:::
+
+::: {.callout-tip}
+**Why compact (`d$mh`) instead of the per-chr file format?** The
+compact layout is 4× smaller in memory and exposes the same biology
+($2 \cdot n_{blocks}$ haplotype slots). All downstream MH-aware code in
+`masreml` / `masbayes` accepts both; the on-disk format only matters
+for pipeline-level interop.
+:::
+
+📐 **Related theory:** [SNP vs Microhaplotypes](../theory/snp-vs-microhaplotypes.qmd) ·
+[GBLUP & GWABLUP](../theory/gblup-gwablup.qmd) ·
+[Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
+
+🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·
+[GWABLUP](../tasks/gwablup.qmd)

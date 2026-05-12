@@ -2,27 +2,173 @@
 title: "Pedigree"
 ---
 
+```{r}
+#| include: false
+library(DT)
+library(tibble)
+
+d <- readRDS("../demo-data/main/demo_data.rds")
+
+dt_table <- function(data, page = 10, scroll_x = FALSE) {
+  DT::datatable(
+    data,
+    rownames = FALSE,
+    class    = "cell-border compact stripe hover",
+    options  = list(
+      pageLength = page,
+      scrollX    = scroll_x,
+      autoWidth  = FALSE,
+      dom        = "frtip"
+    )
+  )
+}
+```
+
 ## Schema
 
-::: {.callout-note}
-TODO: describe expected columns / structure / encoding.
-:::
+Pedigree is consumed by **masreml only** — `masbayes` is a
+marker-based package and does not use a numerator-relationship matrix.
+
+The data frame has one row per individual *including founders*:
+
+| Column | Type | Description |
+|---|---|---|
+| `id` | character | Individual identifier; joins to `rownames(snp)` for offspring |
+| `sire` | character or `NA` | Sire identifier, `NA` for founders without recorded sire |
+| `dam` | character or `NA` | Dam identifier, `NA` for founders without recorded dam |
+
+The demo dataset has 220 rows (large) / 120 rows (small): 10 sire
+founders + 10 dam founders (all with `NA` sire/dam) plus the offspring
+with their two-parent ancestry recorded.
 
 ## Example (from the demo dataset)
 
-::: {.callout-note}
-TODO: show first few rows. Will be filled after demo data is generated
-in Task 13.
-:::
+Full pedigree, with founders surfaced first:
+
+```{r}
+#| echo: false
+dt_table(d$pedigree, page = 10)
+```
+
+Founder vs. offspring count:
+
+```{r}
+#| echo: false
+summary_df <- tibble(
+  category   = c("Sire founders",
+                 "Dam founders",
+                 "Offspring (full-sib families)"),
+  count      = c(sum(is.na(d$pedigree$sire) & is.na(d$pedigree$dam) &
+                     grepl("^SIRE", d$pedigree$id)),
+                 sum(is.na(d$pedigree$sire) & is.na(d$pedigree$dam) &
+                     grepl("^DAM",  d$pedigree$id)),
+                 sum(!is.na(d$pedigree$sire) & !is.na(d$pedigree$dam))),
+  example_id = c(d$pedigree$id[grepl("^SIRE", d$pedigree$id)][1],
+                 d$pedigree$id[grepl("^DAM",  d$pedigree$id)][1],
+                 d$pedigree$id[grepl("^IND",  d$pedigree$id)][1])
+)
+DT::datatable(summary_df, rownames = FALSE,
+              options = list(dom = "t", paging = FALSE))
+```
 
 ## Loading
 
-::: {.callout-note}
-TODO: code chunk showing how each package reads the file.
-:::
+`masreml::build_A_ped()` expects the sire/dam columns as **integer
+row-indices** (with `0` meaning "unknown"), not as character IDs. The
+demo pedigree stores them as character strings (e.g. `"SIRE05"`), so a
+small conversion step is required before calling the builder:
+
+```{r}
+#| eval: false
+library(masreml)
+d <- masreml::load_data("large")
+
+# Map every id to its 1-based row index in the pedigree frame.
+id_to_row <- setNames(seq_len(nrow(d$pedigree)), d$pedigree$id)
+
+ped_int <- data.frame(
+  id   = d$pedigree$id,
+  sire = ifelse(is.na(d$pedigree$sire), 0L, id_to_row[d$pedigree$sire]),
+  dam  = ifelse(is.na(d$pedigree$dam),  0L, id_to_row[d$pedigree$dam]),
+  stringsAsFactors = FALSE
+)
+
+A <- masreml::build_A_ped(ped_int)
+str(A)                          # 220 x 220 numeric, rownames = ids
+```
+
+### Using A inside the mixed model
+
+```{r}
+#| eval: false
+# Pedigree-based BLUP (A-BLUP):
+fit_a <- masreml::masreml(
+  formula  = y_cont_qtl_snp ~ sex,
+  data     = d$pheno,
+  pedigree = d$pedigree
+)
+
+# Combined (single-step) pedigree + genomic:
+fit_hblup <- masreml::masreml(
+  formula  = y_cont_qtl_snp ~ sex,
+  data     = d$pheno,
+  pedigree = d$pedigree,
+  markers  = list(snp_add = d$snp)
+)
+```
 
 ## Common pitfalls
 
 ::: {.callout-warning}
-TODO: missingness encoding, ordering, ID matching across files.
+**Founders must appear in the pedigree.** A common mistake is including
+only offspring rows. `build_A_ped()` walks the matrix bottom-up; if a
+sire row is missing, its descendants lose their genetic-relationship
+columns and inbreeding estimates collapse to 0. The demo pedigree's
+220 rows include 20 founder rows for this reason.
 :::
+
+::: {.callout-warning}
+**Missing parents must be `NA` (or `0` after conversion), not the empty
+string or `"NA"`.** `is.na()` is the only check that triggers founder
+handling — the literal text `"NA"` is not the same as `NA_character_`.
+:::
+
+::: {.callout-warning}
+**Pedigree row order matters for the integer-index conversion shown
+above.** Each parent must appear in the data frame *before* (i.e. at a
+lower row index than) any of its offspring. The demo pedigree
+satisfies this — sires/dams come first, then offspring. If your real
+pedigree has cycles or is unordered, sort topologically before passing
+to `build_A_ped()`:
+
+```{r}
+#| eval: false
+# Toy topological sort assuming no cycles
+sort_pedigree <- function(ped) {
+  done <- character()
+  out  <- ped[0, ]
+  while (nrow(ped) > 0) {
+    ready <- is.na(ped$sire) | (ped$sire %in% done)
+    ready <- ready & (is.na(ped$dam) | (ped$dam %in% done))
+    if (!any(ready)) stop("Pedigree has cycles or missing parent rows.")
+    out  <- rbind(out, ped[ready, ])
+    done <- c(done, ped$id[ready])
+    ped  <- ped[!ready, ]
+  }
+  out
+}
+```
+:::
+
+::: {.callout-tip}
+**Pedigree is optional for marker-based prediction.** If you only need
+GBLUP / BayesA / BayesR on markers, skip the pedigree entirely and use
+`build_G_snp()` or `build_G_mh()` on the genotype matrix. The pedigree
+matters when you have un-genotyped individuals (then `A` covers them)
+or when you want to compare $A$ vs $G$ partitioning.
+:::
+
+📐 **Related theory:** [Mixed Models & BLUP](../theory/mixed-models-blup.qmd) ·
+[GBLUP & GWABLUP](../theory/gblup-gwablup.qmd)
+
+🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd)

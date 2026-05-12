@@ -2,27 +2,158 @@
 title: "Phenotype"
 ---
 
+```{r}
+#| include: false
+library(DT)
+library(tibble)
+
+d <- readRDS("../demo-data/main/demo_data.rds")
+
+dt_table <- function(data, page = 10, scroll_x = FALSE) {
+  DT::datatable(
+    data,
+    rownames = FALSE,
+    class    = "cell-border compact stripe hover",
+    options  = list(
+      pageLength = page,
+      scrollX    = scroll_x,
+      autoWidth  = FALSE,
+      dom        = "frtip"
+    )
+  )
+}
+```
+
 ## Schema
 
-::: {.callout-note}
-TODO: describe expected columns / structure / encoding.
-:::
+Both packages consume phenotypes as a **data frame** with one row per
+individual and at least three column kinds:
+
+| Column kind | Type | Required by | Description |
+|---|---|---|---|
+| Identifier | character | both | Joins to `rownames(snp)` / `rownames(mh)` |
+| Fixed-effect covariates | numeric or factor | both | e.g. `sex`, `age`, batch |
+| Response(s) | numeric or integer 0/1 | both | One column per trait — continuous OR binary |
+| (Optional) `tbv_*` | numeric | none | True breeding values; only meaningful for simulation studies |
+
+The demo dataset bundles **both** continuous and binary versions of two
+traits (SNP-architecture and MH-architecture). Standalone CSVs split
+them out:
+
+| File | Columns |
+|---|---|
+| `pheno_continuous_G1.csv` | `id, sex, y_cont_qtl_snp, y_cont_qtl_mh, tbv_qtl_snp, tbv_qtl_mh` |
+| `pheno_binary_G1.csv`     | `id, sex, y_bin_qtl_snp, y_bin_qtl_mh, tbv_qtl_snp, tbv_qtl_mh` |
+
+`d$pheno` carries all eight columns in one frame.
 
 ## Example (from the demo dataset)
 
-::: {.callout-note}
-TODO: show first few rows. Will be filled after demo data is generated
-in Task 13.
-:::
+```{r}
+#| echo: false
+dt_table(d$pheno, page = 10, scroll_x = TRUE)
+```
+
+Quick summary of the binary trait (median-thresholded, so prevalence
+is 0.5 by construction):
+
+```{r}
+#| echo: false
+bal <- tibble(
+  trait        = c("y_bin_qtl_snp", "y_bin_qtl_mh"),
+  n_cases      = c(sum(d$pheno$y_bin_qtl_snp == 1),
+                   sum(d$pheno$y_bin_qtl_mh  == 1)),
+  n_controls   = c(sum(d$pheno$y_bin_qtl_snp == 0),
+                   sum(d$pheno$y_bin_qtl_mh  == 0)),
+  prevalence   = c(mean(d$pheno$y_bin_qtl_snp),
+                   mean(d$pheno$y_bin_qtl_mh))
+)
+DT::datatable(bal, rownames = FALSE,
+              options = list(dom = "t", paging = FALSE))
+```
 
 ## Loading
 
-::: {.callout-note}
-TODO: code chunk showing how each package reads the file.
-:::
+```{r}
+#| eval: false
+library(masreml)
+d <- masreml::load_data("large")
+
+# Continuous trait, SNP architecture
+y_cont <- d$pheno$y_cont_qtl_snp
+
+# Binary trait, MH architecture
+y_bin  <- d$pheno$y_bin_qtl_mh
+
+# Or load the standalone CSVs directly:
+pheno_c <- read.csv("demo-data/main/pheno_continuous_G1.csv")
+pheno_b <- read.csv("demo-data/main/pheno_binary_G1.csv")
+```
+
+### Passing phenotypes to each package
+
+```{r}
+#| eval: false
+# masreml: REML mixed model with sex as fixed effect
+fit <- masreml::masreml(
+  formula = y_cont_qtl_snp ~ sex,
+  data    = d$pheno,
+  markers = list(snp_add = d$snp),
+  pedigree = d$pedigree
+)
+
+# masbayes: BayesA / BayesR on a continuous trait
+W   <- masbayes::construct_snp_matrix(d$snp, encoding = "vanRaden")
+fit <- masbayes::run_bayesa(y = d$pheno$y_cont_qtl_snp, X = W)
+
+# Binary trait via threshold model in masreml
+fit_bin <- masreml::masreml(
+  formula = y_bin_qtl_snp ~ sex,
+  data    = d$pheno,
+  family  = "binomial",                    # liability-scale model
+  markers = list(snp_add = d$snp)
+)
+```
 
 ## Common pitfalls
 
 ::: {.callout-warning}
-TODO: missingness encoding, ordering, ID matching across files.
+**Row order must match the genotype matrix.** `masreml` aligns on `id`
+when both `data$id` and `rownames(markers$snp_add)` are present, but
+this is the most common source of silent bugs when ID conventions
+differ. Always verify before fitting:
+
+```{r}
+#| eval: false
+stopifnot(identical(d$pheno$id, rownames(d$snp)))
+```
 :::
+
+::: {.callout-warning}
+**Factor levels must be consistent across train and test.** If your
+fixed-effect covariate is a factor (e.g. `sex`), make sure both
+train and test splits see all levels — otherwise the design-matrix
+column count diverges and prediction breaks.
+:::
+
+::: {.callout-warning}
+**Binary phenotypes go through a threshold model, not regression on
+0/1.** Use `family = "binomial"` in `masreml::masreml()` so the
+liability-scale variance is identified. Naive Gaussian fitting of
+binary data produces unbiased EBVs in some regimes but distorts
+heritability estimates.
+:::
+
+::: {.callout-tip}
+**`tbv_*` columns are ground truth, not input.** They are only useful
+for simulation: comparing $\widehat{u}$ against `tbv` is how the
+[Cross-validation](../tasks/cross-validation.qmd) tutorial computes
+accuracy. Never include `tbv_*` as a covariate.
+:::
+
+📐 **Related theory:** [Mixed Models & BLUP](../theory/mixed-models-blup.qmd) ·
+[Threshold Model](../theory/threshold-model.qmd)
+
+🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·
+[Binary trait analysis](../tasks/binary-trait.qmd) ·
+[Cross-validation](../tasks/cross-validation.qmd)

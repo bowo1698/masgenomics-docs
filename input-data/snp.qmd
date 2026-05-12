@@ -1,28 +1,162 @@
 ---
-title: "SNP"
+title: "SNP genotypes"
 ---
+
+```{r}
+#| include: false
+library(DT)
+library(tibble)
+
+d <- readRDS("../demo-data/main/demo_data.rds")
+
+dt_table <- function(data, page = 10, scroll_x = FALSE) {
+  DT::datatable(
+    data,
+    rownames = FALSE,
+    class    = "cell-border compact stripe hover",
+    options  = list(
+      pageLength = page,
+      scrollX    = scroll_x,
+      autoWidth  = FALSE,
+      dom        = "frtip"
+    )
+  )
+}
+```
 
 ## Schema
 
-::: {.callout-note}
-TODO: describe expected columns / structure / encoding.
-:::
+Both packages consume SNP genotypes as an **integer dosage matrix** with
+one row per individual and one column per SNP.
+
+| Field | Type | Description |
+|---|---|---|
+| Row dimension | $n$ individuals | `rownames()` must be set to the individual IDs |
+| Column dimension | $p$ SNPs | `colnames()` set to SNP IDs (must match `map_snp$SNP`) |
+| Cell values | integer `0/1/2` | Count of the alternate allele |
+| Missingness | `NA` | Imputed upstream — neither package estimates a missingness mechanism |
+
+The SNP matrix is paired with a **SNP map** (`d$map_snp` or `snp_map.txt`)
+with one row per SNP:
+
+| Column | Type | Description |
+|---|---|---|
+| `SNP` | character | SNP identifier; joins to `colnames(snp)` |
+| `CHROM` | integer | Chromosome (1..5 in demo) |
+| `POS` | integer | Physical position in base pairs |
 
 ## Example (from the demo dataset)
 
-::: {.callout-note}
-TODO: show first few rows. Will be filled after demo data is generated
-in Task 13.
-:::
+Demo dimensions: `r nrow(d$snp)` × `r ncol(d$snp)` (main) and 100 × 50 (toy).
+Rownames are `IND001..IND200`; colnames are `SNP001..SNP100`.
+
+First 8 individuals × first 10 SNPs of `main/demo_data.rds`:
+
+```{r}
+#| echo: false
+preview <- as.data.frame(d$snp[1:8, 1:10])
+preview <- cbind(id = rownames(preview), preview)
+dt_table(preview, page = 8, scroll_x = TRUE)
+```
+
+The matching map rows for those SNPs:
+
+```{r}
+#| echo: false
+dt_table(d$map_snp[1:10, ], page = 10)
+```
 
 ## Loading
 
-::: {.callout-note}
-TODO: code chunk showing how each package reads the file.
-:::
+`load_data()` is exported by both `masreml` and `masbayes` and returns
+the same byte-identical bundle:
+
+```{r}
+#| eval: false
+# Either package's load_data() returns the canonical list.
+library(masreml)
+d <- masreml::load_data("large")          # or "small"
+str(d$snp)                                # int [1:200, 1:100] 1 2 2 ...
+head(d$map_snp)                           # SNP / CHROM / POS
+
+# Equivalent via masbayes:
+d <- masbayes::load_data("large")
+
+# Or load the standalone CSVs derived alongside the .rds:
+geno <- read.csv("demo-data/main/geno_G1.csv", check.names = FALSE)
+snp_map <- read.table("demo-data/main/snp_map.txt",
+                      header = TRUE, sep = "\t")
+```
+
+For your **own** SNP data — a CSV with an `id` column then one column
+per SNP — convert to a matrix once and pass it on:
+
+```{r}
+#| eval: false
+geno_df <- read.csv("my_genotypes.csv", check.names = FALSE)
+geno    <- as.matrix(geno_df[, -1])
+rownames(geno) <- geno_df$id
+storage.mode(geno) <- "integer"
+```
+
+`build_G_snp()` (masreml) and `construct_snp_matrix()` (masbayes)
+expect the matrix in this shape.
+
+### Building model inputs from a SNP matrix
+
+```{r}
+#| eval: false
+# masreml: SNP-based GRM for BLUP / GBLUP
+G_snp <- masreml::build_G_snp(d$snp)
+str(G_snp)                                # 200 x 200 numeric
+
+# masbayes: design matrix W for BayesA / BayesR
+W <- masbayes::construct_snp_matrix(d$snp, encoding = "vanRaden")
+str(W)
+```
 
 ## Common pitfalls
 
 ::: {.callout-warning}
-TODO: missingness encoding, ordering, ID matching across files.
+**Allele coding direction.** Both packages assume the dosage counts the
+**alternate** allele (0 = homozygous reference, 2 = homozygous
+alternate). If your upstream pipeline reports reference-allele dosages,
+you can either flip with `2L - geno` or rely on the per-marker centring
+that `build_G_snp()` / `construct_snp_matrix(encoding = "vanRaden")`
+applies — the resulting GRM is invariant to a uniform flip, but
+per-marker effect estimates change sign.
 :::
+
+::: {.callout-warning}
+**Row order must match the phenotype frame.** Neither package re-orders
+for you. Always reconcile before passing to `masreml(...)` or
+`run_bayesa()` / `run_bayesr()`:
+
+```{r}
+#| eval: false
+stopifnot(identical(rownames(d$snp), d$pheno$id))
+```
+:::
+
+::: {.callout-warning}
+**Missingness.** `NA` cells must be imputed before fitting. The demo
+data has no missingness by construction. For real data, common choices
+are mean imputation per SNP (cheap, biased toward the population mean)
+or model-based imputation (Beagle / BEAGLE for biobanks). Whatever you
+choose, do it before splitting train/test so the imputed values do not
+leak between sets.
+:::
+
+::: {.callout-tip}
+**Minor allele frequency (MAF).** Markers with very low MAF carry
+almost no information and inflate the GRM's leading eigenvalues. A
+conservative pre-filter is `MAF >= 0.05`. The demo dataset's MAF is
+uniformly drawn from `[0.1, 0.5]` so no filter is needed.
+:::
+
+📐 **Related theory:** [GBLUP & GWABLUP](../theory/gblup-gwablup.qmd) ·
+[SNP vs Microhaplotypes](../theory/snp-vs-microhaplotypes.qmd) ·
+[Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
+
+🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·
+[GWAS](../tasks/gwas.qmd)
