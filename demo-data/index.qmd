@@ -231,6 +231,46 @@ mh_preview <- cbind(id = rownames(mh_preview), mh_preview)
 dt_table(mh_preview, page = 10)
 ```
 
+## Per-chromosome MH genotype files (derived)
+
+Alongside `demo_data.rds`, `generate.R` writes one MicrohapsSel-compatible
+tab-delimited file per chromosome at
+`demo-data/<size>/mh_genotypes/hap_geno_<chr>`. These are **derived from
+`d$mh` + `d$map_mh`** and can be plugged into MicrohapsSel-pipeline
+tooling unchanged; the canonical `.rds` remains the source of truth.
+
+Header layout per file: `ID`, then 4 columns per local block —
+`hap_<i>_1, hap_<i>_1, hap_<i>_2, hap_<i>_2` — with values in `{1, 2}`
+(per-SNP haplotype calls, recovered by decoding the polynomial-encoded
+block ids in `d$mh`). Local block numbering restarts at 1 in each
+per-chr file.
+
+Preview of `main/mh_genotypes/hap_geno_1` (first 10 individuals × first
+3 blocks = 13 columns):
+
+```{r}
+#| echo: false
+mh1 <- read.table("main/mh_genotypes/hap_geno_1", header = TRUE,
+                  sep = "\t", check.names = FALSE,
+                  nrows = 10, stringsAsFactors = FALSE)
+mh1 <- mh1[, 1:13]
+dt_table(mh1, page = 10, scroll_x = TRUE)
+```
+
+Download per-chromosome files (5 chromosomes per dataset):
+
+[main chr 1](main/mh_genotypes/hap_geno_1){.btn .btn-sm .btn-outline-primary}
+[main chr 2](main/mh_genotypes/hap_geno_2){.btn .btn-sm .btn-outline-primary}
+[main chr 3](main/mh_genotypes/hap_geno_3){.btn .btn-sm .btn-outline-primary}
+[main chr 4](main/mh_genotypes/hap_geno_4){.btn .btn-sm .btn-outline-primary}
+[main chr 5](main/mh_genotypes/hap_geno_5){.btn .btn-sm .btn-outline-primary}
+&nbsp;
+[toy chr 1](toy/mh_genotypes/hap_geno_1){.btn .btn-sm .btn-outline-secondary}
+[toy chr 2](toy/mh_genotypes/hap_geno_2){.btn .btn-sm .btn-outline-secondary}
+[toy chr 3](toy/mh_genotypes/hap_geno_3){.btn .btn-sm .btn-outline-secondary}
+[toy chr 4](toy/mh_genotypes/hap_geno_4){.btn .btn-sm .btn-outline-secondary}
+[toy chr 5](toy/mh_genotypes/hap_geno_5){.btn .btn-sm .btn-outline-secondary}
+
 ## Allele frequencies (`d$allele_freq`)
 
 Long-form table consumed by `masbayes::construct_wah_matrix()` when no

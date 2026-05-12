@@ -75,6 +75,82 @@ encode_hap <- function(mat) {
   apply(mat, 1L, function(x) sum(x * 3L ^ (seq_along(x) - 1L)))
 }
 
+# Derived MicrohapsSel-pipeline-compatible per-chromosome MH TSVs.
+#
+# Why this exists separately from the canonical .rds: the .rds carries
+# block-level integer-encoded MH alleles in d$mh; MicrohapsSel-style
+# tooling consumes a per-chromosome tab-delimited file with the
+# duplicated 4-column-per-block layout. The duplication encodes
+# "haplotype value applies to both SNPs in the block", which only makes
+# unambiguous sense when n_snp_per_block == 2 (each polynomial digit is
+# in {1, 2} and decodes uniquely from the encoded id). Both demo configs
+# satisfy this; the stopifnot below guards against future changes.
+#
+# Output is restricted to demo-data/<size>/mh_genotypes/. Sibling-
+# package inst/extdata/ is NEVER written from this script.
+write_per_chr_mh_files <- function(demo_data, out_dir, n_snp_per_block) {
+  stopifnot(n_snp_per_block == 2L)
+  mh_dir <- file.path(out_dir, "mh_genotypes")
+  if (!dir.exists(mh_dir)) dir.create(mh_dir, recursive = TRUE)
+
+  ind_ids <- rownames(demo_data$mh)
+  n_ind   <- length(ind_ids)
+  chrs    <- sort(unique(demo_data$map_mh$chr))
+
+  for (chr in chrs) {
+    blocks_global <- which(demo_data$map_mh$chr == chr)
+    n_blocks_chr  <- length(blocks_global)
+    n_cols        <- 1L + 4L * n_blocks_chr
+
+    # Header uses per-chr LOCAL block numbering (1..n_blocks_chr).
+    # Each block contributes 4 columns: (snp1_h1, snp2_h1, snp1_h2,
+    # snp2_h2). The duplicated `hap_<i>_1, hap_<i>_1` names mirror the
+    # MicrohapsSel convention "haplotype i column-1 applies to SNPs 1
+    # and 2 of the block".
+    headers <- character(n_cols)
+    headers[1L] <- "ID"
+    for (b_local in seq_len(n_blocks_chr)) {
+      base_col <- 1L + 4L * (b_local - 1L) + 1L
+      hdr <- sprintf("hap_%d", b_local)
+      headers[base_col]      <- paste0(hdr, "_1")
+      headers[base_col + 1L] <- paste0(hdr, "_1")
+      headers[base_col + 2L] <- paste0(hdr, "_2")
+      headers[base_col + 3L] <- paste0(hdr, "_2")
+    }
+
+    mat <- matrix("", nrow = n_ind, ncol = n_cols)
+    mat[, 1L] <- ind_ids
+    for (b_local in seq_len(n_blocks_chr)) {
+      b_global <- blocks_global[b_local]
+      e_h1 <- demo_data$mh[, 2L * b_global - 1L]
+      e_h2 <- demo_data$mh[, 2L * b_global]
+
+      # Decode encoded = snp1 + 3*snp2 with snp1, snp2 in {1, 2}.
+      # snp2 holds the higher-order base-3 digit; recover it first.
+      s2_h1 <- (e_h1 - 1L) %/% 3L
+      s1_h1 <- e_h1 - 3L * s2_h1
+      s2_h2 <- (e_h2 - 1L) %/% 3L
+      s1_h2 <- e_h2 - 3L * s2_h2
+
+      base_col <- 1L + 4L * (b_local - 1L) + 1L
+      mat[, base_col]      <- as.character(s1_h1)
+      mat[, base_col + 1L] <- as.character(s2_h1)
+      mat[, base_col + 2L] <- as.character(s1_h2)
+      mat[, base_col + 3L] <- as.character(s2_h2)
+    }
+
+    # writeLines instead of write.table because data.frame and matrix
+    # column-name machinery in R deduplicates names ("hap_1_1" ->
+    # "hap_1_1.1"). The MicrohapsSel reader expects raw duplicates.
+    out_file <- file.path(mh_dir, sprintf("hap_geno_%d", chr))
+    writeLines(
+      c(paste(headers,                     collapse = "\t"),
+        apply(mat, 1L, paste,              collapse = "\t")),
+      out_file
+    )
+  }
+}
+
 generate_demo <- function(cfg) {
 
   N_SIRES                <- cfg$n_sires
@@ -448,6 +524,11 @@ for (size_label in sizes) {
   res <- generate_demo(cfg)
 
   saveRDS(res$demo_data, file.path(out_dir, cfg$out_file))
+
+  # Derived per-chromosome MH TSVs alongside the canonical .rds.
+  # Only into demo-data/<size>/mh_genotypes/ — never into sibling-package
+  # inst/extdata/.
+  write_per_chr_mh_files(res$demo_data, out_dir, cfg$n_snp_per_block)
 
   cat(sprintf("  n=%d  n_snp=%d  n_blocks=%d  n_qtl=%d\n",
               cfg$n_sires * cfg$n_offspring_family,
