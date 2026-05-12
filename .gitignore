@@ -19,3 +19,7 @@ Thumbs.db
 
 /.quarto/
 **/*.quarto_ipynb
+
+# Internal planning / agent notes — never push
+CLAUDE.md
+docs/
