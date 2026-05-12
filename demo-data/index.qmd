@@ -1,6 +1,15 @@
 ---
 title: "Demo Datasets"
+execute:
+  eval: false
 ---
+
+::: {.callout-warning}
+This page is mid-migration — the canonical demo dataset has moved to a
+single `.rds` per size (`main/demo_data.rds`, `toy/demo_data_small.rds`).
+The presentation below still references the previous flat-CSV layout and
+its chunks are disabled until the page is rewritten.
+:::
 
 ```{r}
 #| include: false
