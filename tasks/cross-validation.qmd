@@ -2,7 +2,7 @@
 title: "Cross-validation"
 ---
 
-📐 **Theory:** [Mixed Models & BLUP](../theory/mixed-models-blup.qmd)
+📐 **Theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd)
 
 ## Goal
 

@@ -20,18 +20,18 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: installation/index.qmd
+        text: Installation
       - href: theory/index.qmd
         text: Theory
+      - href: tasks/index.qmd
+        text: Task
       - href: input-data/index.qmd
         text: Input Data
-      - href: demo-data/index.qmd
-        text: Demo Data
-      - href: choosing/index.qmd
-        text: Choosing
-      - href: tasks/index.qmd
-        text: Tasks
       - text: Reference
         menu:
+          - href: reference/maspipeline/index.qmd
+            text: maspipeline
           - href: reference/masreml/index.qmd
             text: masreml
           - href: reference/masbayes/index.qmd
@@ -48,11 +48,10 @@ website:
       style: docked
       contents:
         - theory/index.qmd
-        - theory/mixed-models-blup.qmd
-        - theory/gblup-gwablup.qmd
+        - theory/biallelic-and-multiallelic.qmd
+        - theory/mixed-model-blup-family.qmd
         - theory/bayesian-alphabet.qmd
-        - theory/threshold-model.qmd
-        - theory/snp-vs-microhaplotypes.qmd
+        - theory/continuous-and-binary-trait.qmd
     - title: "Input Data"
       contents:
         - input-data/index.qmd
@@ -60,11 +59,6 @@ website:
         - input-data/microhaplotypes.qmd
         - input-data/phenotype.qmd
         - input-data/pedigree.qmd
-    - title: "Choosing"
-      contents:
-        - choosing/index.qmd
-        - choosing/masreml-vs-masbayes.qmd
-        - choosing/snp-vs-mh.qmd
     - title: "Tasks"
       contents:
         - tasks/index.qmd
@@ -78,6 +72,9 @@ website:
         - internals/index.qmd
         - internals/masreml-rust.qmd
         - internals/masbayes-rust.qmd
+    - title: "Reference: maspipeline"
+      contents:
+        - reference/maspipeline/index.qmd
     - title: "Reference: masreml"
       contents:
         - reference/masreml/index.qmd

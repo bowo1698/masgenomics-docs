@@ -188,7 +188,6 @@ matters when you have un-genotyped individuals (then `A` covers them)
 or when you want to compare $A$ vs $G$ partitioning.
 :::
 
-📐 **Related theory:** [Mixed Models & BLUP](../theory/mixed-models-blup.qmd) ·
-[GBLUP & GWABLUP](../theory/gblup-gwablup.qmd)
+📐 **Related theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd)
 
 🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd)

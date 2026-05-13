@@ -2,18 +2,32 @@
 title: "Theory"
 ---
 
-This section covers the statistical models implemented across `masreml` and `masbayes`,
-their assumptions, and when each one is appropriate.
+This section covers the statistical models implemented across
+`masreml` and `masbayes`. Each page follows the same 7-section
+structure: **Assumption · Linear model · GEBV calculation · Variance
+component & h² · When to Use · See it in code · References**.
 
 ## Pages
 
-- [Mixed Models & BLUP](mixed-models-blup.qmd) — the workhorse linear model behind genomic prediction
-- [GBLUP & GWABLUP](gblup-gwablup.qmd) — using genomic relationship matrices
-- [Bayesian Alphabet](bayesian-alphabet.qmd) — BayesA and BayesR
-- [Threshold Model](threshold-model.qmd) — handling binary phenotypes
-- [SNP vs Microhaplotypes](snp-vs-microhaplotypes.qmd) — what the marker choice changes
+1. [Biallelic & Multi-allelic](biallelic-and-multiallelic.qmd) — how
+   the genotype matrix is built differently for SNP (biallelic) vs
+   microhaplotype (multi-allelic) data, and what each construction
+   feeds downstream.
+2. [Mixed Model & BLUP Family (Frequency-based)](mixed-model-blup-family.qmd)
+   — PBLUP, GBLUP, GWABLUP (Meuwissen et al. 2024). One MME, three
+   relationship matrices.
+3. [Bayesian Alphabet (Probabilistic)](bayesian-alphabet.qmd) — BayesA
+   (scaled inverse-$\chi^2$) and BayesR (4-component mixture), sharing
+   the same linear model.
+4. [Continuous and Binary Trait](continuous-and-binary-trait.qmd) —
+   what changes when the response is binary: liability-scale
+   modelling, Laplace approximation in `masreml`, Albert-Chib
+   augmentation in `masbayes`, and the observed-versus-liability
+   heritability transform.
 
 ::: {.callout-note}
-Each theory page ends with a "See it in code" link pointing to a runnable
-[task tutorial](../tasks/index.qmd) using the [demo dataset](../demo-data/index.qmd).
+Every "See it in code" section uses the
+[bundled demo dataset](../input-data/index.qmd) and calls only real
+exported functions of `masreml` / `masbayes` (cross-checked against
+the package source).
 :::

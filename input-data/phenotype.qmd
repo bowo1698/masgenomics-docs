@@ -49,13 +49,39 @@ them out:
 
 ## Example (from the demo dataset)
 
+### Continuous trait (`pheno_continuous_G1.csv`)
+
+Columns: `id, sex, y_cont_qtl_snp, y_cont_qtl_mh, tbv_qtl_snp,
+tbv_qtl_mh`.
+
 ```{r}
 #| echo: false
-dt_table(d$pheno, page = 10, scroll_x = TRUE)
+pheno_c <- read.csv("../demo-data/main/pheno_continuous_G1.csv",
+                    stringsAsFactors = FALSE)
+dt_table(pheno_c, page = 10, scroll_x = TRUE)
 ```
 
-Quick summary of the binary trait (median-thresholded, so prevalence
-is 0.5 by construction):
+[Download pheno_continuous_G1.csv (large)](../demo-data/main/pheno_continuous_G1.csv){.btn .btn-sm .btn-primary}
+&nbsp;
+[Download pheno_continuous_G1.csv (small)](../demo-data/toy/pheno_continuous_G1.csv){.btn .btn-sm .btn-outline-secondary}
+
+### Binary trait (`pheno_binary_G1.csv`)
+
+Same schema but with the median-thresholded `y_bin_*` columns in place
+of the continuous ones. Prevalence is 0.5 by construction.
+
+```{r}
+#| echo: false
+pheno_b <- read.csv("../demo-data/main/pheno_binary_G1.csv",
+                    stringsAsFactors = FALSE)
+dt_table(pheno_b, page = 10, scroll_x = TRUE)
+```
+
+[Download pheno_binary_G1.csv (large)](../demo-data/main/pheno_binary_G1.csv){.btn .btn-sm .btn-primary}
+&nbsp;
+[Download pheno_binary_G1.csv (small)](../demo-data/toy/pheno_binary_G1.csv){.btn .btn-sm .btn-outline-secondary}
+
+### Case/control balance
 
 ```{r}
 #| echo: false
@@ -71,6 +97,61 @@ bal <- tibble(
 DT::datatable(bal, rownames = FALSE,
               options = list(dom = "t", paging = FALSE))
 ```
+
+## QTL ground truth
+
+Ten QTL under each architecture (SNP and MH), with
+unit-length-normalised effects ($\sum \beta_i^2 = 1$). **Use these for
+QTL recovery analysis only**, not as model input. Four standalone
+`.rds` files mirror `d$qtl` with human-readable identifiers — SNP
+names and MH block ids — so downstream tools can join against
+`d$map_snp` / `d$map_mh` directly.
+
+### Causal SNPs
+
+```{r}
+#| echo: false
+qtl_snp_ids <- readRDS("../demo-data/main/qtl/qtl_snp_ids.rds")
+effects_snp <- readRDS("../demo-data/main/qtl/effects_snp.rds")
+qtl_snp_tbl <- tibble(
+  rank     = seq_along(qtl_snp_ids),
+  snp_id   = qtl_snp_ids,
+  chrom    = d$map_snp$CHROM[match(qtl_snp_ids, d$map_snp$SNP)],
+  position = d$map_snp$POS  [match(qtl_snp_ids, d$map_snp$SNP)],
+  effect   = round(effects_snp, 4)
+)
+DT::datatable(qtl_snp_tbl, rownames = FALSE,
+              options = list(dom = "t", paging = FALSE, ordering = FALSE))
+```
+
+### Causal MH blocks
+
+`d$qtl$mh_idx` indexes columns of $W_{ah}$ rather than block columns
+directly, because the causal "allele" within a multi-allelic block is
+itself a free parameter. The derived `qtl_mh_blocks.rds` reduces each
+$W_{ah}$ column to its parent block id; if two QTL fall in the same
+block, the block id appears twice.
+
+```{r}
+#| echo: false
+qtl_mh_blocks <- readRDS("../demo-data/main/qtl/qtl_mh_blocks.rds")
+effects_mh    <- readRDS("../demo-data/main/qtl/effects_mh.rds")
+qtl_mh_tbl <- tibble(
+  rank      = seq_along(qtl_mh_blocks),
+  block_id  = qtl_mh_blocks,
+  chr       = d$map_mh$chr      [match(qtl_mh_blocks, d$map_mh$block_id)],
+  start_pos = d$map_mh$start_pos[match(qtl_mh_blocks, d$map_mh$block_id)],
+  end_pos   = d$map_mh$end_pos  [match(qtl_mh_blocks, d$map_mh$block_id)],
+  effect    = round(effects_mh, 4)
+)
+DT::datatable(qtl_mh_tbl, rownames = FALSE,
+              options = list(dom = "t", paging = FALSE, ordering = FALSE))
+```
+
+[Download qtl_snp_ids.rds](../demo-data/main/qtl/qtl_snp_ids.rds){.btn .btn-sm .btn-outline-primary}
+[Download qtl_mh_blocks.rds](../demo-data/main/qtl/qtl_mh_blocks.rds){.btn .btn-sm .btn-outline-primary}
+[Download effects_snp.rds](../demo-data/main/qtl/effects_snp.rds){.btn .btn-sm .btn-outline-primary}
+[Download effects_mh.rds](../demo-data/main/qtl/effects_mh.rds){.btn .btn-sm .btn-outline-primary}
 
 ## Loading
 
@@ -180,8 +261,8 @@ for simulation: comparing $\widehat{u}$ against `tbv` is how the
 accuracy. Never include `tbv_*` as a covariate.
 :::
 
-📐 **Related theory:** [Mixed Models & BLUP](../theory/mixed-models-blup.qmd) ·
-[Threshold Model](../theory/threshold-model.qmd)
+📐 **Related theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd) ·
+[Continuous and Binary Trait](../theory/continuous-and-binary-trait.qmd)
 
 🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·
 [Binary trait analysis](../tasks/binary-trait.qmd) ·

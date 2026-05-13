@@ -2,7 +2,7 @@
 title: "GWAS"
 ---
 
-📐 **Theory:** [GBLUP & GWABLUP](../theory/gblup-gwablup.qmd) · [Bayesian Alphabet](../theory/bayesian-alphabet.qmd) (BayesR variable selection)
+📐 **Theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd) · [Bayesian Alphabet](../theory/bayesian-alphabet.qmd) (BayesR variable selection)
 
 ## Goal
 

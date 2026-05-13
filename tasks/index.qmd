@@ -3,8 +3,8 @@ title: "Task Tutorials"
 ---
 
 Each tutorial is a runnable end-to-end workflow on the
-[demo dataset](../demo-data/index.qmd). Tutorials show **both packages**
-side by side where applicable.
+[bundled demo dataset](../input-data/index.qmd). Tutorials show
+**both packages** side by side where applicable.
 
 | Task | Methods covered |
 |---|---|

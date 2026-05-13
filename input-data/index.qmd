@@ -3,26 +3,108 @@ title: "Input Data"
 ---
 
 Both packages consume the same four kinds of input. This section
-documents each one's expected schema, with worked examples drawn from
-the [demo dataset](../demo-data/index.qmd) and code that uses the real
-`masreml` / `masbayes` API.
+documents each one's schema, shows worked examples drawn from the
+**bundled demo dataset**, and exposes every artefact as a download —
+so you can preview the shape, grab the standalone CSV/TSV files, or
+load the canonical `.rds` directly with `load_data()`.
 
-| Input | In-memory shape | Companion file(s) | Page |
-|---|---|---|---|
-| **SNP genotypes** | integer matrix $n \times p$, dosage 0/1/2 | `geno_G1.csv` + `snp_map.txt` | [SNP](snp.qmd) |
-| **Microhaplotype calls** | integer matrix $n \times (2 \cdot n_{blocks})$ (compact) | `mh_genotypes/hap_geno_<chr>` + `microhaplotype_coordinates.csv` | [Microhaplotypes](microhaplotypes.qmd) |
-| **Phenotypes** | data frame: `id`, fixed effects, response(s) | `pheno_continuous_G1.csv`, `pheno_binary_G1.csv` | [Phenotype](phenotype.qmd) |
-| **Pedigree** | data frame: `id`, `sire`, `dam` | `d$pedigree` slot (no standalone file) | [Pedigree](pedigree.qmd) |
+| Input | In-memory shape | Page |
+|---|---|---|
+| **SNP genotypes** | integer matrix $n \times p$, dosage 0/1/2 | [SNP](snp.qmd) |
+| **Microhaplotype calls** | integer matrix $n \times (2 \cdot n_{blocks})$ (compact) | [Microhaplotypes](microhaplotypes.qmd) |
+| **Phenotypes** (continuous + binary, plus QTL ground truth) | data frame: `id`, fixed effects, response(s) | [Phenotype](phenotype.qmd) |
+| **Pedigree** | data frame: `id`, `sire`, `dam` | [Pedigree](pedigree.qmd) |
 
-The fastest way to obtain all four pre-aligned is to load the bundled
-canonical `.rds`:
+## The demo bundle
 
-```r
-library(masreml)   # or masbayes — load_data() is byte-identical in both
-d <- masreml::load_data("large")    # 200 individuals, 100 SNP, 50 MH blocks
-str(d, max.level = 1)
+Each subpage uses the same canonical dataset, shipped byte-identically
+by both sibling packages. Two scales are bundled:
+
+| Size | Individuals | SNPs | MH blocks | $W_{ah}$ columns | QTL | Use |
+|---|---:|---:|---:|---:|---:|---|
+| **`large`** (`main`) | 200 (10 sires × 20 offspring) | 100 | 50 | ~149 | 10 | All standard examples |
+| **`small`** (`toy`) | 100 (10 sires × 10 offspring) | 50  | 25 | ~75  | 5  | Quick-start (runs in seconds) |
+
+Both are simulated with `set.seed(42)` for the genetic stream and
+`set.seed(41)` for the within-family train/test split; re-running
+`demo-data/generate.R` produces bit-identical output.
+
+::: {.callout-tip}
+## One `.rds` per size, byte-identical to the sibling packages
+
+`demo-data/main/demo_data.rds` and `demo-data/toy/demo_data_small.rds`
+are **byte-identical** to the files shipped under
+`masbayes/inst/extdata/` and `masreml/inst/extdata/`. The canonical
+generator lives in the workspace as `tools/make_demo_data.R`; the
+local mirror is `demo-data/generate.R`.
+:::
+
+## Loading
+
+```{r}
+#| eval: false
+# Either package's load_data() returns the canonical list.
+library(masreml)   # or masbayes
+d <- masreml::load_data("large")    # or "small"
+
+# Equivalent via system.file() (returns the bundled path):
+path <- system.file("extdata", "demo_data.rds", package = "masreml")
+d    <- readRDS(path)
+
+# Or load the standalone .rds directly from the site repo:
+d    <- readRDS("demo-data/main/demo_data.rds")
 ```
 
-`d$snp`, `d$mh`, `d$pheno`, `d$pedigree` are already aligned by
-individual id; the four pages below describe each slot's schema and
+`d` is a named list with 12 slots: `snp`, `mh`, `allele_freq`, `pheno`,
+`pedigree`, `qtl`, `meta`, `family_id`, `train_idx`, `test_idx`,
+`map_snp`, `map_mh`. The four subpages describe each slot's schema and
 common ways to construct it from your own data.
+
+## Within-family train/test split
+
+The bundle ships a stratified split: each of the 10 families
+contributes 16 offspring to training and 4 to test in `large` (8/2 in
+`small`). This keeps full-sibs out of the test partition's predictor
+pool without losing family-level relatedness.
+
+| Size | n_train | n_test | per family |
+|---|---:|---:|---|
+| `large` | 160 | 40 | 16 / 4 |
+| `small` | 80  | 20 | 8 / 2  |
+
+Indices live in `d$train_idx` and `d$test_idx` (row indices into
+`d$snp`, `d$mh`, `d$pheno`).
+
+## Download the bundle
+
+::: {.grid}
+::: {.g-col-6}
+**`large` dataset** (~55 KB zipped)
+
+[📦 demo_data.rds](../demo-data/main/demo_data.rds){.btn .btn-sm .btn-primary} &nbsp;
+[📦 main.zip](../demo-data/main.zip){.btn .btn-sm .btn-outline-primary}
+:::
+::: {.g-col-6}
+**`small` dataset** (~23 KB zipped)
+
+[📦 demo_data_small.rds](../demo-data/toy/demo_data_small.rds){.btn .btn-sm .btn-secondary} &nbsp;
+[📦 toy.zip](../demo-data/toy.zip){.btn .btn-sm .btn-outline-secondary}
+:::
+:::
+
+The ZIPs bundle the canonical `.rds` plus every derived CSV/TSV used
+on the subpages.
+
+## Regenerating locally
+
+`demo-data/generate.R` requires `library(masbayes)` (uses
+`construct_wah_matrix()`):
+
+```bash
+Rscript demo-data/generate.R main toy   # both sizes
+Rscript demo-data/generate.R main       # large only
+Rscript demo-data/generate.R toy        # small only
+```
+
+Re-running emits the same `.rds` byte-for-byte (`set.seed()` at the
+top of every config).

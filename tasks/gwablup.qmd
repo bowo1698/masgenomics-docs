@@ -2,7 +2,7 @@
 title: "GWABLUP"
 ---
 
-📐 **Theory:** [GBLUP & GWABLUP](../theory/gblup-gwablup.qmd)
+📐 **Theory:** [Mixed Model & BLUP Family → GWABLUP](../theory/mixed-model-blup-family.qmd#gwablup-weighted-grm-driven-by-gwas-posterior-probabilities)
 
 ## Goal
 

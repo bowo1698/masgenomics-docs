@@ -89,11 +89,70 @@ DT::datatable(ba, rownames = FALSE,
               options = list(dom = "t", paging = FALSE))
 ```
 
-The matching coordinate rows:
+The matching coordinate rows from `d$map_mh`:
 
 ```{r}
 #| echo: false
 dt_table(d$map_mh[1:5, ], page = 5)
+```
+
+The full `d$map_mh` is also written as a standalone CSV with the same
+schema as the maspipeline `microhaplotype_coordinates.csv`:
+
+[Download microhaplotype_coordinates.csv (large)](../demo-data/main/microhaplotype_coordinates.csv){.btn .btn-sm .btn-primary}
+&nbsp;
+[Download microhaplotype_coordinates.csv (small)](../demo-data/toy/microhaplotype_coordinates.csv){.btn .btn-sm .btn-outline-secondary}
+
+## Per-chromosome MH genotype files (MicrohapsSel format)
+
+Alongside the canonical `.rds`, `generate.R` emits one
+MicrohapsSel-compatible TSV per chromosome at
+`mh_genotypes/hap_geno_<chr>`. Header layout: `ID`, then 4 columns per
+local block (`hap_<i>_1, hap_<i>_1, hap_<i>_2, hap_<i>_2`), values
+`{1, 2}` (per-SNP haplotype calls). Local block numbering restarts at
+1 in each per-chr file. These files are derived from `d$mh` + `d$map_mh`
+(round-trip decode-then-re-encode verified) — the `.rds` remains the
+source of truth.
+
+Preview of `main/mh_genotypes/hap_geno_1` (first 10 individuals × first
+3 local blocks = 13 columns):
+
+```{r}
+#| echo: false
+mh1 <- read.table("../demo-data/main/mh_genotypes/hap_geno_1",
+                  header = TRUE, sep = "\t", check.names = FALSE,
+                  nrows = 10, stringsAsFactors = FALSE)
+mh1 <- mh1[, 1:13]
+dt_table(mh1, page = 10, scroll_x = TRUE)
+```
+
+Download per-chromosome files (5 chromosomes per size):
+
+[main chr 1](../demo-data/main/mh_genotypes/hap_geno_1){.btn .btn-sm .btn-outline-primary}
+[main chr 2](../demo-data/main/mh_genotypes/hap_geno_2){.btn .btn-sm .btn-outline-primary}
+[main chr 3](../demo-data/main/mh_genotypes/hap_geno_3){.btn .btn-sm .btn-outline-primary}
+[main chr 4](../demo-data/main/mh_genotypes/hap_geno_4){.btn .btn-sm .btn-outline-primary}
+[main chr 5](../demo-data/main/mh_genotypes/hap_geno_5){.btn .btn-sm .btn-outline-primary}
+&nbsp;
+[toy chr 1](../demo-data/toy/mh_genotypes/hap_geno_1){.btn .btn-sm .btn-outline-secondary}
+[toy chr 2](../demo-data/toy/mh_genotypes/hap_geno_2){.btn .btn-sm .btn-outline-secondary}
+[toy chr 3](../demo-data/toy/mh_genotypes/hap_geno_3){.btn .btn-sm .btn-outline-secondary}
+[toy chr 4](../demo-data/toy/mh_genotypes/hap_geno_4){.btn .btn-sm .btn-outline-secondary}
+[toy chr 5](../demo-data/toy/mh_genotypes/hap_geno_5){.btn .btn-sm .btn-outline-secondary}
+
+## Allele frequencies (`d$allele_freq`)
+
+Long-form table consumed by `masbayes::construct_wah_matrix()` when no
+reference structure is supplied:
+
+```{r}
+#| echo: false
+af <- tibble(
+  haplotype = d$allele_freq$haplotype,
+  allele    = d$allele_freq$allele,
+  freq      = round(d$allele_freq$freq, 4)
+)
+dt_table(af, page = 15)
 ```
 
 ## Loading
@@ -186,8 +245,8 @@ compact layout is 4× smaller in memory and exposes the same biology
 for pipeline-level interop.
 :::
 
-📐 **Related theory:** [SNP vs Microhaplotypes](../theory/snp-vs-microhaplotypes.qmd) ·
-[GBLUP & GWABLUP](../theory/gblup-gwablup.qmd) ·
+📐 **Related theory:** [Biallelic & Multi-allelic](../theory/biallelic-and-multiallelic.qmd) ·
+[Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd) ·
 [Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
 
 🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·

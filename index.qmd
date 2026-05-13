@@ -14,30 +14,42 @@ This site documents two companion R packages with Rust backends:
 Both packages support **SNP** and **microhaplotype** genotypes natively.
 :::
 
-## Quick start
+## Why Rust?
 
-```r
-# install.packages("devtools")
-devtools::install_github("bowo1698/masreml")
-devtools::install_github("bowo1698/masbayes")
-```
+I have only understood and implemented Rust for more than 4 years,
+mostly just for website backends or desktop applications, and yes,
+this is the largest Rust project I have ever built for the purpose of
+end-to-end genomic selection — especially based on multi-allelic
+markers. Indeed, Rust is not yet widely used as a backend for R
+packages today (the majority use C++), but this is a good opportunity
+to introduce Rust as a memory-safe programming language for processing
+large genomic data, which can even be used on laptops/PCs with
+low- to mid-range specifications. This project is open source and
+free, so anyone can provide evaluation and improvement.
+
+In practice this means: the heavy numerical kernels (variance-component
+estimation, MCMC samplers, dense linear algebra for the GRM solve,
+GWAS scans across hundreds of thousands of markers) run in compiled
+Rust through the [extendr](https://extendr.github.io/) FFI boundary,
+while the user-facing API stays in idiomatic R. Memory-safety
+guarantees from Rust's ownership model also mean no segfaults from
+out-of-bounds indexing or use-after-free on large genotype matrices —
+failures surface as recoverable R errors instead of crashing the
+session.
+
+See [Installation](installation/index.qmd) for how to set up Rust and
+both packages on Linux, macOS, and Windows.
 
 ## Where to go next
 
 | You are... | Start here |
 |---|---|
-| New to genomic prediction | [Theory → Mixed Models & BLUP](theory/mixed-models-blup.qmd) |
+| Setting up for the first time | [Installation](installation/index.qmd) |
+| New to genomic prediction | [Theory → Mixed Model & BLUP Family](theory/mixed-model-blup-family.qmd) |
 | Looking for code examples | [Tasks → Genomic Prediction](tasks/genomic-prediction.qmd) |
-| Choosing between methods | [Choosing the Right Tool](choosing/index.qmd) |
+| Looking for input-data formats and the bundled demo | [Input Data](input-data/index.qmd) |
 | Looking for function docs | [Reference → masreml](reference/masreml/index.qmd) · [masbayes](reference/masbayes/index.qmd) |
 | Curious about the Rust internals | [Internals](internals/index.qmd) |
-
-## Data formats
-
-The packages accept **SNP genotypes** (VCF or dosage matrix), **microhaplotype calls**,
-**phenotypes** (continuous and binary), and **pedigree**. See [Input Data](input-data/index.qmd)
-for full schemas, plus a fully-worked [demo dataset](demo-data/index.qmd) you can
-download and reproduce every result on this site with.
 
 ## Citation
 

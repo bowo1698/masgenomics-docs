@@ -59,12 +59,26 @@ preview <- cbind(id = rownames(preview), preview)
 dt_table(preview, page = 8, scroll_x = TRUE)
 ```
 
+The full $200 \times 100$ matrix is also written as a wide CSV with an
+`id` column for plain-CSV consumers:
+
+[Download geno_G1.csv (large)](../demo-data/main/geno_G1.csv){.btn .btn-sm .btn-primary}
+&nbsp;
+[Download geno_G1.csv (small)](../demo-data/toy/geno_G1.csv){.btn .btn-sm .btn-outline-secondary}
+
 The matching map rows for those SNPs:
 
 ```{r}
 #| echo: false
 dt_table(d$map_snp[1:10, ], page = 10)
 ```
+
+`snp_map.txt` is the same data as `d$map_snp`, tab-delimited so it can
+be read with `read.table()` defaults:
+
+[Download snp_map.txt (large)](../demo-data/main/snp_map.txt){.btn .btn-sm .btn-primary}
+&nbsp;
+[Download snp_map.txt (small)](../demo-data/toy/snp_map.txt){.btn .btn-sm .btn-outline-secondary}
 
 ## Loading
 
@@ -154,8 +168,8 @@ conservative pre-filter is `MAF >= 0.05`. The demo dataset's MAF is
 uniformly drawn from `[0.1, 0.5]` so no filter is needed.
 :::
 
-📐 **Related theory:** [GBLUP & GWABLUP](../theory/gblup-gwablup.qmd) ·
-[SNP vs Microhaplotypes](../theory/snp-vs-microhaplotypes.qmd) ·
+📐 **Related theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd) ·
+[Biallelic & Multi-allelic](../theory/biallelic-and-multiallelic.qmd) ·
 [Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
 
 🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·
