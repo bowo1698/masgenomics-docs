@@ -49,6 +49,8 @@ Rust backend, shared demo datasets, and a consistent API. This allows
 the same analysis pipeline to run from start to finish without changing
 tools, programming languages, or input formats during the analysis.
 
+![End-to-end masgenomics workflow.](assets/overview-workflow.svg){fig-align="center" width="80%"}
+
 ::: {.callout-note}
 ## Why Rust?
 
