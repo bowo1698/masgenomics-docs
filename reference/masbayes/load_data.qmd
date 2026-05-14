@@ -157,7 +157,7 @@ the recomputation of allele frequencies.
 
 
 ### Examples
-```{r, warning=FALSE, message=FALSE, eval=TRUE}
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library("masbayes")
 
 d <- load_data()

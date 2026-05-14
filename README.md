@@ -1,34 +1,32 @@
 # masgenomics-docs
 
-Documentation site for the [masbayes](https://github.com/bowo1698/masbayes) and
-[masreml](https://github.com/bowo1698/masreml) R/Rust packages for genomic
-prediction with SNP and microhaplotype data.
+Documentation site for the **masgenomics** suite, companion R packages with
+shared Rust backends for genomic prediction on SNP and microhaplotype data.
+
+- [**masbayes**](https://github.com/bowo1698/masbayes): Bayesian genomic
+  prediction (BayesA, BayesR; MCMC and EM samplers).
+- [**masreml**](https://github.com/bowo1698/masreml): REML mixed models,
+  BLUP / GBLUP / GWABLUP, GWAS, cross-validation, threshold models for
+  binary traits.
+- [**maspipeline**](https://github.com/bowo1698/maspipeline): Rust CLI
+  for phasing and microhaplotype discovery; produces inputs for the two
+  R packages above.
+
+Both R packages support **SNP** and **microhaplotype** genotypes natively
+and handle **continuous** and **binary** traits through a single unified
+API.
 
 **Live site:** https://bowo1698.github.io/masgenomics-docs/
 
-## Local development
+The site covers theory (mixed models, Bayesian alphabet), task tutorials
+(genomic prediction, GWAS), input data formats with bundled demo, function
+reference, and Rust internals.
 
-Requires Quarto ≥1.5 and R ≥4.4.
+## Citation
 
-```bash
-# Install R deps
-Rscript -e 'install.packages(c("altdoc","reactable","gt","tidyverse"))'
-
-# Live preview (auto-reload)
-quarto preview
-
-# One-shot render to ./_site/
-quarto render
-
-# Regenerate auto reference pages from package roxygen
-Rscript _scripts/render-reference.R
-```
-
-## Repo layout
-
-See `docs/plans/2026-05-10-masgenomics-docs-design.md` in the parent project
-for the full design rationale.
+See [`CITATION.bib`](CITATION.bib).
 
 ## License
 
-MIT (content) + package licenses for code examples.
+MIT — see [`LICENSE`](LICENSE). Code examples follow their respective
+package licenses.
