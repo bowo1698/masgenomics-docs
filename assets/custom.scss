@@ -8,6 +8,14 @@ $link-color: $primary;
   font-weight: 600;
 }
 
+/* Logo navbar — SVG aslinya pakai width/height="100%", tanpa rule ini
+   browser tidak tahu intrinsic size dan IMG bisa collapse / overflow. */
+.navbar-brand-logo .navbar-logo {
+  height: 42px;
+  width: auto;
+  max-height: 42px;
+}
+
 /* always-visible code copy button — Quarto enables hover by default */
 .code-copy-button {
   opacity: 0.5 !important;

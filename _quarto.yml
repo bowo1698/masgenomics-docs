@@ -7,6 +7,7 @@ project:
 
 website:
   title: "masgenomics"
+  favicon: assets/MBGs.svg
   description: "Genomic prediction with SNP and microhaplotype data using masbayes and masreml"
   site-url: https://bowo1698.github.io/masgenomics-docs/
   repo-url: https://github.com/bowo1698/masgenomics-docs
@@ -17,6 +18,9 @@ website:
     background: primary
     pinned: true
     search: true
+    logo: assets/MBGs.svg
+    logo-alt: "masgenomics logo"
+    logo-href: index.qmd
     left:
       - href: index.qmd
         text: Home
