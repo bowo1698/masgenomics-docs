@@ -12,7 +12,7 @@ allele effects: <em>zero</em>, <em>small</em>, <em>medium</em>, and
 <em>large</em> effect classes with proportions <code>pi_vec</code> and class
 variances proportional to <code>sigma2_ah</code>. Use <code>method = "mcmc"</code>
 for full Bayesian posterior inference, or <code>method = "em"</code> for
-fast stochastic-EM point estimates (Gaussian only).
+fast stochastic-EM point estimates (Gaussian only) (Wang et al., 2015).
 
 
 
@@ -23,6 +23,7 @@ fast stochastic-EM point estimates (Gaussian only).
   y,
   wtw_diag,
   X = NULL,
+  marker_type = c("auto", "snp", "multiallelic"),
   pi_vec = c(0.95, 0.02, 0.02, 0.01),
   sigma2_e_init,
   sigma2_ah = NULL,
@@ -35,7 +36,10 @@ fast stochastic-EM point estimates (Gaussian only).
   fold_id = 0L,
   save_rds = FALSE,
   save_path = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  map = NULL,
+  windsize = NULL,
+  windnum = NULL
 )
 </code></pre>
 
@@ -46,7 +50,8 @@ fast stochastic-EM point estimates (Gaussian only).
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="w">w</code></td>
 <td>
 Numeric design matrix (<code>n x p</code>). Typically the
-<code>\$W_ah</code> element returned by <code>construct_wah_matrix</code>.
+<code>\$W_ah</code> element returned by <code>construct_wah_matrix</code>
+or the <code>\$W</code> element returned by <code>construct_snp_matrix</code>.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y">y</code></td>
 <td>
@@ -63,6 +68,17 @@ Optional fixed-effects design matrix (<code>n x q</code>). When
 supplied, the model is $y = X\alpha + W\beta + \mu + \epsilon$
 with a flat prior on $\alpha$. Do <strong>not</strong> include a column
 of ones for the intercept; $\mu$ is sampled separately.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="marker_type">marker_type</code></td>
+<td>
+One of <code>"auto"</code> (default), <code>"snp"</code>, or
+<code>"multiallelic"</code>. <code>"auto"</code> resolves to
+<code>"multiallelic"</code>. Setting <code>"snp"</code> (a) rescales
+<code>variance_class</code> by <code>p / sum_2pq</code> so that the per-class
+variance denominator becomes <code>sum_2pq</code> instead of <code>p</code>, and
+(b) switches the default residual-variance prior to a flat
+<code>InvGamma(1, 0)</code> (<code>a0_e = 1, b0_e = 0</code>). Supplying
+<code>prior_params\$a0_e</code> is always honoured.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="pi_vec">pi_vec</code></td>
 <td>
@@ -84,12 +100,14 @@ Prior total genetic variance (required). Typically
 <td>
 Optional explicit variance vector for EM; if
 <code>NULL</code> it is derived from <code>sigma2_ah</code>, <code>pi_vec</code>, and
-<code>prior_params\$variance_class</code>.
+<code>prior_params\$variance_class</code> (with the
+<code>marker_type = "snp"</code> rescaling applied when applicable).
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="prior_params">prior_params</code></td>
 <td>
 Optional named list overriding defaults: <code>a0_e</code>
-(10), <code>a0_g</code> (10), <code>variance_class</code>
+(10 for <code>"multiallelic"</code>, 1 for <code>"snp"</code> when not supplied),
+<code>a0_g</code> (10), <code>variance_class</code>
 (<code>c(0, 0.001, 0.01, 0.1)</code>). <code>b0_e</code> and <code>b0_g</code> are
 computed internally.
 </td></tr>
@@ -136,10 +154,77 @@ completion) to stderr. Default <code>FALSE</code> keeps the Rust side
 silent. The brief R post-fit summary (model, runtime, $h^2$,
 ESS, Geweke) prints regardless.
 </td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="map">map</code></td>
+<td>
+Optional GWAS map. Supplying <code>map</code> (together with
+exactly one of <code>windsize</code> or <code>windnum</code>) computes per-allele
+PIP, per-block PIP, and per-window WPPA from the posterior samples
+and attaches them to the fit. For SNP markers, supply a data.frame
+with columns <code>SNP</code>, <code>CHROM</code>, <code>POS</code> (one row per W
+column). For multi-allelic (MH) markers, supply a data.frame with
+columns <code>block_id</code>, <code>chr</code>, <code>start_pos</code>, <code>end_pos</code>
+(one row per unique block_id in <code>attr(w, "block_id")</code>); this
+matches the schema of <code>microhaplotype_coordinates.csv</code> from the
+<code>maspipeline</code> tool. Marker type is auto-detected from
+<code>attr(w, "block_id")</code>. <code>map = NULL</code> (default) leaves the
+fit object byte-identical to v1.4.0 output.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="windsize">windsize</code></td>
+<td>
+Window size in base pairs for WPPA. Mutually exclusive
+with <code>windnum</code>. Required when <code>map</code> is supplied unless
+<code>windnum</code> is.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="windnum">windnum</code></td>
+<td>
+Number of consecutive markers (or MH blocks) per window
+for WPPA. Mutually exclusive with <code>windsize</code>.
+</td></tr>
 </table>
 
 
 ### Details
+
+<strong>Statistical model.</strong>
+The base linear model for BayesR is:
+
+<p style="text-align: center;"><code class="reqn">y = \mathbf{1}\mu + W\beta + \varepsilon, \quad
+  \varepsilon \sim \mathcal{N}(0,\,\sigma_e^2 I)</code>
+
+
+where $y$ is the phenotype vector, $\mu$ is the intercept,
+$W$ is the marker design matrix (from
+<code>construct_wah_matrix</code> for multi-allelic or
+<code>construct_snp_matrix</code> for SNP markers), and $\beta$
+is the allele-effect vector. When fixed effects are supplied via <code>X</code>:
+
+<p style="text-align: center;">$y = \mathbf{1}\mu + X\alpha + W\beta + \varepsilon$
+
+
+<strong>BayesR mixture prior.</strong>
+Each allele effect is drawn from a four-component mixture (Erbe et al., 2012):
+
+<p style="text-align: center;"><code class="reqn">\beta_j \mid \pi,\,\sigma_\beta^2 \;\sim\;
+  \pi_0\,\mathcal{N}(0,0)
+  + \pi_1\,\mathcal{N}(0,\,0.001\sigma_\beta^2)
+  + \pi_2\,\mathcal{N}(0,\,0.01\sigma_\beta^2)
+  + \pi_3\,\mathcal{N}(0,\,0.1\sigma_\beta^2)</code>
+
+
+where $\pi = (\pi_0, \pi_1, \pi_2, \pi_3)$ are mixture proportions
+(default 0.95, 0.02, 0.02, 0.01), updated each MCMC iteration by
+Dirichlet sampling.
+
+<strong>Heritability.</strong>
+$h^2$ is estimated as:
+
+<p style="text-align: center;"><code class="reqn">h^2 = \frac{\mathrm{Var}(W\hat{\beta})}
+  {\mathrm{Var}(W\hat{\beta}) + \hat{\sigma}_e^2}</code>
+
+
+This estimator is identical for SNP and multi-allelic markers,
+treating heritability as a trait-and-population property rather than
+a marker-panel property.
 
 <strong>Algorithm choice.</strong> MCMC uses marginalised Gibbs sampling and
 returns full posterior chains; recommended when posterior uncertainty,
@@ -176,6 +261,20 @@ returns in-sample metrics.
 <code>b0_g = sigma2_ah * (a0_g - 2) / (a0_g * (1 - pi_vec[1]))</code> before
 calling the Rust engine. For EM, a <code>sigma2_vec</code> is derived as
 <code>variance_class * sigma2_ah / ((1 - pi_vec[1]) * p)</code>.
+
+<strong>Marker-type-aware parameterisation.</strong> When <code>marker_type =
+"snp"</code> the wrapper rescales <code>variance_class</code> by
+<code>ncol(w) / sum(apply(w, 2, var))</code> before passing it to the engine.
+Combined with the engine's hardcoded division by <code>ncol(w)</code>, this
+substitutes <code>sum_2pq</code> for <code>p</code> as the denominator in the
+per-class variance, matching the alternative biallelic-SNP convention
+where rare markers contribute proportionally to allele-frequency
+variance. The default <code>marker_type = "multiallelic"</code> preserves
+the <code>1 / p</code> parameterisation bit-identically.
+
+<strong>Marker-specific heritability note.</strong> The $h^2$ estimator in
+the Statistical model section above is applied regardless of
+<code>marker_type</code>.
 
 
 
@@ -222,7 +321,60 @@ each class plus the mixture proportions <code>pi</code>.
 <dt><code>rds_path</code></dt><dd>Path of the saved RDS file, or <code>NULL</code>
 when <code>save_rds = FALSE</code>.
 </dd>
+<dt><code>pip</code></dt><dd>(GWAS only, since v0.5.0) Per-allele posterior
+inclusion probability, length <code>ncol(w)</code>. Computed as
+<code>colMeans(gamma_samples != 0)</code>. <code>NULL</code> unless <code>map</code>
+was supplied.
+</dd>
+<dt><code>pip_block</code></dt><dd>(GWAS only) Per-block PIP, length
+<code>nrow(map)</code>. For SNP markers, identical to <code>pip</code>. For
+multi-allelic markers, a block is &quot;active&quot; in a posterior sample
+if at least one of its alleles has <code>gamma != 0</code>. <code>NULL</code>
+unless <code>map</code> was supplied.
+</dd>
+<dt><code>gwas</code></dt><dd>(GWAS only) Data frame with columns <code>Wind</code>,
+<code>Chr</code>, <code>N</code>, <code>Start</code>, <code>End</code>, <code>WPPA</code>. Each
+row is one physical window; <code>WPPA</code> is the window posterior
+probability of association, i.e. the fraction of posterior samples
+in which at least one marker / block in the window has non-zero
+effect.
+</dd>
+<dt><code>gwas_meta</code></dt><dd>(GWAS only) List capturing the call:
+<code>windsize</code>, <code>windnum</code>, <code>midpoint_convention</code>,
+<code>marker_type</code>, <code>n_windows</code>.
+</dd>
 </dl>
+
+
+
+### GWAS
+
+Supplying a <code>map</code> together with exactly one of <code>windsize</code> or
+<code>windnum</code> turns <code>run_bayesr()</code> into a one-shot GWAS engine
+alongside genomic prediction. The Rust kernel is untouched; PIP and
+WPPA are derived from the existing <code>gamma_samples</code> matrix.
+
+<strong>Map schema.</strong> For <strong>SNP</strong> markers, <code>map</code> is a
+<code>data.frame</code> with columns <code>SNP</code> (character), <code>CHROM</code>
+(integer), <code>POS</code> (integer), one row per W column.
+For <strong>multi-allelic (MH)</strong> markers, <code>map</code> has columns
+<code>block_id</code> (character), <code>chr</code> (integer), <code>start_pos</code>
+(integer), <code>end_pos</code> (integer), one row per unique block_id in
+<code>attr(w, "block_id")</code>. The MH schema matches the
+<code>microhaplotype_coordinates.csv</code> produced by the
+<code>maspipeline</code> tool, so production pipelines can pass it through
+without translation.
+
+<strong>Windows.</strong> <code>windsize</code> (bp) closes a window when the next
+marker's position exceeds the window start by <code>windsize</code>.
+<code>windnum</code> groups <code>windnum</code> consecutive markers / blocks per
+window. Windows never cross chromosome boundaries.
+
+<strong>Constraints.</strong> GWAS requires <code>method = "mcmc"</code> (EM has no
+posterior samples). <code>run_bayesa</code> accepts the same
+arguments for API symmetry but errors out (BayesA has no zero-effect
+mixture mass, so PIP / WPPA are ill-defined). <code>map = NULL</code>
+(default) leaves the fit object byte-identical to pre-v0.5.0 output.
 
 
 
@@ -235,10 +387,10 @@ breeds with imputed high-density single nucleotide polymorphism
 panels. <em>Journal of Dairy Science</em>, 95(7), 4114-4129.
 [doi:10.3168/jds.2011-5019](https://doi.org/10.3168/jds.2011-5019)
 
-Meuwissen, T. H. E., Hayes, B. J., \&amp; Goddard, M. E. (2001).
-Prediction of total genetic value using genome-wide dense marker
-maps. <em>Genetics</em>, 157(4), 1819-1829.
-[doi:10.1093/genetics/157.4.1819](https://doi.org/10.1093/genetics/157.4.1819)
+Wang, T., Chen, YP. P., \&amp; Goddard, M. E. (2015).
+A computationally efficient algorithm for genomic prediction using
+a Bayesian model. <em>Genet Sel Evol</em>, 47(34).
+[doi:10.1186/s12711-014-0082-4](https://doi.org/10.1186/s12711-014-0082-4)
 
 
 
@@ -254,66 +406,75 @@ maps. <em>Genetics</em>, 157(4), 1819-1829.
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library("masbayes")
 
-set.seed(42)
-n     <- 200
-mcmc  <- list(n_iter = 2000L, n_burn = 1000L, n_thin = 5L, seed = 123L)
-X_cov <- cbind(sex = rbinom(n, 1, 0.5), batch = rnorm(n))  # optional
+d <- load_data("small")
+mcmc <- list(n_iter = 1000L, n_burn = 500L, n_thin = 5L, seed = 123L)
 
-# ---- (A) SNP path ------------------------------------------------------
-n_snp <- 100
-X     <- matrix(rbinom(n * n_snp, 2, prob = runif(n_snp, 0.1, 0.5)),
-                n, n_snp)
-W_snp <- construct_snp_matrix(X)$W
-y     <- W_snp[, 1:5] %*% rnorm(5, 0, 0.5) + rnorm(n, 0, 1)
+# ---- (A) SNP path -----------------------------------------------------
+# Pair `encoding = "zscore"` on the matrix builder with
+# `marker_type = "snp"` on the fitter for the alternative biallelic-SNP
+# convention.
+snp_train <- construct_snp_matrix(d$snp[d$train_idx, ], encoding = "zscore")
+W_train   <- snp_train$W
+y_train   <- d$pheno$y_cont_qtl_snp[d$train_idx]
+X_train   <- model.matrix(~ sex - 1, data = d$pheno[d$train_idx, ])
 
 fit_snp <- run_bayesr(
-  w             = W_snp,
-  y             = y,
-  wtw_diag      = colSums(W_snp^2),
-  X             = X_cov,           # optional
-  sigma2_e_init = var(y) * 0.5,
-  sigma2_ah     = var(y) * 0.5,
-  mcmc_params   = mcmc
+  w             = W_train,
+  y             = y_train,
+  wtw_diag      = colSums(W_train^2),
+  X             = X_train,
+  marker_type   = "snp",
+  sigma2_e_init = var(y_train) * 0.5,
+  sigma2_ah     = var(y_train) * 0.5,
+  mcmc_params   = mcmc,
+  save_rds      = FALSE
 )
 summary(fit_snp)
 
-# ---- (B) Microhaplotype path ------------------------------------------
-n_block <- 50
-hap <- matrix(sample.int(3, n * n_block * 2, replace = TRUE), nrow = n)
-colnames(hap) <- paste0("hap_", rep(seq_len(n_block), each = 2))
-freq <- data.frame(
-  haplotype = paste0("hap_", rep(seq_len(n_block), each = 3)),
-  allele    = rep(1:3, n_block),
-  freq      = rep(c(0.5, 0.3, 0.2), n_block)
+# ---- (B) Microhaplotype path -----------------------------------------
+# d$mh is consumable directly by construct_wah_matrix via attr("block_id").
+# d$allele_freq is the frequency table required for the training call.
+bid    <- attr(d$mh, "block_id")
+hap_tr <- d$mh[d$train_idx, ]
+W_mh   <- construct_wah_matrix(hap_tr, bid, d$allele_freq)$W_ah
+y_mh   <- d$pheno$y_cont_qtl_mh[d$train_idx]
+
+# ---- (C) GWAS (BayesR-only) ------------------------------------------
+# Supply `map` together with `windsize` (bp) or `windnum` (markers per
+# window) to compute per-allele PIP, per-block PIP, and per-window WPPA.
+# Schema for SNP map: SNP / CHROM / POS (one row per W column).
+# The map's row order does not need to be pre-sorted.
+map_snp <- data.frame(
+  SNP   = paste0("M", seq_len(ncol(W_train))),
+  CHROM = rep(seq_len(4L), each = ncol(W_train) %/% 4L),
+  POS   = rep(seq(1e6, by = 1e5,
+                  length.out = ncol(W_train) %/% 4L), 4L)
 )
-W_mh <- construct_wah_matrix(hap, colnames(hap), freq)$W_ah
-y_mh <- W_mh[, 1:5] %*% rnorm(5, 0, 0.5) + rnorm(n, 0, 1)
+fit_gwas <- run_bayesr(
+  w             = W_train,
+  y             = y_train,
+  wtw_diag      = colSums(W_train^2),
+  marker_type   = "snp",
+  sigma2_e_init = var(y_train) * 0.5,
+  sigma2_ah     = var(y_train) * 0.5,
+  mcmc_params   = mcmc,
+  save_rds      = FALSE,
+  map           = map_snp,
+  windsize      = 5e5
+)
+head(fit_gwas$gwas[order(-fit_gwas$gwas$WPPA), ], 5)
 
 fit_mh <- run_bayesr(
   w             = W_mh,
   y             = y_mh,
   wtw_diag      = colSums(W_mh^2),
-  X             = X_cov,           # optional
+  X             = X_train,
   sigma2_e_init = var(y_mh) * 0.5,
   sigma2_ah     = var(y_mh) * 0.5,
-  mcmc_params   = mcmc
+  mcmc_params   = mcmc,
+  save_rds      = FALSE
 )
 summary(fit_mh)
-
-# ---- Train/test split (scheme-agnostic) -------------------------------
-idx  <- sample(n, 0.8 * n)
-W_tr <- W_snp[idx, ]
-y_tr <- y[idx]
-fit  <- run_bayesr(
-  w             = W_tr,
-  y             = y_tr,
-  wtw_diag      = colSums(W_tr^2),
-  sigma2_e_init = var(y_tr) * 0.5,
-  sigma2_ah     = var(y_tr) * 0.5,
-  mcmc_params   = mcmc
-)
-pred <- predict(fit, W_snp[-idx, ], y[-idx])
-pred$metrics$accuracy
 
 
 

@@ -1,0 +1,82 @@
+---
+title: "GWAS"
+---
+
+## What is GWAS?
+
+A **genome-wide association study (GWAS)** scans the genome
+marker-by-marker to identify positions whose genotype is statistically
+associated with phenotypic variation. Where
+[genomic prediction](../genomic-prediction/index.qmd) aggregates
+information across all markers into a single per-individual GEBV,
+GWAS asks the opposite question: for each marker (or microhaplotype
+block), does the genotype carry signal about the trait above what
+random sampling would produce?
+
+The output is a per-marker statistic — a $p$-value, a Bayesian
+posterior inclusion probability (PIP), or a window-level posterior
+probability of association (WPPA). Peaks in this statistic mark
+candidate causal variants for follow-up experiments, fine-mapping, or
+re-weighting in downstream prediction.
+
+## When to use GWAS
+
+| Situation | Use GWAS? |
+|---|---|
+| Looking for individual QTL behind a trait | **Yes** — primary use case |
+| Building a candidate-gene shortlist for functional validation | **Yes** |
+| Re-weighting GBLUP with marker-level evidence (GWABLUP) | **Yes** — see [masreml page](masreml.qmd) |
+| Selecting breeding candidates from a pool | No — use [genomic prediction](../genomic-prediction/index.qmd) |
+| Highly polygenic trait with no expected major QTL | Limited — most markers will be noise |
+
+## Prerequisites
+
+- **Phenotype + genotype**, same as GP.
+- **Fixed-effect covariates** for stratification — typically sex,
+  batch, season, and principal components (top 5–10 PCs guard against
+  cryptic population structure).
+- **For frequentist GWAS** (`masreml`): a fitted mixed-model
+  (`masreml` object) supplies variance components and the relationship
+  matrix needed by the EMMAX-style scan.
+- **For Bayesian GWAS** (`masbayes`): a BayesR MCMC fit with a
+  supplied marker `map` — the package derives PIPs and windowed WPPAs
+  from the posterior mixture-class samples.
+
+## GP vs GWAS at a glance
+
+| Dimension | [Genomic prediction](../genomic-prediction/index.qmd) | GWAS (this task) |
+|---|---|---|
+| Per-marker statistic | None (aggregated GEBV) | $p$-value (`masreml`) or PIP (`masbayes`) |
+| Multiple testing | Not a concern | **Central** — Bonferroni / FDR / WPPA threshold |
+| Output dimension | $n$ (individuals) | $p$ (markers) and/or windows |
+| Headline metric | Cross-validated accuracy | Number of significant loci, $\lambda_\text{GC}$, top-peak strength |
+| Typical follow-up | Rank candidates and select | Annotate peaks, replicate, fine-map, feed into GWABLUP |
+
+## Methods covered
+
+| Approach | Statistic | Package | Page |
+|---|---|---|---|
+| EMMAX-style mixed-model GWAS, window smoothing, **GWABLUP** | $p$-value per marker | `masreml` | [→ with masreml](masreml.qmd) |
+| BayesR PIP and windowed WPPA from the MCMC posterior | PIP per marker / block, WPPA per window | `masbayes` | [→ with masbayes](masbayes.qmd) |
+
+## A note on the masbayes side
+
+`masbayes` exposes GWAS-style output only for **BayesR**. The mixture
+prior places posterior mass on a "zero" class, so each marker has a
+well-defined PIP = $P(\beta_j \ne 0 \mid \text{data})$.
+
+**BayesA has no equivalent** — its scaled-$t$ marginal places no mass
+on exactly zero, so PIPs are not defined. `run_bayesa(..., map = ...)`
+errors out by design.
+
+## What's next?
+
+Pick a package below. Both tutorials use the same bundled demo data
+and can be run in either order. If you want to use GWAS output to
+**re-weight** a prediction model, see the GWABLUP section at the end
+of the `masreml` page.
+
+- [**GWAS with masreml**](masreml.qmd) — `run_gwas()`, Manhattan / QQ
+  plots, GWABLUP.
+- [**GWAS with masbayes**](masbayes.qmd) — BayesR PIPs, WPPA windows,
+  comparison to `masreml::run_gwas`.

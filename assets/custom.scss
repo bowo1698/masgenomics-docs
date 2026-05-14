@@ -122,3 +122,96 @@ kbd {
   color: #6c757d !important;
   background: transparent !important;
 }
+
+/* ─── Hero banner on the home page ──────────────────────────────────── */
+.hero-banner {
+  max-width: 860px;
+  margin: 1.5rem auto 3rem;
+  text-align: center;
+}
+
+.hero-badges { margin-bottom: 1.75rem; }
+.hero-badges > p {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0;
+  opacity: 0.88;
+}
+.hero-badges img { display: block; height: 20px; }
+.hero-badges a   { line-height: 0; }
+
+.hero-cards {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.hero-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+.hero-card > p { margin: 0; }
+
+.hero-logo {
+  display: block;
+  width: 220px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  transition: transform 180ms ease,
+              border-color 180ms ease,
+              box-shadow 180ms ease,
+              background 180ms ease;
+}
+.hero-logo img { display: block; width: 100%; height: auto; }
+
+.hero-logo:hover {
+  transform: translateY(-3px);
+  border-color: $primary;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+              0 0 0 1px rgba(223, 105, 26, 0.25);
+}
+.hero-logo:focus-visible {
+  outline: 2px solid $primary;
+  outline-offset: 4px;
+}
+
+.hero-github {
+  font-size: 0.82rem;
+  font-family: var(--bs-font-monospace);
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: color 150ms ease, background 150ms ease;
+}
+.hero-github:hover {
+  color: $primary;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.hero-tagline {
+  max-width: 680px;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-logo, .hero-github { transition: none; }
+  .hero-logo:hover { transform: none; }
+}
+
+@media (max-width: 576px) {
+  .hero-logo { width: 180px; }
+  .hero-cards { gap: 1.25rem; }
+}

@@ -1,0 +1,280 @@
+---
+title: "Genomic prediction with masreml"
+---
+
+📐 **Theory:** [Mixed Model & BLUP Family](../../theory/mixed-model-blup-family.qmd) ·
+[REML Algorithms](../../theory/blup-reml.qmd) ·
+[GBLUP](../../theory/blup-gblup.qmd) ·
+[Continuous and Binary Trait](../../theory/continuous-and-binary-trait.qmd)
+
+This tutorial fits genomic prediction models with `masreml` end-to-end:
+GBLUP on SNP, Microhaplotype-GBLUP on phased microhaplotypes,
+cross-validation, and the threshold model for binary traits. All code
+chunks evaluate against the bundled demo dataset, so the tables and
+plots below are the actual output you get from running the code.
+
+## Setup
+
+```{r}
+#| message: false
+#| warning: false
+library(masreml)
+library(ggplot2)
+library(knitr)
+
+d <- load_data("large")
+
+# Continuous trait, SNP architecture
+y <- setNames(d$pheno$y_cont_qtl_snp, d$pheno$id)
+
+# Fixed-effect design matrix — sex as the single covariate
+X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
+```
+
+## SNP workflow
+
+### Full-data fit — GBLUP
+
+`masreml()` fits the standard mixed model
+$\mathbf{y} = \mathbf{X}\mathbf{b} + \mathbf{Z}\mathbf{u} + \mathbf{e}$,
+estimates variance components by REML (default `method = "auto"` —
+HE-initialised AI-REML for $n < 50{,}000$), and returns a `masreml`
+object.
+
+```{r}
+fit_gblup <- masreml(
+  y       = y,
+  X       = X_fixed,
+  markers = list(snp_add = d$snp),
+  trait   = "continuous",
+  verbose = FALSE
+)
+
+summary(fit_gblup)
+```
+
+Inspect the GEBV distribution:
+
+```{r}
+#| fig-width: 7
+#| fig-height: 4
+ggplot(data.frame(gebv = fit_gblup$gebv$snp_add),
+       aes(x = gebv)) +
+  geom_histogram(bins = 30, fill = "#2c7fb8", colour = "white") +
+  labs(x = "GEBV (snp_add)", y = "Count",
+       title = "SNP-GBLUP GEBVs — full-data fit") +
+  theme_minimal()
+```
+
+### Predict on held-out candidates
+
+The bundled demo provides a `train_idx` / `test_idx` split:
+
+```{r}
+train_ids <- d$pheno$id[d$train_idx]
+test_ids  <- d$pheno$id[d$test_idx]
+
+fit_train <- masreml(
+  y       = y[train_ids],
+  X       = X_fixed[d$train_idx, , drop = FALSE],
+  markers = list(snp_add = d$snp[train_ids, , drop = FALSE]),
+  trait   = "continuous",
+  verbose = FALSE
+)
+
+pred <- predict(
+  fit_train,
+  markers_new   = list(snp_add = d$snp[test_ids, , drop = FALSE]),
+  markers_train = list(snp_add = d$snp[train_ids, , drop = FALSE]),
+  train_ids     = train_ids,
+  test_ids      = test_ids,
+  X_new         = X_fixed[d$test_idx, , drop = FALSE],
+  y_new         = y[test_ids]
+)
+
+kable(as.data.frame(pred$metrics),
+      digits  = 4,
+      caption = "Held-out accuracy on the test split")
+```
+
+### Cross-validation — `cv_masreml()`
+
+`cv_masreml()` automates K-fold or family-based splits and refits the
+model on each training fold. Default is 5-fold random; pass
+`scheme = "family"` and a family-id vector for genuine
+candidate-selection accuracy.
+
+```{r}
+#| message: false
+cv <- cv_masreml(
+  y       = y,
+  X       = X_fixed,
+  markers = list(snp_add = d$snp),
+  folds   = 5L,
+  scheme  = "random",
+  seed    = 123L
+)
+
+fold_tbl <- data.frame(
+  fold     = seq_along(cv$accuracy_fold),
+  accuracy = cv$accuracy_fold,
+  bias     = cv$bias_fold
+)
+kable(fold_tbl, digits = 4, caption = "Per-fold test accuracy")
+```
+
+```{r}
+kable(data.frame(metric = c("Mean accuracy", "Mean bias"),
+                 value  = c(cv$accuracy, cv$bias)),
+      digits  = 4,
+      caption = "Overall 5-fold CV summary")
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 3.5
+ggplot(fold_tbl, aes(x = factor(fold), y = accuracy)) +
+  geom_col(fill = "#2c7fb8") +
+  geom_hline(yintercept = mean(fold_tbl$accuracy),
+             linetype = "dashed", colour = "red") +
+  labs(x = "Fold", y = "Test accuracy (Pearson r)",
+       title = "5-fold CV — SNP-GBLUP") +
+  theme_minimal()
+```
+
+### Binary trait {#binary-trait}
+
+For 0/1 outcomes, set `trait = "binary"` and pick a link function.
+`masreml` runs a single-step Laplace approximation with the working
+response, returning the posterior mode of the liability-scale GEBV
+plus the fitted probability $\hat{p}_i$.
+
+```{r}
+y_bin <- setNames(d$pheno$y_bin_qtl_snp, d$pheno$id)
+
+fit_bin <- masreml(
+  y       = y_bin,
+  X       = X_fixed,
+  markers = list(snp_add = d$snp),
+  trait   = "binary",
+  link    = "logit",
+  verbose = FALSE
+)
+
+summary(fit_bin)
+```
+
+`fit_bin$h2` is reported on the liability scale (denominator
+$\sigma_u^2 + \pi^2/3$ for logit). Predictions return both the
+liability-scale GEBV and the observed-scale probability:
+
+```{r}
+pred_bin <- predict(fit_bin, y_new = y_bin)
+kable(as.data.frame(pred_bin$metrics),
+      digits  = 4,
+      caption = "Training-set metrics, binary trait (AUC = discrimination)")
+```
+
+## Microhaplotype workflow
+
+Switching from SNP to phased microhaplotype markers only changes the
+`markers` slot. Everything else — fitting, summary, prediction,
+cross-validation, binary trait — is identical.
+
+```{r}
+y_mh <- setNames(d$pheno$y_cont_qtl_mh, d$pheno$id)
+
+fit_mhblup <- masreml(
+  y       = y_mh,
+  X       = X_fixed,
+  markers = list(mh_add = d$mh),
+  trait   = "continuous",
+  verbose = FALSE
+)
+summary(fit_mhblup)
+```
+
+Cross-validation on microhaplotype architecture:
+
+```{r}
+#| message: false
+cv_mh <- cv_masreml(
+  y       = y_mh,
+  X       = X_fixed,
+  markers = list(mh_add = d$mh),
+  folds   = 5L,
+  scheme  = "random",
+  seed    = 123L
+)
+
+fold_mh_tbl <- data.frame(
+  fold     = seq_along(cv_mh$accuracy_fold),
+  accuracy = cv_mh$accuracy_fold,
+  bias     = cv_mh$bias_fold
+)
+kable(fold_mh_tbl, digits = 4,
+      caption = "5-fold CV — Microhaplotype-GBLUP")
+```
+
+Binary trait on microhaplotype architecture:
+
+```{r}
+y_bin_mh <- setNames(d$pheno$y_bin_qtl_mh, d$pheno$id)
+
+fit_bin_mh <- masreml(
+  y       = y_bin_mh,
+  X       = X_fixed,
+  markers = list(mh_add = d$mh),
+  trait   = "binary",
+  link    = "logit",
+  verbose = FALSE
+)
+summary(fit_bin_mh)
+```
+
+The W~αh~ coding (Da 2015) is constructed internally by `masreml`; no
+separate preprocessing call is needed when you go through `masreml()`
+directly. If you want to inspect or reuse the coded matrix, build it
+explicitly with `masbayes::construct_wah_matrix()` — see the
+[`masbayes` tutorial](masbayes.qmd) and the
+[Microhaplotype input page](../../input-data/microhaplotypes.qmd).
+
+## Working with the fit object
+
+Beyond `summary()` and `predict()`:
+
+```{r}
+kable(varcomp(fit_gblup),
+      digits  = 4,
+      caption = "Variance components (SNP-GBLUP)")
+```
+
+```{r}
+acc <- compute_accuracy(gebv = fit_gblup$total_gebv, y = y)
+kable(as.data.frame(acc),
+      digits  = 4,
+      caption = "Training-set accuracy (SNP-GBLUP)")
+```
+
+The full set of accessor methods:
+
+```{r}
+#| eval: false
+fit_gblup$gebv          # named list of per-component GEBVs
+fit_gblup$total_gebv    # aggregated total GEBV vector
+fit_gblup$converged     # convergence flag
+fit_gblup$loglik        # REML log-likelihood
+fit_gblup$n_iter        # iterations to convergence
+```
+
+See [`predict.masreml`](../../reference/masreml/predict.masreml.qmd)
+and [`evaluate_prediction`](../../reference/masreml/evaluate_prediction.qmd)
+for the full argument lists.
+
+## See also
+
+- [`masreml()`](../../reference/masreml/masreml.qmd) — main fitting function
+- [`cv_masreml()`](../../reference/masreml/cv_masreml.qmd) — cross-validation
+- [`predict.masreml`](../../reference/masreml/predict.masreml.qmd) — prediction on new individuals
+- [Theory → REML Algorithms](../../theory/blup-reml.qmd) — variance-component estimation engines
+- [Genomic prediction with masbayes](masbayes.qmd) — Bayesian alternative

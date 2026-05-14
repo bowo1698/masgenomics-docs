@@ -1,7 +1,13 @@
 # Quarto build output
 _site/
-_freeze/
 .quarto/
+
+# Freeze cache: generally regenerated locally on render.
+# EXCEPT: tutorial chunks under tasks/ call masreml/masbayes which CI does not
+# install. Their freeze cache (cached chunk outputs + figures) must be shipped
+# alongside the qmd source so CI renders from cache. See CLAUDE.md, rule 7.
+_freeze/*
+!_freeze/tasks
 
 # R
 .Rhistory
@@ -20,8 +26,9 @@ Thumbs.db
 /.quarto/
 **/*.quarto_ipynb
 
-# Internal planning / agent notes — never push
-CLAUDE.md
-PLAN.md
-REVISION_PLAN.md
+# Internal planning 
 docs/
+
+# Local backups (created before edits to source files; never commit)
+*.bak
+*.bak.*

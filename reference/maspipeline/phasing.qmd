@@ -1,0 +1,96 @@
+---
+title: "Phasing"
+---
+
+## Goal
+
+Resolve diploid genotypes (e.g. `0/1`) into haploid maternal/paternal
+strands (e.g. `0|1` and `1|0`) so microhaplotype blocks can later be
+read off each strand directly. Phasing is done **per chromosome in
+parallel** with Beagle; `bcftools` splits the genome and `tabix` indexes
+the per-chromosome outputs.
+
+::: {.callout-tip}
+## Pipeline position
+
+- **Inputs:** cleaned, biallelic, unphased VCF (single file, or already
+  split per chromosome).
+- **Outputs:** a phased VCF (`genotypes_phased.vcf`) with genotypes
+  encoded as `0|0`, `0|1`, `1|0`, `1|1`.
+- **Tool:** **Beagle** (external; we tested with `beagle.22Jul22.46e.jar`),
+  `bcftools`, `tabix`. No maspipeline binary required for this stage —
+  the pipeline calls Beagle directly.
+- **Previous stage:** [Data preparation](data-preparation.qmd)
+- **Next stage:** [Genotype-to-haplotype](genotype-to-haplotype.qmd)
+:::
+
+---
+
+Phasing is the first critical step in our pipeline, where ambiguous
+diploid genotypes are separated into their constituent haploid
+sequences to allow for the accurate identification of microhaplotype
+blocks. We encourage to do phasing using Beagle in parallel process,
+and to do that, we use `bcftools` to split the VCF file per chromosome
+and `tabix` for indexing a compressed VCF, as an example:
+
+```bash
+for chr in {1..29}; do
+    bcftools view -r ${chr} /data/genotypes.vcf.gz -O z -o /data/tmp/chr${chr}.vcf.gz
+    tabix -p vcf /data/tmp/chr${chr}.vcf.gz
+done
+
+for chr in {1..29}; do
+    (
+        java -Xmx28g -jar ${EBROOTBEAGLE}/beagle.jar \
+            gt=/data/tmp/chr${chr}.vcf.gz \
+            nthreads=4 \
+            out=/data/tmp/chr${chr}_phased
+    ) &
+
+    if (( chr % 8 == 0 )); then
+        wait
+    fi
+done
+wait
+
+for chr in {1..29}; do
+    tabix -p vcf /data/tmp/chr${chr}_phased.vcf.gz
+    bcftools reheader -h <(bcftools view -h /data/genotypes.vcf.gz) /data/tmp/chr${chr}_phased.vcf.gz | \
+        bcftools view -O z -o /data/tmp/chr${chr}_phased_corrected.vcf.gz
+    tabix -p vcf /data/tmp/chr${chr}_phased_corrected.vcf.gz
+done
+
+bcftools concat -O z -o /data/genotypes_phased.vcf.gz \
+    /data/tmp/chr{1..29}_phased_corrected.vcf.gz
+
+tabix -p vcf /data/genotypes_phased.vcf.gz
+
+/usr/bin/rm -rf /data/tmp
+gunzip /data/genotypes_phased.vcf.gz
+```
+
+This process results in a phased VCF file, for example:
+
+```
+##fileformat=VCFv4.2
+##filedate=20260108
+##source="beagle.22Jul22.46e.jar"
+##INFO=<ID=AF,Number=A,Type=Float,Description="Estimated ALT Allele Frequencies">
+##INFO=<ID=DR2,Number=A,Type=Float,Description="Dosage R-Squared: estimated squared correlation between estimated REF dose [P(RA) + 2*P(RR)] and true REF dose">
+##INFO=<ID=IMP,Number=0,Type=Flag,Description="Imputed marker">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DS,Number=A,Type=Float,Description="estimated ALT dose [P(RA) + 2*P(AA)]">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Ind_1	Ind_2
+1	16977	snp1	C	A	.	.	PR	GT	0|0	1|1
+1	33723	snp2	G	T	.	.	PR	GT	1|0	0|0
+```
+
+---
+
+## What's next?
+
+→ Continue to [**Genotype-to-haplotype**](genotype-to-haplotype.qmd) —
+split each phased genotype into its two haploid columns with
+`convert-from-vcf`.
+
+← Back to [overview](index.qmd).

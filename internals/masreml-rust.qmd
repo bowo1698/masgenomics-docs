@@ -11,8 +11,13 @@ TODO: list of Rust files with one-line description each.
 ## Key entry points
 
 - {{< rust-src masreml lib.rs >}} — extendr export macros
-- {{< rust-src masreml gblup/mod.rs >}} — GBLUP solver (TODO verify path)
-- {{< rust-src masreml gwas/mod.rs >}} — GWAS implementation (TODO verify path)
+- {{< rust-src masreml reml/mod.rs >}} — REML solver dispatch (HE, EM, AI, HI, adaptive)
+- {{< rust-src masreml reml/ai_reml.rs >}} — Average-Information REML iteration
+- {{< rust-src masreml reml/em_reml.rs >}} — Expectation-Maximisation REML iteration
+- {{< rust-src masreml reml/he_regression.rs >}} — Haseman-Elston regression
+- {{< rust-src masreml solver/mod.rs >}} — MME solver dispatch (Cholesky, PCG)
+- {{< rust-src masreml matrix/mod.rs >}} — relationship-matrix builders (G_snp, G_mh, A_ped, D_snp)
+- {{< rust-src masreml gwas/mod.rs >}} — GWAS implementation (EMMAX + smoothing)
 
 ## FFI boundary
 

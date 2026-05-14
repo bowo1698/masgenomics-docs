@@ -187,8 +187,10 @@ with prevalence. Report instead:
 | Brier score | Calibration + discrimination jointly |
 | Calibration slope of $\hat{p}_i$ against $y_i$ | Pure calibration; should be 1 if perfectly calibrated |
 
-`masreml::evaluate_prediction(gebv, y, fitted_prob = phat)` reports
-AUC and the Brier score; the calibration slope is a one-line
+`masreml::evaluate_prediction(gebv, y, fitted_prob = phat)` returns
+columns `r_test_y, r_test_g, bias, r_MG, AUC, RMSE`. For binary traits
+the `RMSE` column is computed on the probability scale, so
+$\text{RMSE}^2 \approx \text{Brier}$. The calibration slope is a one-line
 `glm(y ~ phat, family = binomial)`.
 
 ## 4. When to use
@@ -208,14 +210,14 @@ AUC and the Brier score; the calibration slope is a one-line
 library(masreml)
 library(masbayes)
 
-d <- masreml::load_data("large")
+d <- load_data("large")
 
 # --- Continuous: masreml GBLUP -----------------------------------
 y_cont <- d$pheno$y_cont_qtl_snp
 names(y_cont) <- d$pheno$id
 X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
 
-fit_cont <- masreml::masreml(
+fit_cont <- masreml(
   y       = y_cont,
   X       = X_fixed,
   markers = list(snp_add = d$snp),
@@ -226,7 +228,7 @@ fit_cont <- masreml::masreml(
 y_bin <- d$pheno$y_bin_qtl_snp
 names(y_bin) <- d$pheno$id
 
-fit_bin <- masreml::masreml(
+fit_bin <- masreml(
   y       = y_bin,
   X       = X_fixed,
   markers = list(snp_add = d$snp),
@@ -236,12 +238,14 @@ fit_bin <- masreml::masreml(
 # fit_bin$h2 is reported on the liability scale.
 
 # --- Binary: masbayes Albert-Chib (BayesR) -----------------------
-W <- masbayes::construct_snp_matrix(d$snp, encoding = "vanRaden")
-fit_bin_bayesr <- masbayes::run_bayesr(
+W <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
+fit_bin_bayesr <- run_bayesr(
   w             = W,
   y             = y_bin,
   wtw_diag      = colSums(W ^ 2),
   X             = X_fixed,
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = 1.0,             # liability-scale total genetic variance
   sigma2_e_init = 1.0,             # fixed at 1.0 on the liability scale
   method        = "mcmc",
   response_type = "binary"
@@ -249,14 +253,16 @@ fit_bin_bayesr <- masbayes::run_bayesr(
 # fit_bin_bayesr$prob_train holds posterior-mean P(y=1).
 
 # --- Evaluation: observed-scale metrics --------------------------
-gebv  <- predict(fit_bin)$gebv
-phat  <- predict(fit_bin)$prob
-metrics <- masreml::evaluate_prediction(
+gebv  <- predict(fit_bin)$GEBV          # total GEBV vector (alias: $total_gebv)
+phat  <- predict(fit_bin)$prob          # P(y=1) on observed scale
+metrics <- evaluate_prediction(
   gebv        = gebv,
   y           = y_bin,
   fitted_prob = phat
 )
-metrics$AUC; metrics$Brier
+# Returned columns: r_test_y, r_test_g, bias, r_MG, AUC, RMSE
+# (For binary, RMSE^2 ≈ Brier score on the probability scale.)
+metrics$AUC; metrics$RMSE
 ```
 
 ## 6. References

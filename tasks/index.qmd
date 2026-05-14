@@ -2,14 +2,30 @@
 title: "Task Tutorials"
 ---
 
-Each tutorial is a runnable end-to-end workflow on the
-[bundled demo dataset](../input-data/index.qmd). Tutorials show
-**both packages** side by side where applicable.
+Each tutorial is an end-to-end workflow on the
+[bundled demo dataset](../input-data/index.qmd). Tasks are organised
+around **what you want to answer**, not which package implements it —
+each task has separate sub-pages for `masreml` and `masbayes` so you
+can pick whichever fits your workflow.
 
-| Task | Methods covered |
-|---|---|
-| [Genomic Prediction](genomic-prediction.qmd) | GBLUP (`masreml`), BayesA / BayesR (`masbayes`) |
-| [GWAS](gwas.qmd) | `masreml::run_gwas`, BayesR variable selection |
-| [GWABLUP](gwablup.qmd) | weight-then-predict using GWAS p-values |
-| [Cross-validation](cross-validation.qmd) | `masreml::cv_masreml` |
-| [Binary trait analysis](binary-trait.qmd) | threshold model with `masreml` |
+| Task | What it answers | Sub-pages |
+|---|---|---|
+| [**Genomic prediction**](genomic-prediction/index.qmd) | Which candidates have the highest breeding value? | [with masreml](genomic-prediction/masreml.qmd) · [with masbayes](genomic-prediction/masbayes.qmd) |
+| [**GWAS**](gwas/index.qmd) | Which markers carry signal about the trait? | [with masreml](gwas/masreml.qmd) · [with masbayes](gwas/masbayes.qmd) |
+
+Each task overview explains the task itself — what the goal is, how it
+differs from the other task, what inputs you need — before sending you
+to the package-specific tutorial.
+
+## Notes on the tutorials
+
+- All code chunks are illustrative (`#| eval: false`). The package
+  binaries are not installed during the docs build; copy the snippets
+  into your own R session against your installed `masreml` /
+  `masbayes`.
+- Both packages share `load_data()` and the bundled
+  `demo_data.rds` — pick `"large"` for the standard examples and
+  `"small"` for quick smoke tests.
+- Each tutorial covers **SNP** and **microhaplotype** workflows
+  side-by-side; the W-matrix construction is the only major
+  divergence point, with downstream API identical.

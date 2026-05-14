@@ -1,0 +1,93 @@
+---
+title: "Data preparation"
+---
+
+## Goal
+
+Clean and align raw genotype data into a VCF that the phasing software
+can consume — proper chromosome naming, biallelic filtering, and a
+genetic map consistent with sample-id conventions. This is the first
+stage of the four-stage pipeline.
+
+::: {.callout-tip}
+## Pipeline position
+
+- **Inputs:** raw VCF from a variant caller, or PLINK `.bed/.bim/.fam`,
+  or genotype CSV + genetic-map text file.
+- **Outputs:** a single, biallelic, unphased VCF ready for Beagle.
+- **Tool:** `plink` (for format conversion) or `convert-to-vcf` (if
+  starting from CSV); no maspipeline binary required for the VCF-only path.
+- **Previous stage:** — *(this is the entry point)*
+- **Next stage:** [Phasing](phasing.qmd)
+:::
+
+---
+
+Raw genotype data is expected in a .VCF format, as it contains genetic
+map positions, reference/alternative alleles, and unphased genotype
+calls (e.g., 0/1), which serve as the essential input for the
+subsequent phasing step. However, if the raw genotype data is in PLINK
+formats (provided as .bed, .bim, .fam), recoding to .VCF format can be
+done by PLINK as well, for example:
+
+```bash
+plink --bfile GENO_DATA --chr-set 95 no-xy --recode vcf --out GENO_DATA
+```
+
+This will generate unphased genotype data in a .VCF file, for example:
+
+```
+##fileformat=VCFv4.2
+##fileDate=20250503
+##source=PLINKv1.9
+##contig=<ID=1,length=80480704>
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Ind_1	Ind_2
+1	16977	snp1	C	A	.	.	PR	GT	0/0	0/1
+1	33723	snp2	G	T	.	.	PR	GT	0/0	0/0
+```
+
+Alternatively, if the genotype data is in form of .CSV:
+
+```
+ID,snp_1,snp_2,snp_3,...snp_n
+ind_1,0,1,2,...
+ind_2,1,2,0,...
+ind_3,2,0,1,...
+```
+
+Along with a genetic map (in form .txt):
+
+```
+SNPID	Chr	Position
+snp_1	1	0
+snp_2	1	16746
+snp_3	1	217334
+```
+
+We provide `convert-to-vcf` to convert such genotype data to a VCF
+file. This tool can be run as follows:
+
+```bash
+./convert-to-vcf \
+      -i genotypes.csv \
+      -m map.txt \
+      -o genotypes.vcf \
+      --split-by-chr \
+      --parallel \
+      --ncores 4 \
+      --merge-after-split
+```
+
+Note that the conversion is done by splitting the genotype files based
+on the number of chromosomes processed in parallel, then merging them
+into a single VCF file.
+
+---
+
+## What's next?
+
+→ Continue to [**Phasing**](phasing.qmd) — resolve diploid genotypes
+into haploid maternal/paternal strands with Beagle.
+
+← Back to [overview](index.qmd).

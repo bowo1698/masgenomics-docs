@@ -37,7 +37,7 @@ individual and at least three column kinds:
 | (Optional) `tbv_*` | numeric | none | True breeding values; only meaningful for simulation studies |
 
 The demo dataset bundles **both** continuous and binary versions of two
-traits (SNP-architecture and MH-architecture). Standalone CSVs split
+traits (SNP-architecture and microhaplotype-architecture). Standalone CSVs split
 them out:
 
 | File | Columns |
@@ -100,11 +100,11 @@ DT::datatable(bal, rownames = FALSE,
 
 ## QTL ground truth
 
-Ten QTL under each architecture (SNP and MH), with
+Ten QTL under each architecture (SNP and microhaplotype), with
 unit-length-normalised effects ($\sum \beta_i^2 = 1$). **Use these for
 QTL recovery analysis only**, not as model input. Four standalone
 `.rds` files mirror `d$qtl` with human-readable identifiers — SNP
-names and MH block ids — so downstream tools can join against
+names and microhaplotype block ids — so downstream tools can join against
 `d$map_snp` / `d$map_mh` directly.
 
 ### Causal SNPs
@@ -124,7 +124,7 @@ DT::datatable(qtl_snp_tbl, rownames = FALSE,
               options = list(dom = "t", paging = FALSE, ordering = FALSE))
 ```
 
-### Causal MH blocks
+### Causal microhaplotype blocks
 
 `d$qtl$mh_idx` indexes columns of $W_{ah}$ rather than block columns
 directly, because the causal "allele" within a multi-allelic block is
@@ -158,12 +158,12 @@ DT::datatable(qtl_mh_tbl, rownames = FALSE,
 ```{r}
 #| eval: false
 library(masreml)
-d <- masreml::load_data("large")
+d <- load_data("large")
 
 # Continuous trait, SNP architecture
 y_cont <- d$pheno$y_cont_qtl_snp
 
-# Binary trait, MH architecture
+# Binary trait, microhaplotype architecture
 y_bin  <- d$pheno$y_bin_qtl_mh
 
 # Or load the standalone CSVs directly:
@@ -182,13 +182,16 @@ $\mathbf{A}$ via `build_A_ped()` and pass it through the `G` slot.
 
 ```{r}
 #| eval: false
+library(masreml)
+library(masbayes)
+
 # Continuous trait, SNP-additive GBLUP with sex as fixed effect.
 y <- d$pheno$y_cont_qtl_snp
 names(y) <- d$pheno$id
 
 X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
 
-fit <- masreml::masreml(
+fit <- masreml(
   y       = y,
   X       = X_fixed,
   markers = list(snp_add = d$snp),
@@ -198,8 +201,8 @@ fit <- masreml::masreml(
 # masbayes: BayesA on the same trait. The wrapper takes the
 # pre-standardised design matrix `w` plus colSums(w^2) as inputs;
 # sigma2_g and sigma2_e_init are required hyperparameters.
-W   <- masbayes::construct_snp_matrix(d$snp, encoding = "vanRaden")
-fit <- masbayes::run_bayesa(
+W   <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
+fit <- run_bayesa(
   w             = W,
   y             = y,
   wtw_diag      = colSums(W^2),
@@ -214,7 +217,7 @@ fit <- masbayes::run_bayesa(
 # Binary trait via threshold model in masreml (Laplace approximation).
 y_bin <- d$pheno$y_bin_qtl_snp
 names(y_bin) <- d$pheno$id
-fit_bin <- masreml::masreml(
+fit_bin <- masreml(
   y       = y_bin,
   X       = X_fixed,
   markers = list(snp_add = d$snp),
@@ -257,13 +260,13 @@ estimates.
 ::: {.callout-tip}
 **`tbv_*` columns are ground truth, not input.** They are only useful
 for simulation: comparing $\widehat{u}$ against `tbv` is how the
-[Cross-validation](../tasks/cross-validation.qmd) tutorial computes
+[Cross-validation](../tasks/genomic-prediction/masreml.qmd#cross-validation-cv_masreml) tutorial computes
 accuracy. Never include `tbv_*` as a covariate.
 :::
 
 📐 **Related theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd) ·
 [Continuous and Binary Trait](../theory/continuous-and-binary-trait.qmd)
 
-🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·
-[Binary trait analysis](../tasks/binary-trait.qmd) ·
-[Cross-validation](../tasks/cross-validation.qmd)
+🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd) ·
+[Binary trait — with masreml](../tasks/genomic-prediction/masreml.qmd#binary-trait) ·
+[Cross-validation — with masreml](../tasks/genomic-prediction/masreml.qmd#cross-validation-cv_masreml)

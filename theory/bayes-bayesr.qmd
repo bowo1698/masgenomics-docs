@@ -1,0 +1,241 @@
+---
+title: "BayesR"
+---
+
+BayesR extends BayesA by adding an explicit zero-effect class. Instead of
+each marker having a continuous variance, each marker is assigned to one
+of four variance classes — including an atom at zero. This allows exact
+variable selection while still accommodating markers with small, moderate,
+or large effects.
+
+## Prior
+
+$$
+\beta_j \mid \boldsymbol{\pi}, \sigma_g^2
+\;\sim\;
+\pi_0\,\delta_0
+\;+\; \pi_1\,N\!\left(0,\, 0.001\,\sigma_g^2\right)
+\;+\; \pi_2\,N\!\left(0,\, 0.01\,\sigma_g^2\right)
+\;+\; \pi_3\,N\!\left(0,\, 0.1\,\sigma_g^2\right),
+$$ {#eq-bayesr-prior}
+
+with $\sum_k \pi_k = 1$ and a Dirichlet hyperprior:
+
+$$
+\boldsymbol{\pi} \sim \mathrm{Dir}(\mathbf{1}).
+$$
+
+Default initial mixture proportions in `run_bayesr(pi_vec = c(0.95, 0.02, 0.02, 0.01))`:
+95 % of markers start in the zero class, 1 % in the large-variance class.
+
+**What each class represents:**
+
+| Class | Variance | Biological interpretation |
+|-------|---------|--------------------------|
+| $\pi_0\delta_0$ | 0 | No LD with any QTL |
+| $\pi_1 N(0,\, 0.001\sigma_g^2)$ | Very small | Background polygenic signal |
+| $\pi_2 N(0,\, 0.01\sigma_g^2)$ | Moderate | Markers in LD with minor QTLs |
+| $\pi_3 N(0,\, 0.1\sigma_g^2)$ | Large | Markers tagging major QTLs |
+
+The three non-zero variances span three orders of magnitude — enough to
+distinguish background noise from major-QTL signal without requiring a
+continuous variance per marker.
+
+::: {.callout-note}
+**BayesA vs BayesR — which to choose.**
+BayesA gives each marker a *continuous* variance from a heavy-tailed
+prior — appropriate when effects form a continuum. BayesR uses *discrete*
+mixture classes with an exact zero — appropriate when the architecture is
+genuinely sparse. A practical diagnostic: if a BayesR run returns
+$\hat\pi_0 > 0.9$, most markers are in the zero class and the sparse
+assumption holds. If $\hat\pi_0 \approx 0$ and effects are diffuse,
+BayesA or GBLUP is more appropriate.
+:::
+
+---
+
+## PIP Diagnostics
+
+The **posterior inclusion probability** for marker $j$ is:
+
+$$
+\mathrm{PIP}_j = 1 - P(\delta_j = 0 \mid \mathbf{y}),
+$$ {#eq-pip}
+
+where $\hat\pi_0^{(j)}$ is the posterior probability that marker $j$
+belongs to the zero class.
+
+| PIP threshold | Interpretation |
+|---|---|
+| PIP $> 0.5$ | Marker likely associated with the trait |
+| PIP $> 0.9$ | High-confidence QTL region |
+| PIP $\approx 0$ | No evidence of association |
+
+**Architecture inference from $\hat{\boldsymbol{\pi}}$.** The posterior
+distribution over mixture proportions is itself informative. Concentration
+of mass in class 3 ($\sigma_3^2 = 0.1\sigma_g^2$) signals a few major
+QTLs; diffuse mass across classes 1–2 signals a polygenic architecture
+closer to infinitesimal. Inspecting $\hat{\boldsymbol{\pi}}$ before
+finalising model choice is good practice.
+
+---
+
+## SNP vs Multi-allelic: W Matrix Differences
+
+### SNP Design Matrix
+
+Each column is one centred biallelic locus:
+$W_{ij}^{\text{SNP}} = M_{ij} - 2p_j$. The mixture variances
+$\{0.001, 0.01, 0.1\}\sigma_g^2$ scale with $\sigma_g^2$, which is
+estimated from the data.
+
+### Microhaplotype Design Matrix
+
+Each column is one haplotype contrast within a block
+($\mathbf{W}_{\alpha h}$, Da 2015). A block with $h$ haplotypes
+contributes $h - 1$ columns — denser in biological information but
+fewer in total count than the equivalent SNP panel.
+
+**Consequence for $\sigma_g^2$ scaling.** For microhaplotype markers,
+$\sigma_g^2$ is estimated from a design matrix where each column
+already captures a *combination* of SNP alleles in phase. Each column
+therefore explains more variance per unit of effect size than a single
+SNP column. At the same estimated $\sigma_g^2$, the absolute mixture
+variances $\{0.001, 0.01, 0.1\}\sigma_g^2$ translate into *larger*
+per-column effect ranges for microhaplotypes than for SNP — giving the prior more
+room for haplotype-level effects.
+
+---
+
+## Biological Implications of SNP vs microhaplotypes
+
+**PIP interpretation.** For SNP markers, a high PIP on a column means
+that SNP is in LD with a QTL — but the causal variant could be any of
+several nearby SNPs. For microhaplotype markers, a high PIP on a haplotype column
+means the *specific combination* of alleles encoded by that column is
+tagging the QTL. Microhaplotype PIPs are more localised and biologically
+interpretable: they point to a haplotype block rather than a single
+genomic position.
+
+**$\hat\pi_0$ comparison.** Microhaplotype markers tend to produce lower $\hat\pi_0$
+than SNP markers on the same dataset — more columns escape the zero
+class. This reflects the richer per-column information content of
+microhaplotypes: rare haplotype combinations that individual SNPs miss
+(higher PIC than SNP) generate stronger signals for the Dirichlet
+sampler to pick up, resulting in a less sparse estimated architecture
+even when the true architecture is the same.
+
+**PIP stability under selection.** Under directional selection, LD
+between SNP and QTL degrades generation by generation. For BayesR on
+SNP markers, columns that had high PIP in the training generation
+gradually accumulate recombinant chromosomes — their $\hat\beta$ shrinks
+and $\hat\pi_0$ drifts upward over subsequent generations. Haplotype
+blocks of <200 bp are rarely broken by recombination within a single
+generation, so microhaplotype PIPs remain attached to the same haplotype combination
+and stay more stable across rounds of selection.
+
+::: {.callout-note}
+The BayesR prior structure, the Dirichlet hyperprior on $\boldsymbol{\pi}$,
+and the Gibbs/EM sampler are identical for SNP and microhaplotype inputs. Only
+$\mathbf{W}$ changes — `construct_snp_matrix()` for SNP,
+`construct_wah_matrix()` for microhaplotypes — and the `marker_type` argument
+signals which internal convention to apply.
+:::
+
+---
+
+## See it in Code
+
+**SNP — MCMC**
+
+```{r}
+#| eval: false
+library(masbayes)
+
+d       <- load_data("large")
+y       <- d$pheno$y_cont_qtl_snp
+names(y) <- d$pheno$id
+X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
+
+W_snp   <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
+wtw_snp <- colSums(W_snp^2)
+
+# pi_vec: prior sparsity — 95% of markers start in the zero class
+fit_r_snp_mcmc <- run_bayesr(
+  w             = W_snp,
+  y             = y,
+  wtw_diag      = wtw_snp,
+  X             = X_fixed,
+  marker_type   = "snp",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian"
+)
+summary(fit_r_snp_mcmc)
+```
+
+**SNP — EM (MAP estimate, faster)**
+
+```{r}
+#| eval: false
+fit_r_snp_em <- run_bayesr(
+  w             = W_snp,
+  y             = y,
+  wtw_diag      = wtw_snp,
+  X             = X_fixed,
+  marker_type   = "snp",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "em",
+  response_type = "gaussian"
+)
+```
+
+**Microhaplotype — MCMC**
+
+```{r}
+#| eval: false
+wah    <- construct_wah_matrix(
+  hap_matrix           = d$mh,
+  colnames             = attr(d$mh, "block_id"),
+  allele_freq_filtered = d$allele_freq
+)
+wtw_mh <- colSums(wah$W_ah^2)
+
+# marker_type = "multiallelic": W_alpha_h columns, richer per-column information
+fit_r_mh_mcmc <- run_bayesr(
+  w             = wah$W_ah,
+  y             = y,
+  wtw_diag      = wtw_mh,
+  X             = X_fixed,
+  marker_type   = "multiallelic",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian"
+)
+summary(fit_r_mh_mcmc)
+```
+
+## References
+
+- Erbe, M., Hayes, B. J., Matukumalli, L. K., Goswami, S., Bowman, P. J.,
+  Reich, C. M., Mason, B. A. & Goddard, M. E. (2012). Improving accuracy
+  of genomic predictions within and between dairy cattle breeds with
+  imputed high-density single nucleotide polymorphism panels. *Journal of
+  Dairy Science*, 95(7), 4114–4129.
+  [doi:10.3168/jds.2011-5019](https://doi.org/10.3168/jds.2011-5019).
+- Wang, H., Misztal, I., Aguilar, I., Legarra, A., Fernando, R. L.,
+  Vitezica, Z., Okimoto, R., Wing, T., Strasburg, R. & Muir, W. M. (2015).
+  Genome-wide association mapping including phenotypes from relatives
+  without genotypes in a single-step (ssGWAS) for 6-week body weight in
+  broiler chickens. *Frontiers in Genetics*, 5, 134.
+  [doi:10.3389/fgene.2014.00134](https://doi.org/10.3389/fgene.2014.00134).
+- Da, Y. (2015). Multi-allelic haplotype model based on genetic partition
+  for genomic prediction and variance component estimation using SNP
+  markers. *BMC Genetics*, 16, 144.
+  [doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1).

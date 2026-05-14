@@ -1,0 +1,145 @@
+---
+title: "masreml: Universal REML-BLUP for SNP and Multi-allelic Genomic Prediction"
+---
+
+## masreml: Universal REML-BLUP for SNP and Multi-allelic Genomic Prediction {.unnumbered}
+
+
+### Description
+
+Implements REML-BLUP genomic prediction using SNP (additive, dominance)
+and multi-allelic additive markers via a high-performance Rust backend.
+Supports multiple genomic relationship matrices (GRM) simultaneously,
+binary traits via Laplace approximation, EMMAX GWAS, and GWAS-assisted
+prediction (GWABLUP).
+
+
+
+### Statistical model
+
+The general mixed linear model is:
+
+<p style="text-align: center;">$y = Xb + \sum_{k} Z_k u_k + e$
+
+
+with independent random genetic effects
+$u_k \sim \mathcal{N}(0,\,G_k \sigma_{g_k}^2)$ and residuals
+$e \sim \mathcal{N}(0,\,I\sigma_e^2)$, where $G_k$ is the
+genomic relationship matrix for component $k$
+(<code>snp_add</code>, <code>snp_dom</code>, <code>mh_add</code>, or <code>pedigree</code>).
+Variance components
+$(\sigma_{g_1}^2, \ldots, \sigma_{g_K}^2,\,\sigma_e^2)$ are
+estimated by REML; GEBVs are obtained by BLUP.
+
+
+
+### General assumptions
+
+
+<ul>
+<li> Random genetic effects for each component are normally
+distributed: $u_k \sim \mathcal{N}(0,\,G_k \sigma_{g_k}^2)$.
+
+</li>
+<li> Residuals are independent:
+$e \sim \mathcal{N}(0,\,I\sigma_e^2)$.
+
+</li>
+<li> Different random-effect components
+($u_1, u_2, \ldots$) are mutually independent.
+
+</li>
+<li> The GRM $G_k$ captures realized genomic relationships;
+diagonal elements average approximately 1.
+
+</li>
+<li> For binary traits, a single-step Laplace approximation is
+applied on the liability scale (logit or probit link).
+
+</li></ul>
+
+
+
+### How the model works (individual/population level)
+
+masreml estimates genetic merit at the <em>individual level</em> using
+BLUPs derived from the mixed model, rather than directly estimating
+individual marker effects.
+
+Variance components $(\sigma_{g_k}^2, \sigma_e^2)$ are first
+estimated by REML using one of four algorithms selectable via the
+<code>method</code> argument: AI-REML (default for continuous traits),
+HE regression (default for binary), EM-REML (stable fallback), or
+HI (HE-initialized AI). The GRM $G_k$ is built from marker data
+via <code>build_G_snp</code> (VanRaden 2008),
+<code>build_G_mh</code> (Da 2015), or <code>build_D_snp</code>.
+
+GEBVs (BLUPs) are then obtained by solving the mixed model equations.
+For a single additive component the BLUP prediction is:
+
+<p style="text-align: center;"><code class="reqn">\hat{u} = \sigma_g^2\,G\,V^{-1}(y - X\hat{b}),
+  \quad V = G\sigma_g^2 + I\sigma_e^2</code>
+
+
+GEBVs represent the <em>total genomic merit</em> of each individual,
+aggregating marker contributions through the GRM structure.
+
+
+
+### Main functions
+
+
+<dl>
+<dt><code>masreml</code></dt><dd>REML-BLUP genomic prediction (main
+entry point). Accepts raw marker data or pre-built G matrices.
+</dd>
+<dt><code>build_G_snp</code></dt><dd>SNP additive GRM (VanRaden 2008).
+</dd>
+<dt><code>build_G_mh</code></dt><dd>Multi-allelic additive GRM
+(Da 2015).
+</dd>
+<dt><code>build_D_snp</code></dt><dd>SNP dominance GRM (Da 2015).
+</dd>
+<dt><code>build_A_ped</code></dt><dd>Pedigree numerator relationship
+matrix (Henderson 1976).
+</dd>
+<dt><code>run_gwas</code></dt><dd>EMMAX genome-wide association study.
+</dd>
+<dt><code>gwablup</code></dt><dd>GWAS-assisted GBLUP via weighted G.
+</dd>
+<dt><code>cv_masreml</code></dt><dd>k-fold or leave-one-out
+cross-validation.
+</dd>
+</dl>
+
+
+
+### References
+
+
+<ul>
+<li> Meuwissen, T. H. E., Hayes, B. J., \&amp; Goddard, M. E. (2001).
+Prediction of total genetic value using genome-wide dense marker
+maps. <em>Genetics</em>, 157(4), 1819&ndash;1829.
+[doi:10.1093/genetics/157.4.1819](https://doi.org/10.1093/genetics/157.4.1819)
+
+</li>
+<li> VanRaden, P. M. (2008). Efficient methods to compute genomic
+predictions. <em>Journal of Dairy Science</em>, 91(11), 4414&ndash;4423.
+[doi:10.3168/jds.2007-0980](https://doi.org/10.3168/jds.2007-0980)
+
+</li>
+<li> Da, Y. (2015). Multi-allelic haplotype model based on genetic
+partition for genomic prediction and variance component estimation
+using SNP markers. <em>BMC Genetics</em>, 16(1), 144.
+[doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1)
+
+</li></ul>
+
+
+
+### Author(s)
+
+<strong>Maintainer</strong>: Agus Wibowo <a href="mailto:aguswibowo1698@gmail.com">aguswibowo1698@gmail.com</a>
+
+

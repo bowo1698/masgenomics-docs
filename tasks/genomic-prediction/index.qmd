@@ -1,0 +1,84 @@
+---
+title: "Genomic Prediction"
+---
+
+## What is genomic prediction?
+
+**Genomic prediction (GP)** is the use of dense marker data to predict
+the **breeding value** of an individual — that is, the additive
+genetic merit that the individual will transmit to its offspring.
+Where classical pedigree-based BLUP relies on expected co-ancestry
+inferred from family records, GP measures **realised relatedness**
+directly from the marker genome, capturing Mendelian-sampling
+deviations that pedigree records cannot see.
+
+The trained model returns one number per candidate animal or plant —
+the **genomic estimated breeding value (GEBV)** — which downstream
+breeding decisions sort, threshold, and select on. GP rests on the
+**infinitesimal model**: trait variation is assumed to be driven by
+many loci of small effect, jointly captured by the genomic
+relationship matrix or the marker-effects prior.
+
+## When to use GP
+
+| Situation | Use GP? |
+|---|---|
+| Selecting candidates that have no own phenotype yet (juveniles, eggs, embryos) | **Yes** — GP is the standard solution |
+| Replacing a slow / expensive phenotyping step with a fast genotype call | **Yes** |
+| Identifying *which* causal variants matter biologically | No — use [GWAS](../gwas/index.qmd) instead |
+| Trait with very few large QTL of known location | Use marker-assisted selection or include those QTL as fixed effects |
+
+## Prerequisites
+
+- **Training set**: individuals with both phenotype + genotype
+  (~ several hundred for low-heritability traits is the practical
+  minimum; thousands for routine accuracy gains).
+- **Test / candidate set**: animals/plants with genotype only.
+- **Genotype**:
+  - SNP dosage matrix (rows = individuals, columns = SNPs, values 0/1/2), **or**
+  - Phased microhaplotype matrix from the
+    [`maspipeline`](../../reference/maspipeline/index.qmd) preprocessing pipeline.
+- **Fixed-effect covariates** (sex, batch, season). A design matrix `X`
+  built with `stats::model.matrix()` is the standard form.
+- **Optional**: pedigree records, for PBLUP or single-step GBLUP via
+  [`build_A_ped()`](../../reference/masreml/build_A_ped.qmd).
+
+## GP vs GWAS at a glance
+
+The two tasks share inputs but ask different questions:
+
+| Dimension | Genomic prediction (this task) | [GWAS](../gwas/index.qmd) |
+|---|---|---|
+| Output | $n \times 1$ GEBV vector | $p \times 1$ per-marker statistic |
+| Goal | Rank breeding candidates | Identify causal variants |
+| Use of marker effects | Aggregated into a single GEBV | Per-marker hypothesis tests / PIPs |
+| Cross-validation? | Central — accuracy is the headline metric | Less common; power analysis instead |
+| Typical follow-up | Select the top-ranked candidates | Annotate peaks, replicate, GWABLUP |
+
+A single project usually does **both**: GWAS first to understand which
+parts of the genome drive the trait, then GP to translate that into
+selection decisions.
+
+## Methods covered
+
+Both packages here implement the same statistical core — a linear
+mixed model with additive genetic effects — but differ in **how marker
+effects are estimated**.
+
+| Approach | Prior on marker effects | Output | Package | Tutorial |
+|---|---|---|---|---|
+| GBLUP / Microhaplotype-GBLUP | Implicit ridge (all markers shrunk equally) | Aggregated GEBV | `masreml` | [→ with masreml](masreml.qmd) |
+| Threshold model (binary trait) | Same, on liability scale | Liability-scale GEBV + probability | `masreml` | [→ with masreml](masreml.qmd#binary-trait) |
+| BayesA | Scaled-$t$ per marker (heavy tails) | Per-marker $\hat\beta$ + aggregated GEBV | `masbayes` | [→ with masbayes](masbayes.qmd) |
+| BayesR | 4-class mixture (zero / small / medium / large) | Per-marker $\hat\beta$ + PIPs + aggregated GEBV | `masbayes` | [→ with masbayes](masbayes.qmd) |
+
+## What's next?
+
+Pick a package. Both tutorial pages use the same
+[bundled demo data](../../input-data/index.qmd) — you can run them in
+either order.
+
+- [**Genomic prediction with masreml**](masreml.qmd) — REML mixed
+  model, full-data fit, cross-validation, binary trait.
+- [**Genomic prediction with masbayes**](masbayes.qmd) — BayesA and
+  BayesR (MCMC + EM), manual cross-validation, binary trait.

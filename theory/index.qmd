@@ -3,9 +3,7 @@ title: "Theory"
 ---
 
 This section covers the statistical models implemented across
-`masreml` and `masbayes`. Each page follows the same 7-section
-structure: **Assumption · Linear model · GEBV calculation · Variance
-component & h² · When to Use · See it in code · References**.
+`masreml` and `masbayes`.
 
 ## Pages
 

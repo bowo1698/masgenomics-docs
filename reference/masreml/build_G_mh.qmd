@@ -7,11 +7,11 @@ title: "Build Multi-allelic Additive Genomic Relationship Matrix"
 
 ### Description
 
-Constructs the multi-allelic (MH) additive genomic relationship matrix
-(Wgh) following Da (2015). Uses multi-allelic haplotype block coding
-(W_ah) that captures haplotype diversity beyond what bi-allelic SNPs
-can represent. The resulting matrix can be used in <code>masreml()</code> or
-<code>gwablup()</code> via the <code>G</code> argument.
+Constructs the multi-allelic additive genomic relationship matrix
+following Da (2015). Uses multi-allelic haplotype block coding
+($W_{ah}$) that captures haplotype diversity beyond what bi-allelic
+SNPs can represent. The resulting matrix can be used in <code>masreml()</code>
+or <code>gwablup()</code> via the <code>G</code> argument.
 
 
 
@@ -65,6 +65,41 @@ when <code>mh_list</code> is a haplotype matrix without rownames.
 </table>
 
 
+### Details
+
+<strong>Multi-allelic additive GRM (Da, 2015).</strong>
+For individual $i$ with phased alleles $(A_i, A_j)$ at haplotype
+block $h$, the column corresponding to non-baseline allele $k$
+(with population frequency $p_k$) is coded as:
+
+
+<dl>
+<dt>Homozygous ($A_i = A_j = k$):</dt><dd>
+$W_{\alpha h}^{(k)} = -2(1 - p_k)$
+</dd>
+<dt>Heterozygous ($A_i = k$ or $A_j = k$):</dt><dd>
+$W_{\alpha h}^{(k)} = -(1 - 2p_k)$
+</dd>
+<dt>Absent ($A_i \neq k$ and $A_j \neq k$):</dt><dd>
+$W_{\alpha h}^{(k)} = 2p_k$
+</dd>
+</dl>
+
+Rare alleles receive larger absolute deviations; common alleles receive
+smaller deviations. The population column-mean is zero by construction,
+ensuring the additive effects sum to zero across individuals.
+
+The additive multi-allelic GRM is then:
+
+<p style="text-align: center;"><code class="reqn">A_{gh} = \frac{W_{ah} W_{ah}^\top}{k_{ah}}, \quad
+  k_{ah} = \frac{\mathrm{tr}(W_{ah} W_{ah}^\top)}{n}</code>
+
+
+where $n$ is the number of individuals and $k_{ah}$ scales the
+matrix so that diagonal elements average approximately 1.
+
+
+
 ### Value
 
 numeric matrix (n x n) of microhaplotype-based genomic
@@ -75,8 +110,9 @@ based on haplotype block diversity.
 
 ### References
 
-Da et al. (2015) Multi-allelic haplotype model based on genetic partition for genomic prediction
-and variance component estimation using SNP markers. <em>BMC Genet.</em> 15:100.
+Da, Y. (2015) Multi-allelic haplotype model based on genetic partition for
+genomic prediction and variance component estimation using SNP markers.
+<em>BMC Genetics</em> 16:144. [doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1)
 
 
 
@@ -91,46 +127,20 @@ and variance component estimation using SNP markers. <em>BMC Genet.</em> 15:100.
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library("masreml")
 
-# mh_list: one data.frame per chromosome
-# Each row = one individual
-# Columns: ID, then paired strand columns per haplotype block
-chr1 <- data.frame(
-  ID    = paste0("ind", 1:5),
-  B1_s1 = c(0, 1, 0, 2, 1),   # block 1 strand 1
-  B1_s2 = c(1, 1, 2, 0, 0),   # block 1 strand 2
-  B2_s1 = c(2, 0, 1, 1, 0),   # block 2 strand 1
-  B2_s2 = c(0, 1, 2, 0, 1)    # block 2 strand 2
-)
-mh_list <- list(chr1 = chr1)
+d <- load_data("small")
+# d$mh is a haplotype matrix consumable directly via auto-detection.
+G_mh <- build_G_mh(d$mh)
+dim(G_mh)
+# Diagonal ~ 1 + inbreeding coefficient
+round(summary(diag(G_mh)), 3)
 
-# Build Agh matrix from mh_list
-G_mh <- build_G_mh(mh_list)
-
-# Build Agh matrix from haplotype matrix (train/test split)
-# hap_block_all: n x (n_blocks*2), any integer allele codes
+# Train-only G with leakage-safe full-set G for prediction
 G_mh_full <- build_G_mh(
-  mh_list = hap_block_all,
-  ref_mh  = hap_block_all[idx_train, ],
-  ids     = as.character(1:n_total)
+  mh_list = d$mh,
+  ref_mh  = d$mh[d$train_idx, ],
+  ids     = d$pheno$id
 )
-
-# Use in masreml
-fit <- masreml(y, G = list(mh_add = G_mh))
-
-# Use in run_gwas + gwablup (hap_matrix mode)
-fit_tr  <- masreml(y_train, markers = list(mh_add = hap_block_train))
-gwas_tr <- run_gwas(
-  markers     = list(mh_add = hap_block_train),
-  y           = y_train,
-  masreml_fit = fit_tr,
-  ref_markers = list(mh_add = hap_block_train)
-)
-fit_wa <- gwablup(
-  y           = y_train,
-  markers     = list(mh_add = hap_block_train),
-  gwas_result = gwas_tr,
-  ref_markers = list(mh_add = hap_block_train)
-)
+dim(G_mh_full)
 
 
 

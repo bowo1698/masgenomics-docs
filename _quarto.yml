@@ -46,13 +46,30 @@ website:
   sidebar:
     - title: "Theory"
       style: docked
+      collapse-level: 1
       contents:
         - theory/index.qmd
         - theory/biallelic-and-multiallelic.qmd
-        - theory/mixed-model-blup-family.qmd
-        - theory/bayesian-alphabet.qmd
+        - section: "Mixed Model & BLUP Family"
+          href: theory/mixed-model-blup-family.qmd
+          contents:
+            - text: "Overview"
+              href: theory/mixed-model-blup-family.qmd
+            - theory/blup-reml.qmd
+            - theory/blup-pblup.qmd
+            - theory/blup-gblup.qmd
+            - theory/blup-gwablup.qmd
+        - section: "Bayesian Alphabet"
+          href: theory/bayesian-alphabet.qmd
+          contents:
+            - text: "Overview"
+              href: theory/bayesian-alphabet.qmd
+            - theory/bayes-mcmc-em.qmd
+            - theory/bayes-bayesa.qmd
+            - theory/bayes-bayesr.qmd
         - theory/continuous-and-binary-trait.qmd
     - title: "Input Data"
+      collapse-level: 1
       contents:
         - input-data/index.qmd
         - input-data/snp.qmd
@@ -60,26 +77,45 @@ website:
         - input-data/phenotype.qmd
         - input-data/pedigree.qmd
     - title: "Tasks"
+      collapse-level: 1
       contents:
         - tasks/index.qmd
-        - tasks/genomic-prediction.qmd
-        - tasks/gwas.qmd
-        - tasks/gwablup.qmd
-        - tasks/cross-validation.qmd
-        - tasks/binary-trait.qmd
+        - section: "Genomic prediction"
+          href: tasks/genomic-prediction/index.qmd
+          contents:
+            - text: "Overview"
+              href: tasks/genomic-prediction/index.qmd
+            - tasks/genomic-prediction/masreml.qmd
+            - tasks/genomic-prediction/masbayes.qmd
+        - section: "GWAS"
+          href: tasks/gwas/index.qmd
+          contents:
+            - text: "Overview"
+              href: tasks/gwas/index.qmd
+            - tasks/gwas/masreml.qmd
+            - tasks/gwas/masbayes.qmd
     - title: "Internals"
+      collapse-level: 1
       contents:
         - internals/index.qmd
         - internals/masreml-rust.qmd
         - internals/masbayes-rust.qmd
     - title: "Reference: maspipeline"
+      collapse-level: 1
       contents:
-        - reference/maspipeline/index.qmd
+        - text: "Overview"
+          href: reference/maspipeline/index.qmd
+        - reference/maspipeline/data-preparation.qmd
+        - reference/maspipeline/phasing.qmd
+        - reference/maspipeline/genotype-to-haplotype.qmd
+        - reference/maspipeline/microhaplotype-discovery.qmd
     - title: "Reference: masreml"
+      collapse-level: 1
       contents:
         - reference/masreml/index.qmd
         - auto: reference/masreml/*.qmd
     - title: "Reference: masbayes"
+      collapse-level: 1
       contents:
         - reference/masbayes/index.qmd
         - auto: reference/masbayes/*.qmd

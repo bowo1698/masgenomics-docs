@@ -20,7 +20,7 @@ load the canonical `.rds` directly with `load_data()`.
 Each subpage uses the same canonical dataset, shipped byte-identically
 by both sibling packages. Two scales are bundled:
 
-| Size | Individuals | SNPs | MH blocks | $W_{ah}$ columns | QTL | Use |
+| Size | Individuals | SNPs | Microhaplotype blocks | $W_{ah}$ columns | QTL | Use |
 |---|---:|---:|---:|---:|---:|---|
 | **`large`** (`main`) | 200 (10 sires × 20 offspring) | 100 | 50 | ~149 | 10 | All standard examples |
 | **`small`** (`toy`) | 100 (10 sires × 10 offspring) | 50  | 25 | ~75  | 5  | Quick-start (runs in seconds) |
@@ -45,7 +45,7 @@ local mirror is `demo-data/generate.R`.
 #| eval: false
 # Either package's load_data() returns the canonical list.
 library(masreml)   # or masbayes
-d <- masreml::load_data("large")    # or "small"
+d <- load_data("large")    # or "small"
 
 # Equivalent via system.file() (returns the bundled path):
 path <- system.file("extdata", "demo_data.rds", package = "masreml")

@@ -8,7 +8,7 @@ title: "Build SNP Dominance Relationship Matrix"
 ### Description
 
 Constructs the SNP dominance relationship matrix (D) following
-Da et al. (2015). Captures non-additive (dominance) genetic
+Da (2015). Captures non-additive (dominance) genetic
 relationships among individuals. Can be used alongside the additive
 G matrix in <code>masreml()</code> to partition genetic variance into
 additive and dominance components.
@@ -33,6 +33,29 @@ be 0, 1, or 2. Same format as <code>build_G_snp</code>.
 </table>
 
 
+### Details
+
+<strong>SNP dominance GRM (Da, 2015).</strong>
+For individual $i$ at SNP $j$ with allele frequency $p_j$
+and $q_j = 1 - p_j$, the dominance-coded value is:
+
+
+<dl>
+<dt>Genotype $aa$ (dosage = 0):</dt><dd>$W_{D,ij} = -2p_j^2$
+</dd>
+<dt>Genotype $Aa$ (dosage = 1):</dt><dd>$W_{D,ij} = 2p_j q_j$
+</dd>
+<dt>Genotype $AA$ (dosage = 2):</dt><dd>$W_{D,ij} = -2q_j^2$
+</dd>
+</dl>
+
+The dominance GRM is then:
+
+<p style="text-align: center;">$D = \frac{W_D W_D^\top}{\sum_j (2p_j q_j)^2}$
+
+
+
+
 ### Value
 
 numeric matrix (n x n) of dominance relationships.
@@ -41,8 +64,9 @@ numeric matrix (n x n) of dominance relationships.
 
 ### References
 
-Da et al. (2015) Multi-allelic haplotype model based on genetic partition for genomic prediction
-and variance component estimation using SNP markers. <em>BMC Genet.</em> 15:100.
+Da, Y. (2015) Multi-allelic haplotype model based on genetic partition for
+genomic prediction and variance component estimation using SNP markers.
+<em>BMC Genetics</em> 16:144. [doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1)
 
 
 
@@ -56,15 +80,12 @@ and variance component estimation using SNP markers. <em>BMC Genet.</em> 15:100.
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library("masreml")
 
-W <- matrix(sample(0:2, 100*50, replace=TRUE), 100, 50)
-rownames(W) <- paste0("ind", 1:100)
-
-# Additive + dominance model
-fit <- masreml(
-  y       = y,
-  markers = list(snp_add = W, snp_dom = W)
-)
-summary(fit)
+d <- load_data("small")
+D <- build_D_snp(d$snp)
+dim(D)
+# Off-diagonal mean ~ 0 under random mating; diagonal carries the
+# dominance "self" contributions.
+round(summary(diag(D)), 3)
 
 
 

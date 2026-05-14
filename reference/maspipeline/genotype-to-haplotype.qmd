@@ -1,0 +1,130 @@
+---
+title: "Genotype to haplotype"
+---
+
+## Goal
+
+Bridge between phased VCF and the per-chromosome haploid CSV format
+that `haplotype-hybrid` expects. Two `maspipeline` binaries handle the
+round trip: `convert-to-vcf` (CSV → VCF, used during [Data
+preparation](data-preparation.qmd) if you start from CSV), and
+`convert-from-vcf` (phased VCF → per-chromosome haploid files). This
+page documents `convert-from-vcf` — the post-phasing step that this
+stage represents.
+
+::: {.callout-tip}
+## Pipeline position
+
+- **Inputs:** phased VCF (output of [Phasing](phasing.qmd)).
+- **Outputs:** per-chromosome haploid files (`hap/chr*.hap`), per-chr
+  genotype files (`geno/chr*.geno`), and an SNP map.
+- **Tool:** `convert-from-vcf` (a `maspipeline` binary).
+- **Previous stage:** [Phasing](phasing.qmd)
+- **Next stage:** [Microhaplotype discovery](microhaplotype-discovery.qmd)
+:::
+
+---
+
+After phasing, we want to separate the phased haplotypes into
+individual haploid sequences for haploblock detection. Here, we provide
+`convert-from-vcf` for conversion, which accomplishes two key
+transformations:
+
+**1. Haplotype separation**
+
+Each phased genotype (e.g., `0|1`) is split into two separate haplotype
+columns:
+
+- Individual_A with genotype `0|1` becomes:
+  - Haplotype 1: `1` (recoded from `0`)
+  - Haplotype 2: `2` (recoded from `1`)
+
+This separation is essential because LD-based haploblock detection
+requires calculating pairwise $D'$ between SNPs, which depends on
+counting the some possible haplotype combinations (e.g. 0|0, 0|1, 1|0,
+1|1).
+
+**2. Allele recoding**
+
+VCF format uses `0` (reference) and `1` (alternate) encoding. The
+conversion recodes these to:
+
+- `0` → `1` (major allele)
+- `1` → `2` (minor allele)
+
+For genotypes (diploid coding):
+
+- `0|0` → `0` (homozygous major)
+- `0|1` or `1|0` → `1` (heterozygous)
+- `1|1` → `2` (homozygous minor)
+
+To handle large datasets, individuals are processed in chunks (batches)
+rather than all at once. The chunk size is determined by the
+`--interval` parameter:
+
+- `--interval 1`: Process all individuals in one pass (high memory)
+- `--interval 10`: Process in 10 batches (lower memory, slightly
+  slower)
+
+Each chunk reads through the VCF file sequentially, extracts the
+relevant individuals, and writes output incrementally. Data is
+automatically split by chromosome, creating separate output files
+(haplotypes and genotypes), for example:
+
+**Haplotype Files (`hap/chr*.hap`)**
+
+Format: Each individual contributes **two columns** (one per haplotype)
+```
+ID                snp1_h1  snp1_h2  snp2_h1  snp2_h2  ...
+Ind_1             1        2        1        1        ...
+Ind_2             2        2        1        2        ...
+```
+
+This provides input for LD-based haploblock detection.
+
+**Genotype Files (`geno/chr*.geno`)**
+
+Format: Traditional genotype matrix with header
+```
+ID              snp1  snp2  snp3  ...
+Ind_1           1     0     2     ...
+Ind_2           2     1     1     ...
+```
+
+This provides input for GBLUP or other genotype-based prediction models
+that utilises biallelic SNPs.
+
+### Usage Example
+
+```bash
+./convert-from-vcf \
+      -i /data/genotypes_phased.vcf.gz \
+      --map map.txt \
+      --genofolder geno \
+      --hapfolder hap
+```
+
+### Key Parameters
+
+- `-i, --input`: VCF file(s) to convert (required)
+- `--interval`: Number of chunks for processing (default: 1)
+- `--hapfolder`: Output directory for haplotype files (default: `hap`)
+- `--genofolder`: Output directory for genotype files (default: `geno`)
+- `--map`: Output path for SNP map file (default: `map_new.txt`)
+- `--missing`: Code for missing genotypes (default: `-9999`)
+- `-v, --verbose`: Display detailed progress information
+- `-h, --help`: Print help information
+
+The separated haplotype files (`hap/chr*`) then serve as direct input
+for the next step: defining microhaplotype segments using LD-based
+haploblock detection.
+
+---
+
+## What's next?
+
+→ Continue to
+[**Microhaplotype discovery**](microhaplotype-discovery.qmd) — discover
+microhaplotype block boundaries and emit the final genotype matrix.
+
+← Back to [overview](index.qmd).

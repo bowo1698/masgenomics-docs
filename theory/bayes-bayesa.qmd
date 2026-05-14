@@ -1,0 +1,213 @@
+---
+title: "BayesA"
+---
+
+BayesA assigns each marker its own variance, drawn independently from a
+scaled inverse-chi-square distribution. This is the key departure from
+GBLUP: instead of every marker being shrunk by the same amount, markers
+near large-effect QTLs are allowed to "escape" the prior pull while
+markers far from any QTL are shrunk hard toward zero.
+
+## Prior
+
+$$
+\beta_j \mid \sigma_{\beta_j}^2 \sim N(0,\, \sigma_{\beta_j}^2),
+\qquad
+\sigma_{\beta_j}^2 \sim \chi^{-2}(\nu,\, S).
+$$ {#eq-bayesa-prior}
+
+Integrating out $\sigma_{\beta_j}^2$ gives a **Student-$t$ marginal** on
+$\beta_j$:
+
+$$
+\beta_j \;\sim\; t\!\left(\nu,\, 0,\, S\right).
+$$
+
+The Student-$t$ has heavier tails than a normal. In practice: SNPs near a
+QTL, whose posterior $\beta_j$ is large, pull their own $\sigma_{\beta_j}^2$
+upward through the Gibbs update — they are allowed to keep a large effect.
+SNPs far from any QTL, whose $\beta_j$ stays close to zero, face strong
+shrinkage. The shrinkage is *adaptive and marker-specific*, unlike the
+uniform ridge penalty of GBLUP.
+
+**Hyperparameter $S$ — where it comes from.**
+The scale $S$ is derived so that the prior expectation of each per-marker
+variance equals total genetic variance divided by total design variance:
+
+$$
+S \;=\; \frac{\sigma_g^2\,(\nu - 2)}{\nu \cdot \sum_{j} \mathrm{Var}(w_j)},
+$$ {#eq-bayesa-scale}
+
+giving $E[\sigma_{\beta_j}^2] = \sigma_g^2 / \sum_j \mathrm{Var}(w_j)$.
+This anchors the prior to a biologically interpretable value. The default
+degrees of freedom $\nu = 4.5$ gives heavy tails while keeping finite
+variance; increasing $\nu$ makes the prior more normal (less heavy-tailed).
+
+::: {.callout-note}
+BayesA *never* shrinks $\beta_j$ exactly to zero — the Student-$t$
+marginal has support on the entire real line. This makes BayesA less
+appropriate than BayesR when the true architecture is genuinely sparse
+(many true zeros). Use BayesA when you expect a *continuum* of effect
+sizes from near-zero to moderate, with no hard cutoff between "zero"
+and "non-zero" markers.
+:::
+
+---
+
+## SNP vs Multi-allelic: W Matrix Differences
+
+### SNP Design Matrix
+
+$$
+W_{ij}^{\text{SNP}} = M_{ij} - 2p_j,
+\qquad
+\mathrm{Var}(w_j^{\text{SNP}}) = 2p_j(1-p_j).
+$$
+
+Each column represents one biallelic locus, centred on its allele
+frequency. The denominator in @eq-bayesa-scale is
+$\sum_j 2p_j(1-p_j)$ — summed across all SNPs.
+
+### Microhaplotype Design Matrix
+
+$$
+\mathbf{W}_{\alpha h} \;\text{(Da 2015 additive coding)},
+\qquad
+\mathrm{Var}(w_k^{\text{MH}}) = \text{function of haplotype frequencies}.
+$$
+
+Each column represents one haplotype contrast within a block — for a
+block with $h$ haplotypes, the block contributes $h - 1$ columns. The
+denominator in @eq-bayesa-scale becomes $\sum_k \mathrm{Var}(w_k^{\text{MH}})$,
+summed across all haplotype contrast columns.
+
+**Consequence for $S$:** Haplotype columns for rare haplotypes have small
+variance — $\mathrm{Var}(w_k) \approx 0$ for $p_k \to 0$. The sum in the
+denominator is therefore smaller for a rare-haplotype-rich microhaplotype panel than
+for an equivalent SNP panel, so $S$ inflates slightly per column. This
+gives the prior more room for rare-haplotype effects to express — the
+adjustment is automatic, requiring no manual tuning.
+
+---
+
+## Biological Implications of SNP vs microhaplotypes
+
+A SNP effect $\beta_j$ represents the average additive substitution effect
+of one allele copy at locus $j$. A microhaplotype effect $\beta_k$ represents the
+average additive substitution effect of one *haplotype* — a specific
+combination of 2–5 SNP alleles that are already in phase within a block
+of <200 bp.
+
+**Effect concentration.** If a QTL is in LD with a specific haplotype,
+BayesA on microhaplotype markers concentrates the posterior on that haplotype's
+column: $\hat\beta_k$ is large and $\sigma_{\beta_k}^2$ adapts upward for
+that column, while the remaining $h - 2$ columns in the same block stay
+near zero. In contrast, BayesA on SNP markers spreads the QTL signal
+across 2–5 columns — the individual SNPs that together define the
+haplotype — producing several moderate effects rather than one large one.
+Microhaplotype effects are therefore fewer but more interpretable.
+
+**Stability under selection.** A haplotype block of <200 bp is rarely
+broken by recombination within a single generation. The microhaplotype column tracking
+a QTL therefore maintains its effect estimate across generations of
+selection, whereas individual SNP columns in the same region gradually
+lose LD with the QTL as recombination reshuffles the haplotype — a
+process that reduces per-SNP $\hat\beta$ magnitudes and inflates the
+number of columns with non-negligible effects over time.
+
+::: {.callout-note}
+The BayesA prior, the Gibbs sampler, and the EM algorithm are identical
+for SNP and microhaplotype inputs. Only $\mathbf{W}$ changes:
+`construct_snp_matrix()` for SNP, `construct_wah_matrix()` for microhaplotypes. The
+`marker_type` argument in `run_bayesa()` signals which variance scaling
+convention to apply when computing $S$ internally.
+:::
+
+---
+
+## See it in Code
+
+**SNP — MCMC**
+
+```{r}
+#| eval: false
+library(masbayes)
+
+d       <- load_data("large")
+y       <- d$pheno$y_cont_qtl_snp
+names(y) <- d$pheno$id
+X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
+
+W_snp  <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
+wtw_snp <- colSums(W_snp^2)
+
+fit_a_snp_mcmc <- run_bayesa(
+  w             = W_snp,
+  y             = y,
+  wtw_diag      = wtw_snp,
+  X             = X_fixed,
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian"
+)
+summary(fit_a_snp_mcmc)
+```
+
+**SNP — EM (MAP estimate, faster)**
+
+```{r}
+#| eval: false
+fit_a_snp_em <- run_bayesa(
+  w             = W_snp,
+  y             = y,
+  wtw_diag      = wtw_snp,
+  X             = X_fixed,
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "em",
+  response_type = "gaussian"
+)
+```
+
+**Microhaplotype — MCMC**
+
+```{r}
+#| eval: false
+wah    <- construct_wah_matrix(
+  hap_matrix           = d$mh,
+  colnames             = attr(d$mh, "block_id"),
+  allele_freq_filtered = d$allele_freq
+)
+wtw_mh <- colSums(wah$W_ah^2)
+
+# marker_type = "multiallelic" uses the W_alpha_h variance scaling for S
+fit_a_mh_mcmc <- run_bayesa(
+  w             = wah$W_ah,
+  y             = y,
+  wtw_diag      = wtw_mh,
+  X             = X_fixed,
+  marker_type   = "multiallelic",
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian"
+)
+summary(fit_a_mh_mcmc)
+```
+
+## References
+
+- Meuwissen, T. H. E., Hayes, B. J. & Goddard, M. E. (2001). Prediction
+  of total genetic value using genome-wide dense marker maps. *Genetics*,
+  157(4), 1819–1829.
+  [doi:10.1093/genetics/157.4.1819](https://doi.org/10.1093/genetics/157.4.1819).
+- Da, Y. (2015). Multi-allelic haplotype model based on genetic partition
+  for genomic prediction and variance component estimation using SNP
+  markers. *BMC Genetics*, 16, 144.
+  [doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1).

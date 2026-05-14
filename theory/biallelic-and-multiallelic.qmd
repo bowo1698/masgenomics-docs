@@ -19,7 +19,7 @@ population, and **multi-allelic** when three or more do.
 | Marker family | Alleles per locus | Coding | Typical width |
 |---|---|---|---|
 | **SNP** (single-nucleotide polymorphism) — biallelic | 2 (e.g. A vs G at a single base) | dosage $\{0, 1, 2\}$ of the alternate allele | one base pair |
-| **Microhaplotype (MH)** — multi-allelic | up to $2^k$ for a $k$-SNP window, typically 4–20 observed | integer-encoded haplotype id per strand | tens to hundreds of base pairs |
+| **Microhaplotype** — multi-allelic | up to $2^k$ for a $k$-SNP window, typically 4–20 observed | integer-encoded haplotype id per strand | tens to hundreds of base pairs |
 
 The strengths and limits of each:
 
@@ -71,7 +71,7 @@ SNP sequences in a specific genomic block. Each locus is presented in
 two side-by-side columns to show the pair of haplotypes inherited from
 each individual's parents.
 
-### Why MH genotype data needs $\mathbf{W}_{\alpha h}$
+### Why microhaplotype genotype data needs $\mathbf{W}_{\alpha h}$
 
 To construct this complex matrix,
 [Da, Y. (2015)](https://link.springer.com/article/10.1186/s12863-015-0301-1)
@@ -270,24 +270,24 @@ detail, see [Input Data → SNP](../input-data/snp.qmd) and
 ```{r}
 #| eval: false
 library(masreml)
-d <- masreml::load_data("large")
+d <- load_data("large")
 
 # SNP-based GRM (VanRaden Method 1) — eq @eq-grm-snp
-G_snp <- masreml::build_G_snp(d$snp)
+G_snp <- build_G_snp(d$snp)
 dim(G_snp)                          # 200 x 200
 
 # Multi-allelic GRM from compact d$mh — eq @eq-g-mh
-G_mh  <- masreml::build_G_mh(mh_list = d$mh, ids = rownames(d$mh))
+G_mh  <- build_G_mh(mh_list = d$mh, ids = rownames(d$mh))
 dim(G_mh)                           # 200 x 200
 
 # Passed to the BLUP solve via the G slot (named list of relationship matrices):
-fit_g_snp <- masreml::masreml(
+fit_g_snp <- masreml(
   y     = d$pheno$y_cont_qtl_snp,
   G     = list(snp_add = G_snp),
   trait = "continuous"
 )
 # Or let masreml build it internally from raw markers:
-fit_m_snp <- masreml::masreml(
+fit_m_snp <- masreml(
   y       = d$pheno$y_cont_qtl_snp,
   markers = list(snp_add = d$snp),
   trait   = "continuous"
@@ -299,15 +299,16 @@ fit_m_snp <- masreml::masreml(
 ```{r}
 #| eval: false
 library(masbayes)
-d <- masbayes::load_data("large")
+d <- load_data("large")
 
-# SNP design matrix — VanRaden centring (default)
-W_snp <- masbayes::construct_snp_matrix(d$snp, encoding = "vanRaden")
+# SNP design matrix — VanRaden centring (default).
+# construct_snp_matrix() returns a list; extract $W for the design matrix.
+W_snp <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
 # Alternative: per-column z-score
-W_snp_z <- masbayes::construct_snp_matrix(d$snp, encoding = "zscore")
+W_snp_z <- construct_snp_matrix(d$snp, encoding = "zscore")$W
 
 # Multi-allelic W_alpha-h — eq @eq-wah-coding applied per block
-wah <- masbayes::construct_wah_matrix(
+wah <- construct_wah_matrix(
   hap_matrix             = d$mh,
   colnames               = attr(d$mh, "block_id"),
   allele_freq_filtered   = d$allele_freq,

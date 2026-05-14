@@ -1,0 +1,372 @@
+---
+title: "MCMC & EM Algorithms"
+---
+
+Both BayesA and BayesR are fit by one of two algorithms. MCMC explores
+the full posterior distribution by drawing samples from it; EM finds the
+posterior mode deterministically and efficiently. The choice affects what
+you get back — not what model you fit.
+
+## 1. MCMC: Gibbs Sampling
+
+### Intuition
+
+A Markov chain is a sequence of random states where the next state depends
+only on the current one. A **Gibbs sampler** is a special Markov chain that
+updates one unknown at a time, holding everything else fixed at its current
+value. After enough steps, the sequence of states approximates the joint
+posterior distribution. This works because of a fundamental mathematical
+result: any irreducible, aperiodic Markov chain converges to a unique
+stationary distribution regardless of where it started.
+
+### Why Gibbs Sampling Converges
+
+The stationary distribution $\pi$ of a Markov chain with transition matrix
+$\mathbf{P}$ satisfies:
+
+$$
+\pi \mathbf{P} = \pi,
+$$ {#eq-stationary}
+
+meaning $\pi$ is unchanged by one step of the chain. In terms of linear
+algebra, $\pi$ is the **left eigenvector** of $\mathbf{P}$ with eigenvalue
+1. The Gibbs sampler is constructed so that this stationary distribution
+equals the joint posterior $p(\boldsymbol{\beta}, \sigma_e^2, \ldots \mid \mathbf{y})$
+— the distribution we want to sample from.
+
+Two conditions guarantee convergence to $\pi$ (Fundamental Theorem of
+Markov Chains):
+
+1. **Irreducibility** — the chain can reach any parameter state from any
+   starting state. In Gibbs sampling on continuous distributions, this is
+   satisfied whenever every conditional distribution has full support (which
+   it does under normal and inverse-chi-square conditionals).
+2. **Aperiodicity** — the chain does not cycle with a fixed period. Because
+   continuous distributions assign positive probability to every interval,
+   aperiodicity holds automatically.
+
+**How fast does it converge?** The rate is controlled by the
+*spectral gap* — the distance between eigenvalue 1 and the second largest
+eigenvalue $\lambda_2$ of $\mathbf{P}$. A large spectral gap $(1 - \lambda_2)$
+means rapid mixing; a small gap means slow mixing and long burn-in. In
+genomic prediction, high marker collinearity (LD) compresses the spectral gap
+— this is why burn-in for BayesR in high-LD regions can be long.
+
+### General Gibbs Pseudocode
+
+<details>
+<summary><strong>Show Gibbs sweep</strong> <em>(click to expand)</em></summary>
+
+```
+Initialize: β = 0, σ²_e = var(y)×0.5, {σ²_βj} or π
+For t = 1 ... T:
+  For each marker j = 1 ... p:
+    Compute adjusted response:
+      y* = y - Xα̂ - W_{-j} β_{-j}
+    Sample β_j | y*, σ²_βj, σ²_e      → Normal (closed form)
+    Sample σ²_βj | β_j                 → InvChiSq (BayesA)
+      or class indicator δ_j | β_j, π  → Categorical (BayesR)
+  Sample σ²_e | y, β                   → InvChiSq (closed form)
+  Sample α | y, β, σ²_e                → Normal (closed form)
+  (BayesR only) Sample π | {δ_j}       → Dirichlet (closed form)
+Discard first T_burn cycles as burn-in
+Posterior mean of β chains = GEBV
+```
+
+</details>
+
+### Full Mathematics — Marker Update
+
+For adjusted response $\mathbf{y}^* = \mathbf{y} - \mathbf{X}\hat{\boldsymbol{\alpha}} - \mathbf{W}_{-j}\boldsymbol{\beta}_{-j}$,
+the conditional posterior of $\beta_j$ is:
+
+$$
+\beta_j \mid \mathbf{y}^*, \sigma_{\beta_j}^2, \sigma_e^2
+\;\sim\; N\!\left(
+  \frac{\mathbf{w}_j^\top \mathbf{y}^*}
+       {\mathbf{w}_j^\top \mathbf{w}_j + \sigma_e^2/\sigma_{\beta_j}^2},\;
+  \frac{\sigma_e^2}
+       {\mathbf{w}_j^\top \mathbf{w}_j + \sigma_e^2/\sigma_{\beta_j}^2}
+\right).
+$$ {#eq-gibbs-beta}
+
+The denominator $\mathbf{w}_j^\top\mathbf{w}_j + \sigma_e^2/\sigma_{\beta_j}^2$
+acts as a ridge penalty. The larger $\sigma_e^2/\sigma_{\beta_j}^2$, the more
+$\beta_j$ is pulled toward zero. Because $\sigma_{\beta_j}^2$ is itself sampled
+per marker, the *amount of shrinkage adapts to the data* — markers near QTLs
+pull their own $\sigma_{\beta_j}^2$ upward and escape strong shrinkage.
+
+### Full Mathematics — Variance Update (BayesA)
+
+After sampling $\beta_j$, the per-marker variance is drawn from its
+conjugate posterior:
+
+$$
+\sigma_{\beta_j}^2 \mid \beta_j
+\;\sim\; \chi^{-2}\!\left(\nu + 1,\; \nu S + \beta_j^2\right).
+$$ {#eq-gibbs-sigma2}
+
+The scaled inverse-chi-square is conjugate to the normal likelihood —
+this closed-form draw is what makes BayesA Gibbs sampling tractable.
+
+### Full Mathematics — Class Update (BayesR)
+
+Each marker is assigned to a variance class $k \in \{0,1,2,3\}$ via:
+
+$$
+P(\delta_j = k \mid \beta_j, \boldsymbol{\pi}, \sigma_g^2)
+\;\propto\; \pi_k \cdot N\!\left(\beta_j;\; 0,\; \sigma_k^2\right),
+$$ {#eq-gibbs-class}
+
+with $\sigma_0^2 = 0$ (exact zero), and $\sigma_k^2 \in \{0.001, 0.01, 0.1\}\sigma_g^2$
+for $k = 1,2,3$. Class $k=0$ draws $\beta_j = 0$ deterministically;
+other classes draw $\beta_j$ from @eq-gibbs-beta with $\sigma_{\beta_j}^2 = \sigma_k^2$.
+
+### Convergence Diagnostics
+
+Before trusting posterior summaries, verify the sampler has converged:
+
+- **Trace plots** of $\sigma_g^2$, $\sigma_e^2$, and representative $\hat\beta_j$ chains — look for stable mixing around a constant mean with no drift.
+- **Effective sample size (ESS)** — the number of independent-equivalent draws. ESS $< 100$ signals poor mixing; increase chain length or reduce LD between markers.
+- **Gelman-Rubin $\hat{R}$** (if multiple chains) — values $> 1.1$ indicate non-convergence. Run at least two chains from different starting points to detect label switching.
+- **Burn-in adequacy** — discard at least the first 20–50% of the chain; check that posterior moments are stable over the retained half.
+
+`summary(fit)` surfaces ESS and posterior means alongside 95% credible intervals.
+
+---
+
+## 2. EM: Expectation-Maximisation
+
+### Intuition
+
+EM finds the *mode* of the posterior (MAP estimate) without sampling.
+The key idea: instead of maximising the observed-data log-likelihood
+$l(\theta; \mathbf{y})$ directly — which is often intractable when
+latent variables are involved — EM alternates between two simpler steps.
+
+The **E-step** replaces the intractable likelihood with a tractable
+*surrogate function* $Q(\theta; \theta_\text{old})$ that lower-bounds
+$l(\theta; \mathbf{y})$. The **M-step** maximises $Q$ over $\theta$,
+which is guaranteed to also raise $l(\theta; \mathbf{y})$.
+
+### Why EM Always Improves the Likelihood (Jensen's Inequality)
+
+The observed-data log-likelihood can be decomposed as:
+
+$$
+l(\theta; \mathbf{y}) = \mathcal{L}(q, \theta) + \text{KL}(q \,\|\, p_{\boldsymbol{\beta} \mid \mathbf{y}}),
+$$ {#eq-kl-decomp}
+
+where $\mathcal{L}(q, \theta)$ is a lower bound (the **evidence lower bound**,
+ELBO) and $\text{KL}(q \,\|\, p_{\boldsymbol{\beta}\mid\mathbf{y}}) \geq 0$
+is the Kullback-Leibler divergence.
+
+- **E-step:** Set $q(\boldsymbol{\beta}) = p(\boldsymbol{\beta} \mid \mathbf{y}, \theta_\text{old})$, which drives $\text{KL} \to 0$ and makes $\mathcal{L} = l(\theta_\text{old}; \mathbf{y})$ exactly. This is equivalent to computing $Q(\theta; \theta_\text{old}) = E[l(\theta; \mathbf{y}, \boldsymbol{\beta}) \mid \mathbf{y}, \theta_\text{old}]$.
+- **M-step:** Maximise $\mathcal{L}(q, \theta)$ over $\theta$ with $q$ held fixed. This pushes $l$ upward because the KL term returns positive but $\mathcal{L}$ increases by more.
+
+The guarantee is from Jensen's inequality ($\ln$ is concave):
+
+$$
+l(\theta; \mathbf{y}) \geq \mathcal{L}(q, \theta) = Q(\theta; \theta_\text{old}) - \mathrm{const},
+$$
+
+with equality when $\theta = \theta_\text{old}$. Every M-step therefore
+monotonically increases the observed log-likelihood — EM never goes
+downhill.
+
+### General EM Pseudocode
+
+<details>
+<summary><strong>Show EM loop</strong> <em>(click to expand)</em></summary>
+
+```
+Initialize: β = 0, σ²_e = var(y)×0.5, σ²_g = var(y)×0.5
+Until max|β^(t+1) - β^(t)| < tol:
+  E-step:
+    BayesA: compute E[σ⁻²_βj | β_j]  for each j
+    BayesR: compute P(δ_j = k | β_j) for each j and k
+  M-step:
+    Update β_j using current effective variance (ridge solve per marker)
+    Update π from class assignment counts (BayesR only)
+    Update σ²_e, σ²_g from residuals
+Output: MAP point estimates of β (= GEBV), σ²_g, σ²_e, h²
+```
+
+</details>
+
+### Full Mathematics — E-step for BayesA
+
+The posterior mean of the precision $\sigma_{\beta_j}^{-2}$ under its
+inverse-chi-square posterior is:
+
+$$
+E\!\left[\sigma_{\beta_j}^{-2} \mid \beta_j\right]
+= \frac{\nu + 1}{\nu S + \beta_j^2}.
+$$ {#eq-em-bayesa-estep}
+
+This replaces the sampled precision in the Gibbs update with its
+posterior expectation, giving a MAP-equivalent adaptive ridge coefficient
+$\lambda_j = \sigma_e^2 \cdot E[\sigma_{\beta_j}^{-2} \mid \beta_j]$.
+Markers with large $|\beta_j|$ get small $\lambda_j$ (less shrinkage);
+markers with $\beta_j \approx 0$ get large $\lambda_j$ (heavy shrinkage).
+
+### Full Mathematics — E-step for BayesR
+
+Soft class assignment probabilities (responsibilities):
+
+$$
+P(\delta_j = k \mid \beta_j)
+= \frac{\pi_k \cdot N(\beta_j;\, 0,\, \sigma_k^2)}
+       {\sum_{l=0}^{3} \pi_l \cdot N(\beta_j;\, 0,\, \sigma_l^2)},
+$$ {#eq-em-bayesr-estep}
+
+where $N(\beta_j;\, 0,\, 0) = \delta_0(\beta_j)$ for $k=0$.
+
+### Full Mathematics — M-step (shared)
+
+The effective per-marker variance aggregates class responsibilities:
+
+$$
+\tilde\sigma_{\beta_j}^2
+= \sum_{k=1}^{3} P(\delta_j = k \mid \beta_j) \cdot \sigma_k^2.
+$$ {#eq-em-mstep-var}
+
+The M-step then substitutes $\tilde\sigma_{\beta_j}^2$ into @eq-gibbs-beta
+in place of the sampled $\sigma_{\beta_j}^2$, yielding the MAP estimate of
+$\beta_j$ directly — a weighted ridge update with per-marker adaptive penalty.
+
+### Bayesian MAP Extension
+
+When a prior $p(\theta)$ exists on variance components, the M-step
+incorporates it:
+
+$$
+\theta_\text{new} = \arg\max_\theta \left[ Q(\theta;\, \theta_\text{old}) + \ln p(\theta) \right].
+$$ {#eq-em-map}
+
+For BayesA, $p(\sigma_g^2)$ is an inverse-chi-square prior; for BayesR,
+$p(\boldsymbol{\pi})$ is Dirichlet. Adding $\ln p(\theta)$ regularises the
+M-step toward the prior mean — the EM analogue of Bayesian shrinkage.
+
+---
+
+## 3. MCMC vs EM: When to Use Each
+
+| | MCMC | EM |
+|---|---|---|
+| **Output** | Full posterior samples | MAP point estimates |
+| **Per-marker uncertainty** | Credible intervals + ESS | None |
+| **PIP** (BayesR) | Posterior mean of $\mathbb{1}[\delta_j = 0]$ indicator | Soft responsibility $P(\delta_j = 0 \mid \beta_j)$ |
+| **Speed** | Slow — $T \times p$ updates per chain | Fast — converges in ~50–200 iterations |
+| **Convergence check** | Trace plots, $\hat{R}$, ESS, spectral gap proxy | $\|\boldsymbol{\beta}^{(t+1)} - \boldsymbol{\beta}^{(t)}\|_\infty < \epsilon$ |
+| **Guarantee** | Converges to exact posterior (if mixing time is met) | Converges to local MAP — not global |
+| **Best for** | QTL mapping, credible intervals, architecture inference | Predictive accuracy only; large datasets |
+
+Use **MCMC** when posterior uncertainty matters — QTL discovery, credible
+intervals on $h^2$, or inspecting the $\hat{\boldsymbol{\pi}}$ distribution
+to characterise trait architecture. Run multiple chains from different
+starting points and check $\hat{R}$ before trusting results.
+
+Use **EM** when predictive accuracy is the only goal: it typically reaches
+the same GEBV ranking as MCMC in a fraction of the time, with no burn-in
+or convergence monitoring required. Be aware that EM finds a *local* MAP;
+if trait architecture is complex (highly multimodal posterior), MCMC is
+safer.
+
+## See it in Code
+
+```{r}
+#| eval: false
+library(masbayes)
+
+d       <- load_data("large")
+y       <- d$pheno$y_cont_qtl_snp
+names(y) <- d$pheno$id
+X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
+
+W       <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
+wtw     <- colSums(W^2)
+
+# BayesA — MCMC: full posterior with credible intervals
+fit_a_mcmc <- run_bayesa(
+  w             = W,
+  y             = y,
+  wtw_diag      = wtw,
+  X             = X_fixed,
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian"
+)
+
+# BayesA — EM: MAP point estimate, faster; local convergence only
+fit_a_em <- run_bayesa(
+  w             = W,
+  y             = y,
+  wtw_diag      = wtw,
+  X             = X_fixed,
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "em",
+  response_type = "gaussian"
+)
+
+# BayesR — MCMC: full posterior including pi and PIPs
+# pi_vec: prior sparsity — 95% of markers start in the zero class
+fit_r_mcmc <- run_bayesr(
+  w             = W,
+  y             = y,
+  wtw_diag      = wtw,
+  X             = X_fixed,
+  marker_type   = "snp",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian"
+)
+
+# BayesR — EM: MAP with soft class responsibilities
+fit_r_em <- run_bayesr(
+  w             = W,
+  y             = y,
+  wtw_diag      = wtw,
+  X             = X_fixed,
+  marker_type   = "snp",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "em",
+  response_type = "gaussian"
+)
+
+summary(fit_a_mcmc)
+summary(fit_r_mcmc)
+```
+
+## References
+
+- Haugh, M. (2015). *The EM Algorithm* (IEOR E4570: Machine Learning for
+  OR & FE, Lecture Notes). Columbia University, Spring 2015.
+- Roughgarden, T. & Valiant, G. (2024). *Markov Chain Monte Carlo*
+  (CS168: The Modern Algorithmic Toolbox, Lecture 14). Stanford University,
+  May 2024.
+- Meuwissen, T. H. E., Hayes, B. J. & Goddard, M. E. (2001). Prediction
+  of total genetic value using genome-wide dense marker maps. *Genetics*,
+  157(4), 1819–1829.
+  [doi:10.1093/genetics/157.4.1819](https://doi.org/10.1093/genetics/157.4.1819).
+- Wang, H., Misztal, I., Aguilar, I., Legarra, A., Fernando, R. L.,
+  Vitezica, Z., Okimoto, R., Wing, T., Strasburg, R. & Muir, W. M. (2015).
+  Genome-wide association mapping including phenotypes from relatives
+  without genotypes in a single-step (ssGWAS) for 6-week body weight in
+  broiler chickens. *Frontiers in Genetics*, 5, 134.
+  [doi:10.3389/fgene.2014.00134](https://doi.org/10.3389/fgene.2014.00134).
+- Breen, E. J., Fernando, R. L. & Garrick, D. J. (2022). BayesR3 enables
+  fast MCMC blocked processing for large-scale multi-trait genomic
+  prediction and QTN mapping analysis. *Genetics Selection Evolution*,
+  54, 73.
+  [doi:10.1186/s12711-022-00753-3](https://doi.org/10.1186/s12711-022-00753-3).

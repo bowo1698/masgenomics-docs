@@ -81,7 +81,7 @@ small conversion step is required before calling the builder:
 ```{r}
 #| eval: false
 library(masreml)
-d <- masreml::load_data("large")
+d <- load_data("large")
 
 # Map every id to its 1-based row index in the pedigree frame.
 id_to_row <- setNames(seq_len(nrow(d$pedigree)), d$pedigree$id)
@@ -93,7 +93,7 @@ ped_int <- data.frame(
   stringsAsFactors = FALSE
 )
 
-A <- masreml::build_A_ped(ped_int)
+A <- build_A_ped(ped_int)
 str(A)                          # 220 x 220 numeric, rownames = ids
 ```
 
@@ -111,7 +111,7 @@ names(y) <- d$pheno$id
 X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
 
 # Build A on the full pedigree (220 individuals = founders + offspring)
-A_full <- masreml::build_A_ped(ped_int)
+A_full <- build_A_ped(ped_int)
 
 # Restrict to the phenotyped offspring before fitting.
 A_pheno <- A_full[d$pheno$id, d$pheno$id]
@@ -120,7 +120,7 @@ A_pheno <- A_full[d$pheno$id, d$pheno$id]
 # random-effect kernel. The slot key here is `snp_add` simply because
 # that is the recognised label for an additive-relationship slot in
 # masreml's G list — its contents are A, not a SNP-derived G.
-fit_a <- masreml::masreml(
+fit_a <- masreml(
   y     = y,
   X     = X_fixed,
   G     = list(snp_add = A_pheno),
@@ -190,4 +190,4 @@ or when you want to compare $A$ vs $G$ partitioning.
 
 📐 **Related theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd)
 
-🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd)
+🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd)

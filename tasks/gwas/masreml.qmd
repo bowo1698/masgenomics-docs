@@ -1,0 +1,385 @@
+---
+title: "GWAS with masreml"
+---
+
+📐 **Theory:** [Mixed Model & BLUP Family](../../theory/mixed-model-blup-family.qmd) ·
+[GWABLUP](../../theory/blup-gwablup.qmd)
+
+This tutorial runs an EMMAX-style mixed-model GWAS with `masreml`,
+inspects the results, validates them against the bundled ground-truth
+QTL positions, and feeds them into GWABLUP — the GWAS-assisted
+re-weighting of the GRM that lifts GBLUP accuracy when the trait has a
+non-infinitesimal component. The full code is adapted from
+[`masreml/examples/04_gwas.R`](https://github.com/bowo1698/masreml/blob/main/examples/04_gwas.R).
+
+## Setup
+
+```{r}
+#| message: false
+#| warning: false
+library(masreml)
+library(knitr)
+
+d        <- load_data("large")
+ids      <- d$pheno$id
+map_snp  <- d$map_snp
+map_mh   <- d$map_mh
+n_snp    <- nrow(map_snp)
+n_blocks <- nrow(map_mh)
+# Per-block midpoint for the multi-allelic Manhattan
+mh_pos   <- as.integer((map_mh$start_pos + map_mh$end_pos) / 2)
+```
+
+## SNP-based GWAS
+
+### Step 1 — Fit the mixed model
+
+`run_gwas()` consumes a fitted `masreml` object: it pulls variance
+components and the genomic relationship matrix from there. Fit the
+baseline GBLUP first.
+
+```{r}
+y_snp <- setNames(d$pheno$y_cont_qtl_snp, ids)
+W_snp <- d$snp
+storage.mode(W_snp) <- "double"
+rownames(W_snp)     <- ids
+
+fit_snp_g <- masreml(
+  y       = y_snp,
+  markers = list(snp_add = W_snp),
+  method  = "auto",
+  trait   = "continuous",
+  verbose = FALSE
+)
+summary(fit_snp_g)
+```
+
+### Step 2 — Run the GWAS scan
+
+```{r}
+gwas_snp <- run_gwas(
+  markers     = list(snp_add = W_snp),
+  y           = y_snp,
+  masreml_fit = fit_snp_g,
+  ref_markers = list(snp_add = W_snp)
+)
+
+str(gwas_snp)
+```
+
+The output is a list with per-marker columns including:
+
+- `pval` — frequentist $p$ from the EMMAX-style score test
+- `pp` — Bayesian model-averaged posterior probability of non-zero
+  effect (used by GWABLUP for re-weighting)
+- effect estimates and likelihood ratios
+
+### Step 3 — Top peaks
+
+```{r}
+top10_snp_idx <- order(-gwas_snp$pp)[seq_len(10L)]
+kable(data.frame(
+  SNP   = map_snp$SNP[top10_snp_idx],
+  CHROM = map_snp$CHROM[top10_snp_idx],
+  POS   = map_snp$POS[top10_snp_idx],
+  pval  = signif(gwas_snp$pval[top10_snp_idx], 3),
+  pp    = round(gwas_snp$pp[top10_snp_idx], 3)
+), caption = "Top 10 SNPs ranked by posterior probability (pp)")
+```
+
+### Step 4 — Manhattan plot ($-\log_{10}(p)$)
+
+`CMplot` (Yin et al.) provides publication-quality genome-wide plots
+with chromosome banding and threshold lines. We render in-chunk via
+`file.output = FALSE`.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| dpi: 150
+#| message: false
+#| warning: false
+pval_cap <- 1e-12
+thr_snp_p <- 0.05 / n_snp
+
+snp_pval_df <- data.frame(
+  SNP  = map_snp$SNP,
+  Chr  = map_snp$CHROM,
+  Pos  = map_snp$POS,
+  pval = pmax(gwas_snp$pval, pval_cap),
+  check.names = FALSE
+)
+snp_pval_hl <- as.character(map_snp$SNP[gwas_snp$pval < thr_snp_p])
+if (length(snp_pval_hl) == 0L) snp_pval_hl <- NULL
+
+CMplot::CMplot(
+  snp_pval_df,
+  type           = "h",
+  plot.type      = "m",
+  LOG10          = TRUE,
+  threshold      = thr_snp_p,
+  threshold.lty  = 2,
+  threshold.lwd  = 1,
+  threshold.col  = "red",
+  amplify        = FALSE,
+  highlight      = snp_pval_hl,
+  highlight.text = snp_pval_hl,
+  highlight.col  = NULL,
+  file.output    = FALSE,
+  verbose        = FALSE,
+  ylab           = expression(-log[10](italic(p)))
+)
+```
+
+### Step 5 — Manhattan plot of posterior probability
+
+`pp` is smoothed and shrunk toward zero — the Manhattan of
+$-\log_{10}(1 - pp)$ emphasises the markers that GWABLUP will
+upweight.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| dpi: 150
+#| message: false
+#| warning: false
+pp_cap <- 1 - 1e-3
+snp_pp_df <- data.frame(
+  SNP    = map_snp$SNP,
+  Chr    = map_snp$CHROM,
+  Pos    = map_snp$POS,
+  `1-pp` = 1 - pmin(gwas_snp$pp, pp_cap),
+  check.names = FALSE
+)
+snp_pp_hl <- as.character(map_snp$SNP[gwas_snp$pp > 0.5])
+if (length(snp_pp_hl) == 0L) snp_pp_hl <- NULL
+
+CMplot::CMplot(
+  snp_pp_df,
+  type           = "h",
+  plot.type      = "m",
+  LOG10          = TRUE,
+  threshold      = 0.5,
+  threshold.lty  = 2,
+  threshold.lwd  = 1,
+  threshold.col  = "red",
+  amplify        = FALSE,
+  highlight      = snp_pp_hl,
+  highlight.text = snp_pp_hl,
+  highlight.col  = NULL,
+  file.output    = FALSE,
+  verbose        = FALSE,
+  ylab           = expression(-log[10](1 - italic(pp)))
+)
+```
+
+### Step 6 — GWAS-assisted prediction (GWABLUP)
+
+GWABLUP re-weights the genomic relationship matrix using the per-SNP
+`pp` values from the GWAS scan. Markers with high `pp` get heavier
+weights; the resulting weighted GRM enters a second mixed-model fit.
+
+```{r}
+fit_snp_wa <- gwablup(
+  y           = y_snp,
+  markers     = list(snp_add = W_snp),
+  gwas_result = gwas_snp,
+  ref_markers = list(snp_add = W_snp),
+  trait       = "continuous"
+)
+
+kable(data.frame(
+  model = c("GBLUP", "GWABLUP"),
+  h2    = c(as.numeric(fit_snp_g$varcomp$h2["snp_add"]),
+            as.numeric(fit_snp_wa$varcomp$h2["snp_add"]))
+), digits = 4,
+   caption = "SNP architecture — h² captured by GBLUP vs GWABLUP")
+```
+
+::: {.callout-tip}
+**Graceful degradation.** When the training-set GWAS is underpowered,
+the `pp` values are near-uniform and the re-weighted GRM is
+numerically close to the baseline GBLUP G. `gwablup()` then collapses
+to GBLUP — it does not hurt accuracy in underpowered regimes, it just
+stops helping.
+:::
+
+## Microhaplotype-based GWAS
+
+The same flow applies with `markers = list(mh_add = d$mh)`. Each
+microhaplotype block produces one statistic per *block* (not per
+allele); the Manhattan x-axis uses physical positions from
+`d$map_mh`.
+
+```{r}
+y_mh <- setNames(d$pheno$y_cont_qtl_mh, ids)
+mh   <- d$mh
+rownames(mh) <- ids
+
+fit_mh_g <- masreml(
+  y       = y_mh,
+  markers = list(mh_add = mh),
+  method  = "auto",
+  trait   = "continuous",
+  verbose = FALSE
+)
+
+gwas_mh <- run_gwas(
+  markers     = list(mh_add = mh),
+  y           = y_mh,
+  masreml_fit = fit_mh_g,
+  ref_markers = list(mh_add = mh)
+)
+```
+
+```{r}
+top10_mh_idx <- order(-gwas_mh$pp)[seq_len(10L)]
+kable(data.frame(
+  Block = map_mh$block_id[top10_mh_idx],
+  CHR   = map_mh$chr[top10_mh_idx],
+  POS   = mh_pos[top10_mh_idx],
+  pval  = signif(gwas_mh$pval[top10_mh_idx], 3),
+  pp    = round(gwas_mh$pp[top10_mh_idx], 3)
+), caption = "Top 10 microhaplotype blocks ranked by posterior probability")
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| dpi: 150
+#| message: false
+#| warning: false
+thr_mh_p <- 0.05 / n_blocks
+mh_pval_df <- data.frame(
+  Block = map_mh$block_id,
+  Chr   = map_mh$chr,
+  Pos   = mh_pos,
+  pval  = pmax(gwas_mh$pval, pval_cap),
+  check.names = FALSE
+)
+mh_pval_hl <- as.character(map_mh$block_id[gwas_mh$pval < thr_mh_p])
+if (length(mh_pval_hl) == 0L) mh_pval_hl <- NULL
+
+CMplot::CMplot(
+  mh_pval_df,
+  type           = "h",
+  plot.type      = "m",
+  LOG10          = TRUE,
+  threshold      = thr_mh_p,
+  threshold.lty  = 2,
+  threshold.col  = "red",
+  amplify        = FALSE,
+  highlight      = mh_pval_hl,
+  highlight.text = mh_pval_hl,
+  highlight.col  = NULL,
+  file.output    = FALSE,
+  verbose        = FALSE,
+  ylab           = expression(-log[10](italic(p)))
+)
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| dpi: 150
+#| message: false
+#| warning: false
+mh_pp_df <- data.frame(
+  Block  = map_mh$block_id,
+  Chr    = map_mh$chr,
+  Pos    = mh_pos,
+  `1-pp` = 1 - pmin(gwas_mh$pp, pp_cap),
+  check.names = FALSE
+)
+mh_pp_hl <- as.character(map_mh$block_id[gwas_mh$pp > 0.5])
+if (length(mh_pp_hl) == 0L) mh_pp_hl <- NULL
+
+CMplot::CMplot(
+  mh_pp_df,
+  type           = "h",
+  plot.type      = "m",
+  LOG10          = TRUE,
+  threshold      = 0.5,
+  threshold.lty  = 2,
+  threshold.col  = "red",
+  amplify        = FALSE,
+  highlight      = mh_pp_hl,
+  highlight.text = mh_pp_hl,
+  highlight.col  = NULL,
+  file.output    = FALSE,
+  verbose        = FALSE,
+  ylab           = expression(-log[10](1 - italic(pp)))
+)
+```
+
+GWABLUP on multi-allelic blocks:
+
+```{r}
+fit_mh_wa <- gwablup(
+  y           = y_mh,
+  markers     = list(mh_add = mh),
+  gwas_result = gwas_mh,
+  ref_markers = list(mh_add = mh),
+  trait       = "continuous"
+)
+
+kable(data.frame(
+  model = c("Microhaplotype-GBLUP", "Microhaplotype-GWABLUP"),
+  h2    = c(as.numeric(fit_mh_g$varcomp$h2["mh_add"]),
+            as.numeric(fit_mh_wa$varcomp$h2["mh_add"]))
+), digits = 4,
+   caption = "Microhaplotype architecture — h² captured by GBLUP vs GWABLUP")
+```
+
+## QTL recovery sanity check
+
+Because the demo data ships with the true QTL positions in
+`d$qtl$snp_idx` and `d$qtl$mh_idx`, we can verify that the GWAS scan
+recovers them — the median `pp` at QTL markers should be substantially
+higher than at non-QTL markers.
+
+```{r}
+# Map allele-level QTL indices to block ids for the MH path
+qtl_block_names <- unique(d$allele_freq$haplotype[d$qtl$mh_idx])
+qtl_blocks      <- as.integer(sub("block_", "", qtl_block_names))
+
+kable(data.frame(
+  path        = c("SNP", "Microhaplotype"),
+  pp_at_QTL   = c(median(gwas_snp$pp[d$qtl$snp_idx]),
+                  median(gwas_mh$pp[qtl_blocks])),
+  pp_non_QTL  = c(median(gwas_snp$pp[-d$qtl$snp_idx]),
+                  median(gwas_mh$pp[-qtl_blocks]))
+), digits = 3,
+   caption = "Median posterior probability at true QTL vs non-QTL markers")
+```
+
+The ratio between the two columns is a discrimination diagnostic — a
+ratio of ~2× or better indicates the GWAS resolves the QTL signal
+above background noise on this demo. On real data, expect a similar
+or stronger separation when the trait is well powered and the marker
+density is appropriate.
+
+## Working with the GWAS output
+
+```{r}
+# Markers passing a Bonferroni threshold
+bonferroni <- 0.05 / n_snp
+sum(gwas_snp$pval < bonferroni)
+
+# Markers passing a posterior-probability threshold
+sum(gwas_snp$pp > 0.5)
+```
+
+`run_gwas()` does **not** apply multiple-testing correction itself —
+the choice (Bonferroni / FDR / posterior threshold) is left to the
+analyst, since the appropriate method depends on whether you want a
+strict family-wise error guarantee, an expected-FDR control, or a
+Bayesian posterior threshold.
+
+## See also
+
+- [`run_gwas()`](../../reference/masreml/run_gwas.qmd) ·
+  [`gwablup()`](../../reference/masreml/gwablup.qmd)
+- [Theory → GWABLUP](../../theory/blup-gwablup.qmd) — Meuwissen 2024 framework
+- [GWAS with masbayes](masbayes.qmd) — BayesR PIP-based alternative
+- [`masreml/examples/04_gwas.R`](https://github.com/bowo1698/masreml/blob/main/examples/04_gwas.R) — full source for this tutorial

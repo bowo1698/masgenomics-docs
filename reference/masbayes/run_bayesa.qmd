@@ -22,6 +22,7 @@ stochastic-EM point estimates (Gaussian only).
   y,
   wtw_diag,
   X = NULL,
+  marker_type = c("auto", "snp", "multiallelic"),
   nu = 4.5,
   sigma2_g,
   sigma2_e_init,
@@ -33,7 +34,10 @@ stochastic-EM point estimates (Gaussian only).
   fold_id = 0L,
   save_rds = FALSE,
   save_path = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  map = NULL,
+  windsize = NULL,
+  windnum = NULL
 )
 </code></pre>
 
@@ -44,7 +48,8 @@ stochastic-EM point estimates (Gaussian only).
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="w">w</code></td>
 <td>
 Numeric design matrix (<code>n x p</code>). Typically the
-<code>\$W_ah</code> element returned by <code>construct_wah_matrix</code>.
+<code>\$W_ah</code> element returned by <code>construct_wah_matrix</code>
+or the <code>\$W</code> element returned by <code>construct_snp_matrix</code>.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="y">y</code></td>
 <td>
@@ -60,6 +65,17 @@ Optional fixed-effects design matrix (<code>n x q</code>). When
 supplied, the model is $y = X\alpha + W\beta + \mu + \epsilon$
 with a flat prior on $\alpha$. Do <strong>not</strong> include a column
 of ones for the intercept; $\mu$ is sampled separately.
+</td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="marker_type">marker_type</code></td>
+<td>
+One of <code>"auto"</code> (default), <code>"snp"</code>, or
+<code>"multiallelic"</code>. <code>"auto"</code> resolves to
+<code>"multiallelic"</code>. Setting <code>"snp"</code> switches the default
+residual-variance prior to a flat <code>InvGamma(1, 0)</code>
+(<code>a0_e = 1, b0_e = 0</code>); the per-marker prior scale
+<code>s_squared</code> is unaffected because it already adapts via
+<code>sum_2pq</code>. Custom supply of <code>prior_params\$a0_e</code> is always
+honoured and overrides the SNP-mode flat default.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="nu">nu</code></td>
 <td>
@@ -79,8 +95,11 @@ at <code>1.0</code>.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="prior_params">prior_params</code></td>
 <td>
-Optional named list. Only <code>a0_e</code> (default 10)
-is used; <code>b0_e</code> is derived as <code>sigma2_e_init * (a0_e - 1)</code>.
+Optional named list. Only <code>a0_e</code> is used;
+<code>b0_e</code> is derived as <code>sigma2_e_init * (a0_e - 1)</code>. Default
+<code>a0_e</code> is 10 for <code>marker_type = "multiallelic"</code> and 1 for
+<code>marker_type = "snp"</code> (with <code>b0_e = 0</code>); supplying
+<code>a0_e</code> explicitly always overrides the default.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="mcmc_params">mcmc_params</code></td>
 <td>
@@ -123,10 +142,60 @@ progress (start banner, Iter X/Y diagnostics, ESS / Geweke,
 completion) to stderr. Default <code>FALSE</code> keeps the Rust side
 silent. The brief R post-fit summary prints regardless.
 </td></tr>
+<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="map">map</code>, <code id="windsize">windsize</code>, <code id="windnum">windnum</code></td>
+<td>
+Accepted for API symmetry with
+<code>run_bayesr</code> but <strong>not supported</strong> for BayesA. Passing
+any non-NULL <code>map</code> raises an error; BayesA has no zero-effect
+mixture mass, so PIP and WPPA are ill-defined for it. Use
+<code>run_bayesr</code> for GWAS-style posterior summaries.
+</td></tr>
 </table>
 
 
 ### Details
+
+<strong>Statistical model.</strong>
+The base linear model for BayesA is:
+
+<p style="text-align: center;"><code class="reqn">y = \mathbf{1}\mu + W\beta + \varepsilon, \quad
+  \varepsilon \sim \mathcal{N}(0,\,\sigma_e^2 I)</code>
+
+
+where $y$ is the phenotype vector, $\mu$ is the intercept,
+$W$ is the marker design matrix (from
+<code>construct_wah_matrix</code> for multi-allelic or
+<code>construct_snp_matrix</code> for SNP markers), and $\beta$
+is the allele-effect vector. When fixed effects are supplied via <code>X</code>:
+
+<p style="text-align: center;">$y = \mathbf{1}\mu + X\alpha + W\beta + \varepsilon$
+
+
+<strong>BayesA prior.</strong>
+Each allele effect has a marker-specific variance drawn from a scaled
+inverse chi-squared distribution (Meuwissen et al., 2001):
+
+<p style="text-align: center;"><code class="reqn">\beta_j \mid \sigma_{\beta_j}^2 \;\sim\; \mathcal{N}(0,\,\sigma_{\beta_j}^2),
+  \quad \sigma_{\beta_j}^2 \;\sim\; \chi^{-2}(\nu,\,S^2)</code>
+
+
+where $\nu$ is the degrees-of-freedom hyperparameter (<code>nu</code>,
+default 4.5) and $S^2 = \sigma_\beta^2 / L$ is the scale, with
+$L$ denoting the total number of alleles (columns of $W$).
+The wrapper derives <code>s_squared</code> as
+<code>sigma2_g * (nu - 2) / (nu * sum_2pq)</code>, which sets
+$E[\sigma_{\beta_j}^2] = \sigma_\beta^2 / \sum_j \mathrm{Var}(w_j)$.
+
+<strong>Heritability.</strong>
+$h^2$ is estimated as:
+
+<p style="text-align: center;"><code class="reqn">h^2 = \frac{\mathrm{Var}(W\hat{\beta})}
+  {\mathrm{Var}(W\hat{\beta}) + \hat{\sigma}_e^2}</code>
+
+
+This estimator is identical for SNP and multi-allelic markers,
+treating heritability as a trait-and-population property rather than
+a marker-panel property.
 
 <strong>Algorithm choice.</strong> MCMC uses marginalised Gibbs sampling and
 returns full posterior chains. EM is much faster but provides no
@@ -145,7 +214,13 @@ train-test splits, and k-fold CV uniformly. See
 <strong>Derived parameter.</strong> The wrapper computes
 <code>s_squared = sigma2_g * (nu - 2) / (nu * sum(apply(w, 2, var)))</code>
 so the prior expectation of each marker variance equals
-<code>sigma2_g / sum_2pq</code>.
+<code>sigma2_g / sum_2pq</code>. This adapts to the supplied design matrix
+and is therefore the same formula under both
+<code>marker_type = "multiallelic"</code> and <code>marker_type = "snp"</code>.
+
+<strong>Marker-specific heritability note.</strong> The $h^2$ estimator in
+the Statistical model section above is applied regardless of
+<code>marker_type</code>.
 
 
 
@@ -213,69 +288,48 @@ maps. <em>Genetics</em>, 157(4), 1819-1829.
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library("masbayes")
 
-set.seed(42)
-n     <- 200
-mcmc  <- list(n_iter = 2000L, n_burn = 1000L, n_thin = 5L, seed = 123L)
-X_cov <- cbind(sex = rbinom(n, 1, 0.5), batch = rnorm(n))  # optional
+d <- load_data("small")
+mcmc <- list(n_iter = 1000L, n_burn = 500L, n_thin = 5L, seed = 123L)
 
-# ---- (A) SNP path ------------------------------------------------------
-n_snp <- 100
-X     <- matrix(rbinom(n * n_snp, 2, prob = runif(n_snp, 0.1, 0.5)),
-                n, n_snp)
-W_snp <- construct_snp_matrix(X)$W
-y     <- W_snp[, 1:5] %*% rnorm(5, 0, 0.5) + rnorm(n, 0, 1)
+# ---- (A) SNP path -----------------------------------------------------
+snp_train <- construct_snp_matrix(d$snp[d$train_idx, ], encoding = "zscore")
+W_train   <- snp_train$W
+y_train   <- d$pheno$y_cont_qtl_snp[d$train_idx]
+X_train   <- model.matrix(~ sex - 1, data = d$pheno[d$train_idx, ])
 
 fit_snp <- run_bayesa(
-  w             = W_snp,
-  y             = y,
-  wtw_diag      = colSums(W_snp^2),
-  X             = X_cov,           # optional
+  w             = W_train,
+  y             = y_train,
+  wtw_diag      = colSums(W_train^2),
+  X             = X_train,
+  marker_type   = "snp",
   nu            = 4.5,
-  sigma2_g      = var(y) * 0.5,
-  sigma2_e_init = var(y) * 0.5,
-  mcmc_params   = mcmc
+  sigma2_g      = var(y_train) * 0.5,
+  sigma2_e_init = var(y_train) * 0.5,
+  mcmc_params   = mcmc,
+  save_rds      = FALSE
 )
 summary(fit_snp)
 
-# ---- (B) Microhaplotype path ------------------------------------------
-n_block <- 50
-hap <- matrix(sample.int(3, n * n_block * 2, replace = TRUE), nrow = n)
-colnames(hap) <- paste0("hap_", rep(seq_len(n_block), each = 2))
-freq <- data.frame(
-  haplotype = paste0("hap_", rep(seq_len(n_block), each = 3)),
-  allele    = rep(1:3, n_block),
-  freq      = rep(c(0.5, 0.3, 0.2), n_block)
-)
-W_mh <- construct_wah_matrix(hap, colnames(hap), freq)$W_ah
-y_mh <- W_mh[, 1:5] %*% rnorm(5, 0, 0.5) + rnorm(n, 0, 1)
+# ---- (B) Microhaplotype path -----------------------------------------
+# d$allele_freq is the frequency table required for the training call.
+bid    <- attr(d$mh, "block_id")
+hap_tr <- d$mh[d$train_idx, ]
+W_mh   <- construct_wah_matrix(hap_tr, bid, d$allele_freq)$W_ah
+y_mh   <- d$pheno$y_cont_qtl_mh[d$train_idx]
 
 fit_mh <- run_bayesa(
   w             = W_mh,
   y             = y_mh,
   wtw_diag      = colSums(W_mh^2),
-  X             = X_cov,           # optional
+  X             = X_train,
   nu            = 4.5,
   sigma2_g      = var(y_mh) * 0.5,
   sigma2_e_init = var(y_mh) * 0.5,
-  mcmc_params   = mcmc
+  mcmc_params   = mcmc,
+  save_rds      = FALSE
 )
 summary(fit_mh)
-
-# ---- Predict on a held-out test set -----------------------------------
-idx  <- sample(n, 0.8 * n)
-W_tr <- W_snp[idx, ]
-y_tr <- y[idx]
-fit  <- run_bayesa(
-  w             = W_tr,
-  y             = y_tr,
-  wtw_diag      = colSums(W_tr^2),
-  nu            = 4.5,
-  sigma2_g      = var(y_tr) * 0.5,
-  sigma2_e_init = var(y_tr) * 0.5,
-  mcmc_params   = mcmc
-)
-pred <- predict(fit, W_snp[-idx, ], y[-idx])
-pred$metrics$accuracy
 
 
 

@@ -26,9 +26,9 @@ dt_table <- function(data, page = 10, scroll_x = FALSE) {
 
 ## Schema
 
-Microhaplotypes (MHs) are short genomic windows in which the **phased
+Microhaplotypes are short genomic windows in which the **phased
 combination** of SNP alleles defines a multi-allelic locus. Both
-packages consume MHs in **two interchangeable layouts**:
+packages consume microhaplotypes in **two interchangeable layouts**:
 
 1. **On-disk file layout (maspipeline / MicrohapsSel format)** — one
    tab-delimited file per chromosome at
@@ -103,7 +103,7 @@ schema as the maspipeline `microhaplotype_coordinates.csv`:
 &nbsp;
 [Download microhaplotype_coordinates.csv (small)](../demo-data/toy/microhaplotype_coordinates.csv){.btn .btn-sm .btn-outline-secondary}
 
-## Per-chromosome MH genotype files (MicrohapsSel format)
+## Per-chromosome microhaplotype genotype files (MicrohapsSel format)
 
 Alongside the canonical `.rds`, `generate.R` emits one
 MicrohapsSel-compatible TSV per chromosome at
@@ -162,7 +162,7 @@ dt_table(af, page = 15)
 ```{r}
 #| eval: false
 library(masreml)   # or masbayes
-d <- masreml::load_data("large")
+d <- load_data("large")
 
 dim(d$mh)                       # 200 100
 attr(d$mh, "block_id")[1:6]     # "block_1" "block_1" "block_2" "block_2" ...
@@ -193,15 +193,18 @@ encode_block <- function(s1_h1, s2_h1, s1_h2, s2_h2) {
 }
 ```
 
-### Building model inputs from a MH matrix
+### Building model inputs from a microhaplotype matrix
 
 ```{r}
 #| eval: false
-# masreml: MH-based GRM. build_G_mh auto-detects the compact layout.
-G_mh <- masreml::build_G_mh(mh_list = d$mh, ids = rownames(d$mh))
+library(masreml)
+library(masbayes)
 
-# masbayes: W_alpha-h design matrix for BayesA / BayesR on MH alleles.
-wah <- masbayes::construct_wah_matrix(
+# masreml: microhaplotype-based GRM. build_G_mh auto-detects the compact layout.
+G_mh <- build_G_mh(mh_list = d$mh, ids = rownames(d$mh))
+
+# masbayes: W_alpha-h design matrix for BayesA / BayesR on microhaplotype alleles.
+wah <- construct_wah_matrix(
   hap_matrix             = d$mh,
   colnames               = attr(d$mh, "block_id"),
   allele_freq_filtered   = d$allele_freq,
@@ -217,8 +220,10 @@ str(wah)            # W_ah is n x (sum(n_alleles_b - 1))
 **`block_id` length must equal `ncol(mh)`.** The block-id vector is
 repeated **twice per block** (once per strand), so it has length
 $2 \cdot n_{blocks}$, not $n_{blocks}$. `masbayes::construct_wah_matrix()`
-checks this internally; `masreml::build_G_mh()` reads it from
-`attr(mh, "block_id")`.
+consumes it via the `colnames` argument. `masreml::build_G_mh()` does
+not read this attribute — it infers block boundaries positionally
+from `ncol(mh) / 2` (paired strands), so block ordering in `mh` must
+match the genotype-pipeline output.
 :::
 
 ::: {.callout-warning}
@@ -240,7 +245,7 @@ missingness.
 ::: {.callout-tip}
 **Why compact (`d$mh`) instead of the per-chr file format?** The
 compact layout is 4× smaller in memory and exposes the same biology
-($2 \cdot n_{blocks}$ haplotype slots). All downstream MH-aware code in
+($2 \cdot n_{blocks}$ haplotype slots). All downstream microhaplotype-aware code in
 `masreml` / `masbayes` accepts both; the on-disk format only matters
 for pipeline-level interop.
 :::
@@ -249,5 +254,5 @@ for pipeline-level interop.
 [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd) ·
 [Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
 
-🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·
-[GWABLUP](../tasks/gwablup.qmd)
+🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd) ·
+[GWAS → GWABLUP](../tasks/gwas/masreml.qmd#step-6-gwas-assisted-prediction-gwablup)

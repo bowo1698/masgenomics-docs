@@ -5,251 +5,178 @@ title: "Mixed Model & BLUP Family (Frequency-based)"
 ## TL;DR
 
 ::: {.callout-tip}
-The linear mixed model $\mathbf{y} = \mathbf{Xb} + \mathbf{Zu} +
-\mathbf{e}$ with $\mathbf{u} \sim N(\mathbf{0}, \mathbf{K}\sigma_u^2)$
-underpins three closely-related methods that differ only in $\mathbf{K}$:
+All four methods in this family solve the same mixed-model equations.
+The only thing that changes is **K** — the matrix that measures
+genetic similarity between individuals.
 
-- **PBLUP** — $\mathbf{K} = \mathbf{A}$, the pedigree
-  numerator-relationship matrix.
-- **GBLUP** — $\mathbf{K} = \mathbf{G}_u$, the genomic relationship
-  matrix from genotype data (VanRaden 2008, Method 1).
-- **GWABLUP** — $\mathbf{K} = \mathbf{G}_D$, a GBLUP relationship matrix
-  reweighted by per-SNP **posterior probabilities** from a prior GWAS
-  (Meuwissen, Eikje & Gjuvsland 2024).
+| Method | Relationship matrix **K** | Data required |
+|--------|--------------------------|---------------|
+| **PBLUP** | $\mathbf{A}$ — pedigree numerator-relationship matrix | Pedigree records |
+| **GBLUP** | $\mathbf{G}_u$ — VanRaden Method 1 (SNP dosage) | SNP genotypes |
+| **Microhaplotype-GBLUP** | $\mathbf{A}_h = \mathbf{T}_{\alpha h}\mathbf{T}_{\alpha h}^\top$ — Da (2015) | Phased microhaplotypes |
+| **GWABLUP** | $\mathbf{G}_D$ — $\mathbf{G}_u$ re-weighted by per-SNP posterior probabilities | SNP genotypes + GWAS |
 
-All three are fit via REML in `masreml::masreml()`; the variance
-components, GEBVs, and prediction accuracy machinery are shared.
+Same MME. Four relationship matrices.
 :::
 
-## 1. Assumption
+## 1. Assumptions
 
-1. **Linearity** — additive effects on the response scale.
-2. **Multivariate normality** of random effects and residuals:
-   $\mathbf{u} \sim N(\mathbf{0}, \mathbf{K}\sigma_u^2)$,
+The following assumptions apply to all four methods. Where an
+assumption becomes more specific for a particular method, it is
+noted in that method's page.
+
+1. **Linearity and additivity.** Genetic effects act additively on
+   the response scale. Dominance, epistasis, and gene-by-environment
+   interactions are not modelled.
+
+2. **Multivariate normality of random effects and residuals.**
+   $\mathbf{u} \sim N(\mathbf{0}, \mathbf{K}\sigma_u^2)$ and
    $\mathbf{e} \sim N(\mathbf{0}, \mathbf{I}\sigma_e^2)$.
-3. **Independence** of $\mathbf{u}$ and $\mathbf{e}$.
-4. **Homoscedastic residuals** — heterogeneous variance by family /
-   population / sex requires structured residual variance.
-5. **$\mathbf{K}$ is correctly specified.** Errors in pedigree, allele
-   coding, or allele frequencies propagate into $\mathbf{K}$ and bias
-   $\hat{\mathbf{u}}$.
-6. For GBLUP: marker allele frequencies are consistent across training
-   and prediction populations (or are explicitly re-centred for
-   transfer).
-7. For GWABLUP: the training-set GWAS is informative for the target —
-   under-powered GWAS produces noisy weights that under-perform equal
-   weighting.
+   Shrinkage of GEBVs toward the population mean is a consequence
+   of this distributional assumption — not an ad hoc regularisation.
 
-## 2. Linear model
+3. **Independence of $\mathbf{u}$ and $\mathbf{e}$; homoscedastic
+   residuals.** If residual variance differs systematically across
+   families, populations, or sexes, a structured $\mathbf{R}$ matrix
+   is required.
 
-The mixed model:
+4. **K is correctly specified.** Errors in **K** — wrong pedigree
+   entries, wrong allele coding, wrong allele frequencies — propagate
+   directly into $\hat{\mathbf{u}}$ and bias GEBVs. There is no
+   downstream correction.
+
+5. **Method-specific requirements.** PBLUP requires complete and
+   accurately assigned pedigree records. GBLUP and Microhaplotype-GBLUP require
+   allele frequencies from the base (unselected founder) population.
+   Microhaplotype-GBLUP additionally requires reliable phasing. GWABLUP requires
+   a sufficiently powered training-set GWAS — an underpowered GWAS
+   produces noisy weights that underperform equal weighting.
+
+## 2. General Linear Mixed Model
+
+All four methods fit the same linear mixed model:
 
 $$
 \mathbf{y} = \mathbf{X}\mathbf{b} + \mathbf{Z}\mathbf{u} + \mathbf{e},
 \qquad
 \mathbf{u} \sim N(\mathbf{0}, \mathbf{K}\sigma_u^2),
 \quad
-\mathbf{e} \sim N(\mathbf{0}, \mathbf{I}\sigma_e^2).
+\mathbf{e} \sim N(\mathbf{0}, \mathbf{I}\sigma_e^2),
 $$ {#eq-mm}
 
-with $\mathbf{y}$ the $n \times 1$ phenotype vector, $\mathbf{X}$ the
-$n \times p$ fixed-effect design matrix (built via
-`stats::model.matrix()` from your covariates), $\mathbf{Z}$ the
-random-effect incidence (usually $\mathbf{I}$ when one observation per
-individual), $\mathbf{u}$ the additive genetic effects, and
-$\mathbf{e}$ the residuals.
+where $\mathbf{y}$ ($n \times 1$) is the phenotype vector,
+$\mathbf{X}$ ($n \times p$) is the fixed-effect design matrix,
+$\mathbf{Z}$ is the random-effect incidence matrix, and
+$\mathbf{u}$ holds the additive genetic values (GEBVs).
 
-Henderson's **mixed-model equations (MME)** are
+Henderson's **mixed-model equations (MME)** solve for
+$\hat{\mathbf{b}}$ and $\hat{\mathbf{u}}$ simultaneously:
 
 $$
 \begin{bmatrix}
 \mathbf{X}^\top \mathbf{X} & \mathbf{X}^\top \mathbf{Z} \\
-\mathbf{Z}^\top \mathbf{X} & \mathbf{Z}^\top \mathbf{Z} + \mathbf{K}^{-1} \lambda
+\mathbf{Z}^\top \mathbf{X} & \mathbf{Z}^\top \mathbf{Z}
+  + \mathbf{K}^{-1} \lambda
 \end{bmatrix}
 \begin{bmatrix} \hat{\mathbf{b}} \\ \hat{\mathbf{u}} \end{bmatrix}
 =
-\begin{bmatrix} \mathbf{X}^\top \mathbf{y} \\ \mathbf{Z}^\top \mathbf{y} \end{bmatrix},
+\begin{bmatrix} \mathbf{X}^\top \mathbf{y} \\
+  \mathbf{Z}^\top \mathbf{y} \end{bmatrix},
 \quad
-\lambda = \sigma_e^2 / \sigma_u^2,
+\lambda = \frac{\sigma_e^2}{\sigma_u^2}.
 $$ {#eq-mme}
 
-with $\lambda$ the variance ratio. Solving @eq-mme yields generalised
-least-squares estimates $\hat{\mathbf{b}}$ of the fixed effects and the
-**best linear unbiased predictor** $\hat{\mathbf{u}} = E[\mathbf{u}
-\mid \mathbf{y}]$ of the random effects.
+**What BLUP does.** The MME solves two problems at once. It estimates
+fixed effects $\hat{\mathbf{b}}$ while accounting for the fact that
+relatives are not independent observations. It also predicts the
+random genetic effects $\hat{\mathbf{u}}$ — the GEBVs — by
+*shrinking* each individual's raw performance toward the population
+mean. The amount of shrinkage is controlled by $\lambda$: animals
+with few records or distant relatives are shrunk more; animals with
+many close relatives and many records are shrunk less. High
+heritability (small $\lambda$) means less shrinkage; low heritability
+(large $\lambda$) means more.
 
-## 3. GEBV calculation
+**K as a common language.** The relationship matrix **K** tells the
+MME how much information to borrow from relatives when predicting a
+given individual. A large off-diagonal $K_{ij}$ means the model
+transfers information from individual $j$ to predict individual $i$.
+Choosing different **K** matrices — pedigree, genomic,
+haplotype-weighted, GWAS-weighted — is a statement about which
+definition of genetic similarity best captures the architecture of
+the trait.
 
-The three methods all solve @eq-mme; what changes is $\mathbf{K}$:
+#### References {.unnumbered}
 
-### PBLUP — pedigree numerator-relationship matrix
+- Henderson, C. R. (1975). Best linear unbiased estimation and
+  prediction under a selection model. *Biometrics*, 31(2), 423–447.
+  [doi:10.2307/2529430](https://doi.org/10.2307/2529430).
+- Patterson, H. D. & Thompson, R. (1971). Recovery of inter-block
+  information when block sizes are unequal. *Biometrika*, 58(3),
+  545–554.
+  [doi:10.1093/biomet/58.3.545](https://doi.org/10.1093/biomet/58.3.545).
 
-$\mathbf{K} = \mathbf{A}$, computed from pedigree by Wright's
-path-counting algorithm (see
-[Biallelic & Multi-allelic](biallelic-and-multiallelic.qmd#eq-a-matrix)).
-$\mathbf{A}$ counts expected proportion of alleles identical by
-descent; diagonal $A_{ii} = 1 + F_i$, off-diagonal
-$A_{ij} = 2\,\phi_{ij}$ with $\phi$ the kinship coefficient.
+## 3. Methods
 
-### GBLUP — VanRaden Method 1 genomic relationship matrix
+Select a page from the sidebar to read the full mathematical detail
+and code examples.
 
-$$
-\mathbf{K} = \mathbf{G}_u = \frac{\mathbf{W}\mathbf{W}^\top}{2 \sum_{j=1}^{p} p_j (1 - p_j)},
-$$ {#eq-gblup-grm}
+| Page | What it covers |
+|------|---------------|
+| [REML Algorithms](blup-reml.qmd) | How variance components are estimated: EM, Newton-Raphson, AI-REML — and when each is used |
+| [PBLUP](blup-pblup.qmd) | Pedigree-based kinship; classical animal model |
+| [GBLUP](blup-gblup.qmd) | SNP-GBLUP (VanRaden 2008) and Microhaplotype-GBLUP (Da 2015) |
+| [GWABLUP](blup-gwablup.qmd) | GWAS-assisted weighted GRM (Meuwissen et al. 2024) |
 
-with $\mathbf{W}_{ij} = M_{ij} - 2 p_j$ the centred SNP-dosage matrix
-and $p_j$ the training-set minor allele frequencies. Mean diagonal
-$\approx 1 + F$, comparable to $\mathbf{A}$. For microhaplotypes,
-replace $\mathbf{W}$ with the $W_{\alpha h}$ design matrix (see
-[Biallelic & Multi-allelic](biallelic-and-multiallelic.qmd#mh-design-matrix-w_alpha-h)).
+## 4. Variance Component & h²
 
-### GWABLUP — weighted GRM driven by GWAS posterior probabilities
+The MME requires $\lambda = \sigma_e^2/\sigma_u^2$, but these
+variance components are unknown and must be estimated from the data.
+`masreml` uses **REML** (restricted maximum likelihood), which
+maximises the likelihood of the data *after projecting out the fixed
+effects* — ensuring variance estimates are not inflated by
+fixed-effect degrees of freedom.
 
-Following Meuwissen, Eikje & Gjuvsland (2024), the procedure is:
+| Method | `method =` | Notes |
+|--------|-----------|-------|
+| Haseman-Elston regression (HE) | `"HE"` | Method-of-moments OLS; single-pass, no iteration |
+| Expectation-Maximisation (EM) | `"EM"` | Monotone $L_{REML}$ ascent; guaranteed $\sigma^2 > 0$; slow |
+| Average Information (AI) | `"AI"` | Newton-like; near-quadratic convergence; step-halving safeguard |
+| HE-initialised AI-REML (HI) | `"HI"` | HE warm-start, then AI-REML — same estimate as AI, fewer iterations |
+| Auto | `"auto"` *(default)* | $n \ge 50{,}000$: HE only. $n < 50{,}000$: HE → AI → EM fallback |
 
-**Step 1.** Run an EMMAX-style GWAS in the training data and collect
-the per-SNP **likelihood ratio**
-$$
-LR_j = \tfrac{1}{2}\,(\hat{b}_j / se_j)^2,
-$$ {#eq-lr}
-the half-squared standardised SNP-effect estimate.
+See [REML Algorithms](blup-reml.qmd) for the full derivation, pseudocode, and per-engine convergence criteria.
 
-**Step 2.** Smooth the LRs by taking a moving average over neighbouring
-SNPs (window sizes 5–161 tested in the paper; `run_gwas(window = 5L)`
-by default).
-
-**Step 3.** Combine the smoothed $\overline{LR_j}$ with a prior $\pi$
-of substantial-effect SNPs (paper sets $\pi = 0.001$; same default in
-`masreml::run_gwas(pi = 0.001)`) to obtain the **posterior probability**:
-$$
-\overline{PP_j}
-= \frac{\pi\,\exp(\overline{LR_j})}
-       {\pi\,\exp(\overline{LR_j}) + (1 - \pi)}.
-$$ {#eq-pp}
-
-**Step 4.** Build the weighted GRM with diagonal weights
-$D_{jj} = \overline{PP_j}$:
-$$
-\mathbf{G}_D
-= \frac{\mathbf{W}\,\mathbf{D}\,\mathbf{W}^\top}
-       {\sum_{j=1}^{p} 2 p_j (1 - p_j)\,D_{jj}}.
-$$ {#eq-grm-weighted}
-
-`masreml::gwablup()` also imposes a `min_weight` floor (default
-`1e-4`) so $\mathbf{G}_D$ remains well-conditioned.
-
-**Step 5.** Solve the BLUP MME (@eq-mme) with $\mathbf{K} =
-\mathbf{G}_D$.
-
-## 4. Variance component & h²
-
-REML maximises the restricted likelihood (the likelihood after
-projecting out fixed effects); `masreml::masreml(method = "AI")` uses
-average-information REML, `"EM"` uses expectation-maximisation,
-`"HE"` uses Haseman-Elston, `"HI"` the Henderson-iterative scheme.
-Default `"auto"` picks based on dataset size.
-
-Heritability is
+Heritability is estimated as:
 
 $$
-h^2 = \frac{\sigma_u^2}{\sigma_u^2 + \sigma_e^2},
+h^2 = \frac{\sigma_u^2}{\sigma_u^2 + \sigma_e^2}.
 $$ {#eq-h2}
 
-obtained from the REML estimates of $(\sigma_u^2, \sigma_e^2)$. Posterior
-quantities are summarised by `summary(fit)` and the `varcomp()` S3
-generic. Standard errors come from the AI matrix.
+::: {.callout-note}
+**Chip heritability.** When **K** is built from a SNP or
+microhaplotype panel, $\hat{h}^2$ estimates the proportion of
+phenotypic variance explained by additive effects *as captured by
+the markers*, not the true narrow-sense heritability. If the panel
+misses rare causal variants, $\hat{h}^2$ will be below the true
+$h^2$.
+:::
 
-## 5. When to use
+#### References {.unnumbered}
 
-| Situation | Choose |
-|---|---|
-| No genotypes, only pedigree | **PBLUP** — `masreml(y, G = list(snp_add = A_pheno))` |
-| Polygenic continuous trait, dense markers | **GBLUP** — `masreml(y, markers = list(snp_add = M))` |
-| MH-resolved markers (phased haplotype blocks) | **GBLUP with MH** — `markers = list(mh_add = mh)` |
-| Sparse architecture with prior GWAS evidence | **GWABLUP** — Meuwissen et al. 2024 pipeline |
-| Need per-marker effects rather than aggregated GEBVs | Move to Bayesian alphabet — see [Bayesian Alphabet](bayesian-alphabet.qmd) |
-| Binary trait | See [Continuous and Binary trait](continuous-and-binary-trait.qmd) |
+- Patterson, H. D. & Thompson, R. (1971). Recovery of inter-block
+  information when block sizes are unequal. *Biometrika*, 58(3),
+  545–554.
+  [doi:10.1093/biomet/58.3.545](https://doi.org/10.1093/biomet/58.3.545).
 
-## 6. See it in code
+## 5. When to Use
 
-```{r}
-#| eval: false
-library(masreml)
-
-d <- masreml::load_data("large")
-y <- d$pheno$y_cont_qtl_snp
-names(y) <- d$pheno$id
-X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
-
-# --- PBLUP (pedigree only) ---------------------------------------
-ped_int <- data.frame(
-  id   = d$pedigree$id,
-  sire = ifelse(is.na(d$pedigree$sire), 0L,
-                match(d$pedigree$sire, d$pedigree$id)),
-  dam  = ifelse(is.na(d$pedigree$dam),  0L,
-                match(d$pedigree$dam,  d$pedigree$id))
-)
-A_full  <- masreml::build_A_ped(ped_int)
-A_pheno <- A_full[d$pheno$id, d$pheno$id]
-fit_pblup <- masreml::masreml(
-  y     = y,
-  X     = X_fixed,
-  G     = list(snp_add = A_pheno),
-  trait = "continuous"
-)
-
-# --- GBLUP (SNP) -------------------------------------------------
-fit_gblup <- masreml::masreml(
-  y       = y,
-  X       = X_fixed,
-  markers = list(snp_add = d$snp),
-  trait   = "continuous"
-)
-
-# --- GBLUP (MH) --------------------------------------------------
-fit_mhblup <- masreml::masreml(
-  y       = y,
-  X       = X_fixed,
-  markers = list(mh_add = d$mh),
-  trait   = "continuous"
-)
-
-# --- GWABLUP -----------------------------------------------------
-# Step 1-3 inside run_gwas (LR -> smoothing -> PP)
-gwas <- masreml::run_gwas(
-  markers     = list(snp_add = d$snp),
-  y           = y,
-  masreml_fit = fit_gblup,
-  X           = X_fixed,
-  pi          = 0.001,
-  window      = 5L
-)
-# Steps 4-5 inside gwablup() (weighted G -> BLUP solve)
-fit_gwa <- masreml::gwablup(
-  y           = y,
-  markers     = list(snp_add = d$snp),
-  gwas_result = gwas,
-  X           = X_fixed,
-  min_weight  = 1e-4
-)
-summary(fit_gwa)
-```
-
-## 7. References
-
-- Henderson, C. R. (1975). *Best linear unbiased estimation and
-  prediction under a selection model.* Biometrics, 31(2), 423–447.
-  [doi:10.2307/2529430](https://doi.org/10.2307/2529430).
-
-- VanRaden, P. M. (2008). *Efficient methods to compute genomic
-  predictions.* Journal of Dairy Science, 91(11), 4414–4423.
-  [doi:10.3168/jds.2007-0980](https://doi.org/10.3168/jds.2007-0980).
-
-- Meuwissen, T., Eikje, L. S. & Gjuvsland, A. B. (2024). *GWABLUP:
-  genome-wide association assisted best linear unbiased prediction of
-  genetic values.* Genetics Selection Evolution, 56:17.
-  [doi:10.1186/s12711-024-00881-y](https://doi.org/10.1186/s12711-024-00881-y).
-
-- Patterson, H. D. & Thompson, R. (1971). *Recovery of inter-block
-  information when block sizes are unequal.* Biometrika, 58(3),
-  545–554. (Origin of REML.)
+| Situation | Recommended method |
+|-----------|-------------------|
+| No genotypes; pedigree only | [PBLUP](blup-pblup.qmd) |
+| Genotypes available; polygenic continuous trait | [GBLUP](blup-gblup.qmd) |
+| Phased microhaplotype data available | [Microhaplotype-GBLUP](blup-gblup.qmd#mh-gblup-da-2015) |
+| Non-infinitesimal architecture + powered GWAS | [GWABLUP](blup-gwablup.qmd) |
+| Highly polygenic trait; weak or no GWAS signal | [GBLUP](blup-gblup.qmd) (GWABLUP collapses to GBLUP anyway) |
+| Per-marker effects needed, not aggregated GEBVs | [Bayesian Alphabet](bayesian-alphabet.qmd) |
+| Binary trait | [Continuous and Binary Trait](continuous-and-binary-trait.qmd) |

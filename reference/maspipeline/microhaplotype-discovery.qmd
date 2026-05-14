@@ -1,0 +1,144 @@
+---
+title: "Microhaplotype discovery and genotyping"
+---
+
+## Goal
+
+Discover microhaplotype block boundaries — either by LD-based
+haploblock detection (Jonas et al. 2017) or by fixed-window segmentation
+— and emit the final microhaplotype genotype matrix. This matrix is
+consumed downstream by `masreml::build_G_mh()` and
+`masbayes::construct_wah_matrix()`.
+
+::: {.callout-tip}
+## Pipeline position
+
+- **Inputs:** per-chromosome haploid files `hap/chr*` and the SNP map
+  produced by the previous stage.
+- **Outputs:** block definition files and a numerical microhaplotype
+  genotype matrix (one row per individual, two columns per block).
+- **Tool:** `haplotype-hybrid` (a `maspipeline` binary).
+- **Previous stage:** [Genotype-to-haplotype](genotype-to-haplotype.qmd)
+- **Next stage:** — *(pipeline output; ready for `masreml` /
+  `masbayes`)*. See
+  [Input data → Microhaplotypes](../../input-data/microhaplotypes.qmd)
+  for the on-disk schema consumed by the R packages.
+:::
+
+---
+
+Because our objective is to discover microhaplotype segments, we only
+use outputs from `hap/chr*` and perform arguments `--method
+ld-haploblock` and `--haplotype-type micro`. The `haplotype-hybrid`
+tool works with finding all potential haplotype candidates that meet
+an LD criteria (e.g., $D' > 0.45$) as the argument of
+`--d-prime-threshold 0.45` is applied. After that, align with the
+microhaplotype definition, they are selected from the haplotype block
+candidates, where in each segment should contain consecutive SNPs
+within 125 or 150 bp.
+
+The final genotype data will be:
+
+```
+ID       hap_1_1  hap_1_1  hap_1_2  hap_1_2  hap_1_3  hap_1_3
+ind_1        2        1        1        2        3        3
+ind_2        1        3        2        2        3        2
+ind_3        3        1        2        2        2        3
+```
+
+This genotype data consists of numerical microhaplotype alleles in
+diploid format, where each number represents a unique combination of
+SNP sequences in a specific genomic block. Each locus is presented in
+two side-by-side columns to show the pair of haplotypes inherited from
+each individual's parents.
+
+For example, at locus `hap_1_1`, individual `ind_1` has alleles `2`
+and `1`, meaning they inherited microhaplotype variant 2 from one
+parent and variant 1 from the other, where each variant represents a
+distinct multi-SNP sequence pattern (e.g., variant 1 might be "AACG"
+while variant 2 is "ATCG" for a 4-SNP microhaplotype).
+
+> It is important to note that, as we apply multiple criteria,
+> generated microhaplotype segments will be significantly lower than
+> fully haplotype blocks. The main advantage of this system is that we
+> effectively use lower computational resources than haplotype-based
+> genotypes or even biallelic SNPs. Therefore, a specialised coding
+> matrix and model are strongly required to handle such genotype data,
+> particularly to prevent multicollinearity while effectively utilising
+> the multiallelic power.
+
+### Usage Example
+
+```bash
+# Microhaplotype discovery and genotyping (LD-based, physical window)
+./haplotype-hybrid \
+      --ncores 4 \
+      -i hap/chr* \
+      -m map.txt \
+      -o mh_info_ld_micro \
+      --generate-genotypes mh_genotypes \
+      -v \
+      ld-haploblock micro --window-bp 125
+
+# Fixed physical distance blocks (e.g., 100 kb)
+./haplotype-hybrid \
+      -i hap/chr* \
+      -m map.txt \
+      -o mh_info_fixedkb \
+      --generate-genotypes fixedkb_genotypes \
+      -v \
+      fixed-kb --window-bp 100000
+```
+
+### Key Parameters
+
+Use ```./haplotype-hybrid --help``` to see manuals.
+
+- `-i, --input <INPUT>...`: Phased haplotype files, one per chromosome
+  (required, e.g., `hap/chr*`)
+- `-m, --map <MAP>`: SNP map file with columns: SNPID, Chr, Position
+  (required)
+- `--method <METHOD>`: Block definition method (default:
+  `ld_haploblock`, possible values: `ld-haploblock`, `snp-count-simple`)
+- `--haplotype-type <HAPLOTYPE_TYPE>`: For LD method - `pure` selects
+  best N-SNP haplotype per block, `micro` splits blocks into physical
+  windows (default: `pure`, possible values: `pure`, `micro`)
+- `--d-prime-threshold <D_PRIME_THRESHOLD>`: D' threshold for
+  consecutive SNP LD in haploblock discovery (default: `0.45`, Jonas 2017)
+- `--window-bp <WINDOW_BP>`: Physical window size in base pairs for
+  microhaplotype segments (default: `125`)
+- `-w, --window <WINDOW>`: Haplotype size in SNPs for `pure` mode or
+  window size for `snp-count-simple` (default: `4`)
+- `--min-snps <MIN_SNPS>`: Minimum SNPs required per block (default: `2`)
+- `--max-snps <MAX_SNPS>`: Maximum SNPs allowed per block (default: `4`)
+- `--aft <AFT>`: Allele Frequency Threshold for Criterion-B score
+  calculation (default: `0.08`)
+- `--md <MD>`: Maximum Deviation parameter for Criterion-B weighting
+  (default: `0.1`)
+- `--min-ld <MIN_LD>`: Minimum mean LD (r²) threshold for block
+  filtering (optional, e.g., `0.3`)
+- `--no-dedup`: Skip deduplication of blocks with identical SNP ranges
+- `--noheader`: Specify if haplotype input files have no header row
+- `-o, --output <OUTPUT>`: Output directory for block definition files
+  (default: `hap_info_microhap`)
+- `--generate-genotypes <GENERATE_GENOTYPES>`: Generate haplotype
+  genotype files with specified prefix (e.g., `mh_geno_ld`)
+- `--missing <MISSING>`: Code for missing alleles in genotype output
+  (e.g., `9`)
+- `--missing-value <MISSING_VALUE>`: Replacement value for blocks
+  containing missing alleles (default: `-9999`)
+- `-v, --verbose`: Display detailed progress and diagnostic information
+- `-h, --help`: Print help information
+
+---
+
+## What's next?
+
+← Back to [overview](index.qmd).
+
+The microhaplotype genotype matrix produced here is the input expected
+by `masreml::build_G_mh()` (additive GRM construction) and
+`masbayes::construct_wah_matrix()` (W~αh~ design matrix for BayesA /
+BayesR). See
+[Input data → Microhaplotypes](../../input-data/microhaplotypes.qmd)
+for the on-disk schema.

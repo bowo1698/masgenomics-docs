@@ -47,7 +47,30 @@ Unused.
 
 ### Details
 
-Three usage modes:
+<strong>GEBV formula (direct marker effects).</strong>
+The genomic estimated breeding value for individual $i$ is obtained
+by summing the posterior mean allele effects across all loci:
+
+<p style="text-align: center;">$\hat{g}_i = \hat{\mu} + \mathbf{w}_i^\top \hat{\boldsymbol{\beta}}$
+
+
+where $\mathbf{w}_i$ is row $i$ of the marker design matrix $W$
+and $\hat{\boldsymbol{\beta}}$ is the vector of posterior mean allele
+effects. When fixed effects were supplied to the fitting function:
+
+<p style="text-align: center;">$\hat{g}_i = \hat{\mu} + \mathbf{x}_i^\top \hat{\boldsymbol{\alpha}} + \mathbf{w}_i^\top \hat{\boldsymbol{\beta}}$
+
+
+For binary traits, the liability-scale GEBV is converted to a predicted
+probability via the probit inverse link:
+
+<p style="text-align: center;">$P(y_i = 1) = \Phi(\hat{g}_i)$
+
+
+This is identical for SNP and multi-allelic (microhaplotype) markers;
+only the construction of $W$ differs between the two marker types.
+
+<strong>Three usage modes.</strong>
 
 
 <dl>
@@ -95,17 +118,30 @@ scale so <code>bias</code> is the calibration slope), <code>h2, sigma2_g,
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library("masbayes")
 
-# Train/test split
-fit  <- run_bayesr(W_train, y_train, wtw_train, wty_train,
-                   sigma2_e_init = var(y_train)/2,
-                   sigma2_ah     = var(y_train)/2)
+d       <- load_data("small")
+W       <- construct_snp_matrix(d$snp)$W
+y       <- d$pheno$y_cont_qtl_snp
+W_train <- W[d$train_idx, ]
+W_test  <- W[d$test_idx, ]
+y_train <- y[d$train_idx]
+y_test  <- y[d$test_idx]
+
+fit  <- run_bayesr(
+  w             = W_train,
+  y             = y_train,
+  wtw_diag      = colSums(W_train^2),
+  sigma2_e_init = var(y_train) / 2,
+  sigma2_ah     = var(y_train) / 2,
+  mcmc_params   = list(n_iter = 1000L, n_burn = 500L,
+                       n_thin = 5L, seed = 1L),
+  save_rds      = FALSE
+)
 
 pred <- predict(fit, W_test, y_test)   # test-set evaluation
 pred$metrics$accuracy
-pred$metrics$RMSE
 
-fc   <- predict(fit, W_unknown)        # forecast only, no y
-fc$GEBV
+fc   <- predict(fit, W_test)           # forecast only, no y_new
+head(fc$GEBV)
 
 insamp <- predict(fit)                 # in-sample reference
 insamp$metrics$R2

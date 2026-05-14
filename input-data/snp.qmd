@@ -89,12 +89,12 @@ the same byte-identical bundle:
 #| eval: false
 # Either package's load_data() returns the canonical list.
 library(masreml)
-d <- masreml::load_data("large")          # or "small"
+d <- load_data("large")                   # or "small"
 str(d$snp)                                # int [1:200, 1:100] 1 2 2 ...
 head(d$map_snp)                           # SNP / CHROM / POS
 
 # Equivalent via masbayes:
-d <- masbayes::load_data("large")
+# library(masbayes); d <- load_data("large")
 
 # Or load the standalone CSVs derived alongside the .rds:
 geno <- read.csv("demo-data/main/geno_G1.csv", check.names = FALSE)
@@ -120,12 +120,16 @@ expect the matrix in this shape.
 
 ```{r}
 #| eval: false
+library(masreml)
+library(masbayes)
+
 # masreml: SNP-based GRM for BLUP / GBLUP
-G_snp <- masreml::build_G_snp(d$snp)
+G_snp <- build_G_snp(d$snp)
 str(G_snp)                                # 200 x 200 numeric
 
-# masbayes: design matrix W for BayesA / BayesR
-W <- masbayes::construct_snp_matrix(d$snp, encoding = "vanRaden")
+# masbayes: design matrix W for BayesA / BayesR.
+# construct_snp_matrix() returns a list (W, freq, n, p); extract $W.
+W <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
 str(W)
 ```
 
@@ -172,5 +176,5 @@ uniformly drawn from `[0.1, 0.5]` so no filter is needed.
 [Biallelic & Multi-allelic](../theory/biallelic-and-multiallelic.qmd) ·
 [Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
 
-🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction.qmd) ·
-[GWAS](../tasks/gwas.qmd)
+🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd) ·
+[GWAS](../tasks/gwas/index.qmd)

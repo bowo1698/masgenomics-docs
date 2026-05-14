@@ -8,6 +8,7 @@ Reference documentation for the `masbayes` package.
 
 - [construct_snp_matrix](construct_snp_matrix.qmd)
 - [construct_wah_matrix](construct_wah_matrix.qmd)
+- [load_data](load_data.qmd)
 - [predict.masbayes_bayesa](predict.masbayes_bayesa.qmd)
 - [predict.masbayes_bayesr](predict.masbayes_bayesr.qmd)
 - [run_bayesa](run_bayesa.qmd)

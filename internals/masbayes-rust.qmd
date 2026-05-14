@@ -11,8 +11,13 @@ TODO: list of Rust files with one-line description each.
 ## Key entry points
 
 - {{< rust-src masbayes lib.rs >}} — extendr export macros
-- {{< rust-src masbayes bayesa.rs >}} — BayesA sampler (TODO verify path)
-- {{< rust-src masbayes bayesr.rs >}} — BayesR sampler (TODO verify path)
+- {{< rust-src masbayes bayesa.rs >}} — BayesA Gibbs sampler (MCMC)
+- {{< rust-src masbayes bayesa_em.rs >}} — BayesA EM (MAP estimate)
+- {{< rust-src masbayes bayesr.rs >}} — BayesR Gibbs sampler (MCMC, 4-class mixture)
+- {{< rust-src masbayes bayesr_em.rs >}} — BayesR EM (MAP with soft class responsibilities)
+- {{< rust-src masbayes matrix.rs >}} — W matrix builders (W, W_alpha_h)
+- {{< rust-src masbayes types.rs >}} — shared types / fit-result structs
+- {{< rust-src masbayes utils.rs >}} — RNG, log-density helpers
 
 ## FFI boundary
 
