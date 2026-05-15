@@ -18,13 +18,13 @@ Quarto](https://img.shields.io/badge/Built%20with-Quarto-2780e3?style=flat-squar
 
 ::::: hero-cards
 ::: hero-card
-[![masbayes](assets/masbayes.svg)](reference/masbayes/index.qmd){.hero-logo}
+[![masbayes v0.5.0](assets/masbayes.svg)](reference/masbayes/index.qmd){.hero-logo}
 
 [GitHub ↗](https://github.com/bowo1698/masbayes){.hero-github}
 :::
 
 ::: hero-card
-[![masreml](assets/masreml.svg)](reference/masreml/index.qmd){.hero-logo}
+[![masreml v0.3.1](assets/masreml.svg)](reference/masreml/index.qmd){.hero-logo}
 
 [GitHub ↗](https://github.com/bowo1698/masreml){.hero-github}
 :::
