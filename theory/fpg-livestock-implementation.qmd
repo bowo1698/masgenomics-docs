@@ -123,6 +123,33 @@ of the 16 traits included in the selection index. With one caveat: the
 GS line produced higher levels of inbreeding than the traditionally
 selected line.
 
+## Aquaculture: Genetic diversity and inbreeding issues
+
+The development of genomic selection has significantly improved production
+outcomes in aquaculture by using SNP-based genomic prediction to enhance
+the accuracy of selection for various traits. For species such as Atlantic salmon,
+tilapia, rainbow trout, and Pacific oysters, genomic selection for production
+and disease resistance has increased in accuracy by 20-30%, with some cases
+achieving significantly higher accuracy. Furthermore, the development of
+next-generation sequencing technologies, such as SNP arrays and sequencing-based
+genotyping methods, has made genomic selection more affordable and is beginning
+to be implemented in breeding programs for Atlantic salmon, tilapia, and shrimp.
+
+However, significant challenges remain in the application of
+genomic selection. For example, repeated use of SNP-based selection methods
+can reduce genetic diversity within a population over time, thereby reducing 
+the accuracy of genomic prediction methods. This is because the ability of SNPs
+to remain in LD with the causative variant decreases. Furthermore, although 
+most of the wild-stock aquaculture species have very high genetic diversity,
+low genetic diversity within an aquaculture population can lead to increased
+inbreeding, further reducing the population's ability to adapt to environmental changes.
+Finally, another challenge in aquaculture breeding programs is the effect of
+genotype-environment (G×E) interactions, where strains of aquaculture species
+that perform well in one environment may not perform as well in another.
+Therefore, future development of genomic prediction methods should focus on
+improving the accuracy of selection for desirable traits while preserving the
+genetic diversity and adaptability of aquaculture species populations.
+
 ## 5. Summary
 
 | Species | Typical accuracy | Reference-population structure | Main reason GS helps |

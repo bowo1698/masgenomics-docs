@@ -109,6 +109,7 @@ website:
               href: tasks/gwas/index.qmd
             - tasks/gwas/masreml.qmd
             - tasks/gwas/masbayes.qmd
+        - tasks/marker-qtl-congruency.qmd
     - title: "Internals"
       collapse-level: 1
       contents:
