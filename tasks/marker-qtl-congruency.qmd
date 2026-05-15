@@ -517,11 +517,11 @@ final <- final[order(final$Scenario, final$Trait, final$Marker, final$Model), ]
 #| label: combined-table
 #| eval: true
 #| echo: false
-DT::datatable(
+knitr::kable(
   final,
-  options  = list(pageLength = 32, scrollX = TRUE, ordering = TRUE),
-  rownames = FALSE,
-  caption  = "Combined results: 2 QTL scenarios × 2 traits × 2 markers × 4 models = 32 model fits. Train n=200, test n=100, h² target = 0.3, n_QTL = 10."
+  digits  = 3,
+  align   = c("l", "l", "l", "l", "r", "r", "r", "r", "r", "r", "r", "l"),
+  caption = "Combined results: 2 QTL scenarios × 2 traits × 2 markers × 4 models = 32 model fits. Train n = 200, test n = 100, h² target = 0.3, n_QTL = 10."
 )
 ```
 
