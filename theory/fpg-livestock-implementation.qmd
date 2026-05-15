@@ -1,0 +1,169 @@
+---
+title: "Implementation Across Livestock"
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+The general genomic selection (GS) workflow in the preceding pages
+appears to be a unified methodology, but in practice, it behaves very
+differently across species. Several factors can significantly influence
+the estimation of breeding values, including how the reference
+population is constructed, how phenotyping is performed, how long a
+generation lasts, and how much weight is placed on the cross's
+performance.
+
+## Dairy cattle: The showcase
+
+Dairy cattle is where GS has worked best. The accuracies cited exceed:
+
+-   **0.8** for production traits.
+-   **0.7** for fertility, longevity, somatic cell count, and other
+    traits.
+
+The dairy sector achieves these figures for two reasons. First, its
+reference population is very large. Second, the vast majority of animals
+in that population are progeny-tested bulls, whose phenotypes are the
+average performance of their female offspring, as it is the most
+accurate phenotype available anywhere in the dairy industry.
+Furthermore, the selection candidates predicted by these reference bulls
+are often close relatives of the bulls themselves, maintaining high
+accuracy in predicting breeding value.
+
+Subsequently, the scale of routine genotype testing was no longer small.
+Approximately 2 million dairy cows worldwide have been genotyped for
+genomic prediction purposes. The following table shows an example of how
+many dairy cows are genotyped in the US:
+
+| Breed       | Animals genotyped (USA) |
+|-------------|-------------------------|
+| Holstein    | 934,781                 |
+| Jersey      | 120,439                 |
+| Brown Swiss | 19,588                  |
+| Ayrshire    | 4,767                   |
+
+France alone has genotyped at least 360,000 dairy cows. In Canada, the
+rate of genetic improvement has nearly doubled since GS was introduced.
+
+However, there are at least two serious consequences of GS
+implementation. First, the annual inbreeding rate continues to increase,
+which should be a serious concern for the future development of GS
+technology. Second, the majority of animals currently genotyped in many
+countries are female calves, not bulls, because genotyping is quite
+expensive.
+
+## Beef cattle: Same idea, harder problem
+
+The application of GS in the beef cattle sector lags behind that in the
+dairy sector. This is because the accuracy of predicting breeding value
+is generally lower, and the potential economic benefits are smaller, as
+traits such as growth rate can be measured in selection candidates
+themselves without waiting for offspring.
+
+However, the advantage of GS in beef cattle farming lies in traits that
+are difficult to record directly, such as feed conversion efficiency,
+beef quality, and similar late-emerging or invasive measures. For these
+traits, the infrastructure already exists, but reference populations are
+smaller, and these animals are typically not tested for their progeny.
+Van Eenennaam et al. (2014) reported **accuracies ranging from 0.3 to
+0.7** across studies.
+
+Multiracial reference populations are one solution, but the improvement
+is relatively small. Bolormaa et al. (2013) reported an improvement from
+**0.33 to 0.38** with a multiracial reference. Akanno et al. (2014)
+found that using a few US purebreds to predict a Canadian crossbreed
+population yielded low accuracy, and when the target breed was
+completely absent from the reference, accuracy was very low. The
+mechanisms are the same as those that limit interracial transfer in
+general. De Roos et al. (2009) showed that linkage disequilibrium (LD)
+does not persist across breeds beyond very short genomic distances
+(below about 10 kb), so a high-density panel is necessary for any
+transfer to be successful.
+
+Nevertheless, GS continues to operate on beef cattle. The Angus EBV in
+Australia and the US already uses DNA information where available. More
+than **52,000 Angus cattle** have been genotyped in the US. Raw
+genotypes are sent to EBV calculation organisations, typically
+commercial services like Zoetis or GeneSeek, which then provide breeding
+values.
+
+## Pig: Generation interval, maternal traits, crossbred performance
+
+In pig breeding, the constraints are different. The critical selection
+step is selecting superior boars from the core herd, and boar testing is
+generally recorded before this step. Therefore, the chance of shortening
+the generation interval is lower than in dairy farming.
+
+GS in pigs is mainly aimed at three categories of traits that the
+traditional system handles poorly:
+
+-   **Slaughter quality**: Invasive to record on live selection
+    candidates.
+-   **Maternal traits**: Cannot be recorded on the boars themselves. The
+    workaround is to base GS on female sibs and aunts of the test boars.
+    Male selection accuracies for maternal traits were near **50%**
+    (Lillehammer et al., 2011).
+-   **Crossbred performance in commercial environments**: Pork is
+    produced by crossbred pigs, but the nucleus animals are selected for
+    purebred performance in a favourable environment. Some studies
+    reported that the correlation between purebreds raised in a good
+    environment and crossbreeds raised in a poorer environment ranged
+    between 0.4 and 0.7.
+
+## Poultry: The layer experiment
+
+Poultry is a group that has benefited significantly from genetic
+engineering. Wolc et al. (2015) divided a population of laying hens into
+two sublines: one selected based on conventional phenotypes, and the
+other based on genomic predictions. The trial lasted three years, with
+four cycles of genomic selection and two cycles of phenotypic selection.
+Both programs were designed to produce the same level of inbreeding per
+year. As a result, the GS line outperformed the phenotypic line in most
+of the 16 traits included in the selection index. With one caveat: the
+GS line produced higher levels of inbreeding than the traditionally
+selected line.
+
+## 5. Summary
+
+| Species | Typical accuracy | Reference-population structure | Main reason GS helps |
+|------------------|------------------|------------------|------------------|
+| Dairy cattle | \>0.8 production, \>0.7 fertility/longevity | Very large, progeny-tested bulls, international consortia | Long generation interval; expensive phenotypes |
+| Beef cattle | 0.3-0.7 (Van Eenennaam et al., 2014) | Smaller within-breed; multi-breed attempts give modest gains | Late or invasive traits (feed conversion, meat quality) |
+| Pig | \~50% for maternal traits | Sib/aunt-based references for traits not measurable on boars | Slaughter, maternal, crossbred performance |
+| Poultry (layers) | GS line beat phenotypic on most of 16 index traits (Wolc et al., 2015) | Within-line | Replaces some phenotypic recording, accelerates response |
+
+The cross-species pattern is consistent. GS pays where phenotype
+recording on the elite candidates is hard or slow; it pays less where
+phenotyping was already cheap. The next page picks up the open questions
+in the review — whole-genome sequence data, the computational scale, the
+industry consequences, and how to keep inbreeding under control.
+
+## References
+
+-   Akanno, E. C., Plastow, G., Woodward, B. W., Bauck, S., Okut, H.,
+    Wu, X. L., et al. (2014). Reliability of molecular breeding values
+    for Warner-Bratzler shear force and carcass traits of beef cattle —
+    an independent validation study. *Journal of Animal Science*, 92(7),
+    2896–2904. <https://doi.org/10.2527/jas.2013-7374>
+-   Bolormaa, S., Pryce, J. E., Kemper, K. E., Savin, K., Hayes, B. J.,
+    Barendse, W., et al. (2013b). Accuracy of prediction of genomic
+    breeding values for residual feed intake and carcass and meat
+    quality traits in *Bos taurus*, *Bos indicus*, and composite beef
+    cattle. *Journal of Animal Science*, 91(7), 3088–3104.
+    <https://doi.org/10.2527/jas.2012-5827>
+-   de Roos, A. P. W., Hayes, B. J., & Goddard, M. E. (2009).
+    Reliability of genomic predictions across multiple populations.
+    *Genetics*, 183(4), 1545–1553.
+    <https://doi.org/10.1534/genetics.109.104935>
+-   Lillehammer, M., Meuwissen, T. H. E., & Sonesson, A. K. (2011).
+    Genomic selection for maternal traits in pigs. *Journal of Animal
+    Science*, 89(12), 3908–3916.
+    <https://doi.org/10.2527/jas.2011-4044>
+-   Van Eenennaam, A. L., Weigel, K. A., Young, A. E., Cleveland, M. A.,
+    & Dekkers, J. C. M. (2014). Applied animal genomics: Results from
+    the field. *Annual Review of Animal Biosciences*, 2, 105–139.
+    <https://doi.org/10.1146/annurev-animal-022513-114119>
+-   Wolc, A., Zhao, H. H., Arango, J., Settar, P., Fulton, J. E.,
+    O'Sullivan, N. P., et al. (2015). Response and inbreeding from a
+    genomic selection experiment in layer chickens. *Genetics Selection
+    Evolution*, 47, 59.

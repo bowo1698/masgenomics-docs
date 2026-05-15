@@ -1,53 +1,56 @@
 ---
 title: "Installation"
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
-Both `masreml` and `masbayes` have **Rust backends** compiled at
-install time, so you need the Rust toolchain (`rustc` + `cargo`) on
-your machine before you install either R package. The toolchain is a
-one-time setup; once Rust is present, installing or upgrading the
-packages is a single `install.packages()` call each.
+Both `masreml` and `masbayes` use **Rust backends**, so you need the
+Rust toolchain (`rustc` + `cargo`) on your machine before you install
+either R package. The toolchain is a one-time setup, so once Rust is
+present, installing or upgrading the packages is a single
+`install.packages()` call each.
 
 ## Rust & cargo Installation
 
 The recommended installer for every supported platform is
 [**`rustup`**](https://rustup.rs), the official Rust toolchain manager.
-It installs `rustc`, `cargo`, and the standard library, and gives you
-a single command (`rustup update`) to keep them current.
+It installs `rustc`, `cargo`, and the standard library, and gives you a
+single command (`rustup update`) to keep them current.
 
 ### Linux
 
 Open a terminal and run:
 
-```bash
+``` bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 Accept the default installation (option **1**). When it finishes,
 re-source your shell so `cargo` and `rustc` are on `PATH`:
 
-```bash
+``` bash
 source "$HOME/.cargo/env"
 ```
 
 Verify:
 
-```bash
+``` bash
 rustc --version       # rustc 1.7x.x
 cargo --version       # cargo 1.7x.x
 ```
 
-Most distributions also need a C/C++ toolchain and OpenSSL headers
-for `extendr` to link the Rust kernels into R. On Debian / Ubuntu:
+Most distributions also need a C/C++ toolchain and OpenSSL headers for
+`extendr` to link the Rust kernels into R. On Debian / Ubuntu:
 
-```bash
+``` bash
 sudo apt-get update
 sudo apt-get install -y build-essential libssl-dev pkg-config
 ```
 
 On Fedora / RHEL / Rocky:
 
-```bash
+``` bash
 sudo dnf install -y gcc gcc-c++ openssl-devel pkgconf-pkg-config
 ```
 
@@ -55,7 +58,7 @@ sudo dnf install -y gcc gcc-c++ openssl-devel pkgconf-pkg-config
 
 Open Terminal and run the same installer:
 
-```bash
+``` bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source "$HOME/.cargo/env"
 ```
@@ -64,7 +67,7 @@ If Xcode Command Line Tools are not yet installed, the system will
 prompt for them; accept the prompt (or install manually with
 `xcode-select --install`). Verify:
 
-```bash
+``` bash
 rustc --version
 cargo --version
 ```
@@ -74,21 +77,25 @@ followed by `rustup-init`, but the official one-liner is simpler.
 
 ### Windows
 
-1. Download **`rustup-init.exe`** from [rustup.rs](https://rustup.rs).
-2. Run it. When prompted for the host triple, accept the default
-   (`x86_64-pc-windows-msvc`); when prompted for installation type,
-   choose **1) Proceed with installation (default)**.
-3. The installer will detect whether you have the Microsoft C++
-   Build Tools — if not, follow the on-screen link to
-   [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/),
-   install the **Desktop development with C++** workload, then re-run
-   `rustup-init.exe`.
-4. Open a new PowerShell or Command Prompt window (so `PATH` is
-   refreshed) and verify:
-   ```powershell
-   rustc --version
-   cargo --version
-   ```
+1.  Download **`rustup-init.exe`** from [rustup.rs](https://rustup.rs).
+
+2.  Run it. When prompted for the host triple, accept the default
+    (`x86_64-pc-windows-msvc`); when prompted for installation type,
+    choose **1) Proceed with installation (default)**.
+
+3.  The installer will detect whether you have the Microsoft C++ Build
+    Tools — if not, follow the on-screen link to [Visual Studio Build
+    Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/),
+    install the **Desktop development with C++** workload, then re-run
+    `rustup-init.exe`.
+
+4.  Open a new PowerShell or Command Prompt window (so `PATH` is
+    refreshed) and verify:
+
+    ``` powershell
+    rustc --version
+    cargo --version
+    ```
 
 For all platforms, `rustup update` later picks up the newest stable
 toolchain release.
@@ -103,7 +110,7 @@ installs reuse the cargo cache.
 
 ### masbayes
 
-```r
+``` r
 install.packages(
     "https://github.com/bowo1698/masbayes/archive/refs/heads/main.tar.gz",
     repos = NULL, type = "source"
@@ -115,7 +122,7 @@ library(masbayes)
 
 ### masreml
 
-```r
+``` r
 install.packages(
     "https://github.com/bowo1698/masreml/archive/refs/heads/main.tar.gz",
     repos = NULL, type = "source"
@@ -126,6 +133,6 @@ library(masreml)
 ```
 
 After both packages load without error, you are ready to follow the
-[Task tutorials](../tasks/index.qmd) or the
-[Input Data](../input-data/index.qmd) walkthroughs using the bundled
-demo dataset.
+[Task tutorials](../tasks/index.qmd) or the [Input
+Data](../input-data/index.qmd) walkthroughs using the bundled demo
+dataset.

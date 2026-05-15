@@ -1,64 +1,64 @@
 ---
 title: "Biallelic & Multi-allelic"
+editor: 
+  markdown: 
+    wrap: 72
 ---
 
-## 1. What is the difference between biallelic and multi-allelic?
+## What is the difference between biallelic and multi-allelic?
 
 **Polymorphism** is the existence of two or more variants of a DNA
-sequence at the same physical location (locus) in a population.
-Without polymorphism there is nothing to predict from — every
-individual would carry the same alleles and the genetic component of
-phenotypic variance would be zero. Quantitative-genetic analyses
-therefore rely on **genetic markers**: positions in the genome where
-multiple alleles segregate, so that allelic state correlates (through
-linkage or causation) with the trait being predicted.
+sequence at the same physical location (locus) in a population. Without
+polymorphism there is nothing to predict from, as every individual would
+carry the same alleles, and the genetic component of phenotypic variance
+would be zero. Quantitative-genetic analyses therefore rely on **genetic
+markers**: positions in the genome where multiple alleles segregate, so
+that allelic state correlates (through linkage or causation) with the
+trait being predicted.
 
 A marker is **biallelic** when exactly two alleles segregate in the
 population, and **multi-allelic** when three or more do.
 
 | Marker family | Alleles per locus | Coding | Typical width |
-|---|---|---|---|
+|------------------|------------------|------------------|------------------|
 | **SNP** (single-nucleotide polymorphism) — biallelic | 2 (e.g. A vs G at a single base) | dosage $\{0, 1, 2\}$ of the alternate allele | one base pair |
 | **Microhaplotype** — multi-allelic | up to $2^k$ for a $k$-SNP window, typically 4–20 observed | integer-encoded haplotype id per strand | tens to hundreds of base pairs |
 
 The strengths and limits of each:
 
-| | SNP (biallelic) | Microhaplotype (multi-allelic) |
-|---|---|---|
+|   | SNP (biallelic) | Microhaplotype (multi-allelic) |
+|------------------------|------------------------|------------------------|
 | **Pros** | Cheap to genotype and impute; massive panels (100k–1M markers); robust to single-SNP errors; simple 0/1/2 coding feeds every published mixed-model and Bayesian routine | Captures within-block linkage phase that per-SNP coding loses; each locus carries more bits of information; larger expected effect per locus → easier to detect causal variants; fewer parameters than the corresponding SNP set when within-block LD is strong |
 | **Limits** | Each locus only weakly tags a causal variant unless in tight LD; many small effects → polygenic / infinitesimal regime; sensitive to allele-frequency drift across populations | Requires phased reads (Beagle / FImpute style); a single mis-called SNP within a block can flip the whole haplotype id; population-specific haplotype frequencies make cross-population transfer harder than SNP transfer |
 
 The model machinery (BLUP family, Bayesian alphabet) is identical in
-form for both — what changes is **how the genotype matrix is built**.
+form for both. What changes is **how the genotype matrix is built**.
 Sections 2–4 below explain that construction; the model itself is
-covered in
-[Mixed Model & BLUP Family](mixed-model-blup-family.qmd) and
+covered in [Mixed Model & BLUP Family](mixed-model-blup-family.qmd) and
 [Bayesian Alphabet](bayesian-alphabet.qmd).
 
 ## 2. What is the form of raw data from SNPs and microhaplotypes?
 
 ### SNP genotypes
 
-Raw SNP data is a wide integer table: one row per individual, one
-column per SNP, values in $\{0, 1, 2\}$ counting the alternate-allele
-copies.
+Raw SNP data is a wide integer table: one row per individual, one column
+per SNP, values in $\{0, 1, 2\}$ counting the alternate-allele copies.
 
-| ID | SNP001 | SNP002 | SNP003 | … |
-|---|---|---|---|---|
-| ind_1 | 1 | 0 | 2 | … |
-| ind_2 | 2 | 1 | 0 | … |
-| ind_3 | 0 | 2 | 1 | … |
+| ID    | SNP001 | SNP002 | SNP003 | …   |
+|-------|--------|--------|--------|-----|
+| ind_1 | 1      | 0      | 2      | …   |
+| ind_2 | 2      | 1      | 0      | …   |
+| ind_3 | 0      | 2      | 1      | …   |
 
-Both packages consume it as an integer matrix
-($\texttt{rownames()}$ = individual IDs, $\texttt{colnames()}$ = SNP
-IDs). See [Input Data → SNP](../input-data/snp.qmd) for the bundled
-demo dataset.
+Both packages consume it as an integer matrix ($\texttt{rownames()}$ =
+individual IDs, $\texttt{colnames()}$ = SNP IDs). See [Input Data →
+SNP](../input-data/snp.qmd) for the bundled demo dataset.
 
 ### Microhaplotype genotypes
 
 For microhaplotypes, the final genotype data will be:
 
-```
+```         
 ID       hap_1_1  hap_1_1  hap_1_2  hap_1_2  hap_1_3  hap_1_3
 ind_1        2        1        1        2        3        3
 ind_2        1        3        2        2        3        2
@@ -66,24 +66,24 @@ ind_3        3        1        2        2        2        3
 ```
 
 This genotype data consists of numerical microhaplotype alleles in
-diploid format, where each number represents a unique combination of
-SNP sequences in a specific genomic block. Each locus is presented in
-two side-by-side columns to show the pair of haplotypes inherited from
-each individual's parents.
+diploid format, where each number represents a unique combination of SNP
+sequences in a specific genomic block. Each locus is presented in two
+side-by-side columns to show the pair of haplotypes inherited from each
+individual's parents.
 
 ### Why microhaplotype genotype data needs $\mathbf{W}_{\alpha h}$
 
-To construct this complex matrix,
-[Da, Y. (2015)](https://link.springer.com/article/10.1186/s12863-015-0301-1)
+To construct this complex matrix, [Da, Y.
+(2015)](https://link.springer.com/article/10.1186/s12863-015-0301-1)
 introduced a special coding system that serves to balance the
 statistical influence of each variant based on its frequency. This
 system mathematically assigns larger deviation values to rare alleles
 and smaller values to common alleles. This aims to ensure that rare
 variants have a proportional influence on genomic predictions, while
-ensuring that the average additive effect across the population
-remains zero to keep the model balanced. Technically, the coding rule
-is applied to each individual $i$ for haplotype $k$ with population
-frequency $p_k$ as follows:
+ensuring that the average additive effect across the population remains
+zero to keep the model balanced. Technically, the coding rule is applied
+to each individual $i$ for haplotype $k$ with population frequency $p_k$
+as follows:
 
 $$
 W_{i,k} = \begin{cases}
@@ -105,19 +105,19 @@ copies each individual inherited from their parents), so tools like
 (pedigree-based phasing/imputation) are crucial. For each haplotype
 block, we count how many times each allele appears across all
 individuals and divide by total haplotypes ($2n$ for $n$ individuals).
-For example, if allele 3 appears in 5 out of 200 haplotypes
-(100 individuals), its frequency is $p_k = 5/200 = 0.025$ (2.5%).
+For example, if allele 3 appears in 5 out of 200 haplotypes (100
+individuals), its frequency is $p_k = 5/200 = 0.025$ (2.5%).
 
 This standardisation ensures three critical properties. First, the
 matrix is mean-centered with $\mathbb{E}[W_k] = 0$, meaning that
 positive and negative deviations balance out across the population.
 Second, variance scales with $\text{Var}(W_k) \propto 2p_k(1-p_k)$,
 matching Hardy-Weinberg genetic expectations where intermediate-
-frequency alleles contribute most variance. Third, the haplotype
-genomic relationship matrix $\mathbf{G} = \mathbf{W}\mathbf{W}^\top /
-k_{\alpha h}$ (where $k_{\alpha h} = \text{tr}(\mathbf{G}) / n$)
-becomes comparable to SNP-based GRM by
-[VanRaden, P. M. (2008)](https://www.journalofdairyscience.org/article/S0022-0302(08)70990-1/fulltext),
+frequency alleles contribute most variance. Third, the haplotype genomic
+relationship matrix $\mathbf{G} = \mathbf{W}\mathbf{W}^\top /
+k_{\alpha h}$ (where $k_{\alpha h} = \text{tr}(\mathbf{G}) / n$) becomes
+comparable to SNP-based GRM by [VanRaden, P. M.
+(2008)](https://www.journalofdairyscience.org/article/S0022-0302(08)70990-1/fulltext),
 enabling proven statistical methods like GBLUP to work directly with
 multi-allelic markers.
 
@@ -125,27 +125,28 @@ multi-allelic markers.
 
 Consider 4 individuals genotyped at **Locus 1_1** which has 4 distinct
 alleles. Allele 2 is the most frequent (60%), chosen as baseline and
-dropped. Allele 1 (37.5%) and Allele 3 (2.5% — rare) are included in
-the matrix. Allele 4 (0%) is ignored as it is monomorphic in this
-sample.
+dropped. Allele 1 (37.5%) and Allele 3 (2.5% — rare) are included in the
+matrix. Allele 4 (0%) is ignored as it is monomorphic in this sample.
 
 **Step 1: Phased genotypes (maternal/paternal)**
 
-- ID1: 1/3 → carries two different non-baseline alleles, alleles 1 and 3
-- ID2: 1/2 → carries one non-baseline and one baseline allele, allele 1 and 2 (baseline)
-- ID3: 2/2 → homozygous for the baseline allele (allele 2)
-- ID4: 3/3 → homozygous for the rare allele (allele 3)
+-   ID1: 1/3 → carries two different non-baseline alleles, alleles 1 and
+    3
+-   ID2: 1/2 → carries one non-baseline and one baseline allele, allele
+    1 and 2 (baseline)
+-   ID3: 2/2 → homozygous for the baseline allele (allele 2)
+-   ID4: 3/3 → homozygous for the rare allele (allele 3)
 
 **Step 2: Apply coding rule**
 
-|     | Genotype | allele1 calculation | allele1 value | allele3 calculation | allele3 value |
-|-----|----------|---------------------|---------------|---------------------|---------------|
-| ID1 | 1/3      | $-(1-2 \times 0.375) = -0.25$ | **−0.25** | $-(1-2 \times 0.025) = -0.95$ | **−0.95** |
-| ID2 | 1/2      | $-(1-2 \times 0.375) = -0.25$ | **−0.25** | $2 \times 0.025 = 0.05$ | **0.05** |
-| ID3 | 2/2      | $2 \times 0.375 = 0.75$ | **0.75** | $2 \times 0.025 = 0.05$ | **0.05** |
-| ID4 | 3/3      | $2 \times 0.375 = 0.75$ | **0.75** | $-2(1-0.025) = -1.95$ | **−1.95** |
+|   | Genotype | allele1 calculation | allele1 value | allele3 calculation | allele3 value |
+|------------|------------|------------|------------|------------|------------|
+| ID1 | 1/3 | $-(1-2 \times 0.375) = -0.25$ | **−0.25** | $-(1-2 \times 0.025) = -0.95$ | **−0.95** |
+| ID2 | 1/2 | $-(1-2 \times 0.375) = -0.25$ | **−0.25** | $2 \times 0.025 = 0.05$ | **0.05** |
+| ID3 | 2/2 | $2 \times 0.375 = 0.75$ | **0.75** | $2 \times 0.025 = 0.05$ | **0.05** |
+| ID4 | 3/3 | $2 \times 0.375 = 0.75$ | **0.75** | $-2(1-0.025) = -1.95$ | **−1.95** |
 
-**Step 3: Final $\mathbf{W}_{\alpha h}$ matrix**
+**Step 3: Final** $\mathbf{W}_{\alpha h}$ matrix
 
 |     | hap_1_1_allele1 | hap_1_1_allele3 |
 |-----|-----------------|-----------------|
@@ -157,32 +158,31 @@ sample.
 The matrix $\mathbf{W}_{\alpha h}$ uses allele frequencies to "weight"
 the genotypes. Here is how to interpret the resulting values:
 
-- **Rare alleles (e.g., Allele 3 at 2.5%):** Because this allele is
-  scarce, its presence creates a massive statistical "deviation."
-    - **Carriers** (ID1 & ID4) get large negative values (**−0.95** to
-      **−1.95**), making them stand out sharply.
-    - **Non-carriers** (ID2 & ID3) get a value near zero (**0.05**),
-      meaning they stay close to the population average.
-- **Common alleles (e.g., Allele 1 at 37.5%):** Because this allele
-  is common, its presence is less surprising to the model.
-    - **Carriers** (ID1 & ID2) receive moderate negative values
-      (**−0.25**).
-    - **Non-carriers** (ID3 & ID4) receive moderate positive values
-      (**0.75**).
-    - The gap between carrier and non-carrier is smaller here because
-      the allele is less "informative" than a rare one.
+-   **Rare alleles (e.g., Allele 3 at 2.5%):** Because this allele is
+    scarce, its presence creates a massive statistical "deviation."
+    -   **Carriers** (ID1 & ID4) get large negative values (**−0.95** to
+        **−1.95**), making them stand out sharply.
+    -   **Non-carriers** (ID2 & ID3) get a value near zero (**0.05**),
+        meaning they stay close to the population average.
+-   **Common alleles (e.g., Allele 1 at 37.5%):** Because this allele is
+    common, its presence is less surprising to the model.
+    -   **Carriers** (ID1 & ID2) receive moderate negative values
+        (**−0.25**).
+    -   **Non-carriers** (ID3 & ID4) receive moderate positive values
+        (**0.75**).
+    -   The gap between carrier and non-carrier is smaller here because
+        the allele is less "informative" than a rare one.
 
 This weighting ensures rare, potentially high-impact genetic variants
-contribute more to genomic predictions than common background
-variation.
+contribute more to genomic predictions than common background variation.
 
-However, compared to biallelic markers (SNPs) that have a simple
-0/1/2 coding and only one effect per marker to estimate, multi-allelic
+However, compared to biallelic markers (SNPs) that have a simple 0/1/2
+coding and only one effect per marker to estimate, multi-allelic
 markers, such as haplotypes and microhaplotypes, have a more expanded
-parameter space. Each haplotype block can have multiple alleles
-(often 10–20 or more), and after dropping the baseline, we must
-estimate separate effects for each remaining allele. So, while the
-linear model equation seems similar:
+parameter space. Each haplotype block can have multiple alleles (often
+10–20 or more), and after dropping the baseline, we must estimate
+separate effects for each remaining allele. So, while the linear model
+equation seems similar:
 
 $$
 \mathbf{y} = \mathbf{W}_{\alpha h}\boldsymbol{\beta}_{\alpha h} + \mathbf{e}
@@ -192,8 +192,8 @@ where $\mathbf{y}$ is the phenotype vector, $\mathbf{W}_{\alpha h}$ is
 our multi-allelic matrix, $\boldsymbol{\beta}_{\alpha h}$ contains all
 allele effects, and $\mathbf{e}$ is residual error. The key difference
 is that $\boldsymbol{\beta}$ now has thousands or tens of thousands of
-parameters instead of hundreds of thousands of SNPs, but each
-parameter carries more biological information.
+parameters instead of hundreds of thousands of SNPs, but each parameter
+carries more biological information.
 
 ## 3. Matrix for models
 
@@ -207,13 +207,12 @@ proportional to a **relationship matrix** $\mathbf{K}$. With genotype
 data, $\mathbf{K} = \mathbf{G}$ is the **genomic relationship matrix
 (GRM)** — an $n \times n$ symmetric positive (semi-)definite matrix
 whose entry $G_{ij}$ captures the realised additive-genetic similarity
-between individuals $i$ and $j$. GBLUP's mixed-model equations
-(see [Henderson MME](mixed-model-blup-family.qmd#eq-mme)) require
-$\mathbf{G}^{-1}$ directly; the structure of $\mathbf{G}$ — not the
-raw marker matrix — is what enters the solve.
+between individuals $i$ and $j$. GBLUP's mixed-model equations (see
+[Henderson MME](mixed-model-blup-family.qmd#eq-mme)) require
+$\mathbf{G}^{-1}$ directly; the structure of $\mathbf{G}$ — not the raw
+marker matrix — is what enters the solve.
 
-**For SNPs (VanRaden 2008, Method 1):**
-$$
+**For SNPs (VanRaden 2008, Method 1):** $$
 \mathbf{G}_u = \frac{\mathbf{W}\mathbf{W}^\top}{2 \sum_{j=1}^{p} p_j (1 - p_j)},
 \qquad
 \mathbf{W}_{ij} = M_{ij} - 2 p_j,
@@ -224,10 +223,9 @@ The denominator scales the mean diagonal of $\mathbf{G}_u$ to
 $\approx 1 + F$, matching the pedigree $\mathbf{A}$.
 
 **For microhaplotypes:** the same construction with
-$\mathbf{W}_{\alpha h}$ from @eq-wah-coding in place of
-$\mathbf{W}$, with denominator
-$\sum_b \sum_{a=1}^{A_b - 1} 2 f_{b,a}(1 - f_{b,a})$ (sum across all
-non-baseline alleles in all blocks):
+$\mathbf{W}_{\alpha h}$ from @eq-wah-coding in place of $\mathbf{W}$,
+with denominator $\sum_b \sum_{a=1}^{A_b - 1} 2 f_{b,a}(1 - f_{b,a})$
+(sum across all non-baseline alleles in all blocks):
 
 $$
 \mathbf{G}_{\text{mh}}
@@ -239,20 +237,21 @@ $$ {#eq-g-mh}
 
 The [Bayesian Alphabet](bayesian-alphabet.qmd) (BayesA, BayesR) does
 **not** form a GRM. The regression
-$\mathbf{y} = \mathbf{W}\boldsymbol{\beta} + \boldsymbol{\epsilon}$
-is fit directly in marker space — the prior on $\boldsymbol{\beta}$
-does the shrinkage that, in GBLUP, came from $\mathbf{G}$. The matrix
-$\mathbf{W}$ must still be **centred** so the per-marker effects are
-on a common scale and the intercept absorbs the mean:
+$\mathbf{y} = \mathbf{W}\boldsymbol{\beta} + \boldsymbol{\epsilon}$ is
+fit directly in marker space — the prior on $\boldsymbol{\beta}$ does
+the shrinkage that, in GBLUP, came from $\mathbf{G}$. The matrix
+$\mathbf{W}$ must still be **centred** so the per-marker effects are on
+a common scale and the intercept absorbs the mean:
 
-- **SNPs**: VanRaden centring $W_{ij} = M_{ij} - 2 p_j$ (default in
-  `masbayes::construct_snp_matrix(encoding = "vanRaden")`), or
-  per-column z-score $W_{ij}^z = (M_{ij} - 2 p_j) / \sqrt{2 p_j (1 - p_j)}$
-  (`encoding = "zscore"`).
-- **Microhaplotypes**: the same $\mathbf{W}_{\alpha h}$ from
-  @eq-wah-coding goes straight into `masbayes::run_bayesa()` or
-  `run_bayesr()` (Bayesian variants accept multi-allelic design
-  matrices natively).
+-   **SNPs**: VanRaden centring $W_{ij} = M_{ij} - 2 p_j$ (default in
+    `masbayes::construct_snp_matrix(encoding = "vanRaden")`), or
+    per-column z-score
+    $W_{ij}^z = (M_{ij} - 2 p_j) / \sqrt{2 p_j (1 - p_j)}$
+    (`encoding = "zscore"`).
+-   **Microhaplotypes**: the same $\mathbf{W}_{\alpha h}$ from
+    @eq-wah-coding goes straight into `masbayes::run_bayesa()` or
+    `run_bayesr()` (Bayesian variants accept multi-allelic design
+    matrices natively).
 
 Bayesian methods sidestep the $\mathbf{G}^{-1}$ solve entirely, which
 matters when $p \gg n$ (BLUP gets a large dense inverse; Bayesian
@@ -260,9 +259,9 @@ samplers iterate per marker).
 
 ## 4. Important function
 
-Both packages expose builder functions for these matrices. The
-canonical demo dataset (`load_data("large")`) is used here; for
-detail, see [Input Data → SNP](../input-data/snp.qmd) and
+Both packages expose builder functions for these matrices. The canonical
+demo dataset (`load_data("large")`) is used here; for detail, see [Input
+Data → SNP](../input-data/snp.qmd) and
 [Microhaplotypes](../input-data/microhaplotypes.qmd).
 
 ### Full GRM for GBLUP (`masreml`)
@@ -324,20 +323,20 @@ W_mh <- wah$W_ah                     # n x ~149
 
 ## References
 
-- VanRaden, P. M. (2008). *Efficient methods to compute genomic
-  predictions.* Journal of Dairy Science, 91(11), 4414–4423.
-  [doi:10.3168/jds.2007-0980](https://doi.org/10.3168/jds.2007-0980).
+-   VanRaden, P. M. (2008). *Efficient methods to compute genomic
+    predictions.* Journal of Dairy Science, 91(11), 4414–4423.
+    [doi:10.3168/jds.2007-0980](https://doi.org/10.3168/jds.2007-0980).
 
-- Da, Y. (2015). *Multi-allelic haplotype model based on genetic
-  partition for genomic prediction and variance component estimation
-  using SNP markers.* BMC Genetics, 16, 144.
-  [doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1).
+-   Da, Y. (2015). *Multi-allelic haplotype model based on genetic
+    partition for genomic prediction and variance component estimation
+    using SNP markers.* BMC Genetics, 16, 144.
+    [doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1).
 
-- Browning, S. R. & Browning, B. L.
-  *Beagle 5: rapid genotype imputation and haplotype phasing.*
-  [faculty.washington.edu/browning/beagle](https://faculty.washington.edu/browning/beagle/beagle.html).
+-   Browning, S. R. & Browning, B. L. *Beagle 5: rapid genotype
+    imputation and haplotype phasing.*
+    [faculty.washington.edu/browning/beagle](https://faculty.washington.edu/browning/beagle/beagle.html).
 
-- Sargolzaei, M., Chesnais, J. P. & Schenkel, F. S. (2014).
-  *A new approach for efficient genotype imputation using information
-  from relatives.* BMC Genomics, 15, 478. FImpute software:
-  [animalbiosciences.uoguelph.ca/~msargol/fimpute](https://animalbiosciences.uoguelph.ca/~msargol/fimpute/).
+-   Sargolzaei, M., Chesnais, J. P. & Schenkel, F. S. (2014). *A new
+    approach for efficient genotype imputation using information from
+    relatives.* BMC Genomics, 15, 478. FImpute software:
+    [animalbiosciences.uoguelph.ca/\~msargol/fimpute](https://animalbiosciences.uoguelph.ca/~msargol/fimpute/).

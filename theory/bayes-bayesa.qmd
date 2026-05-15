@@ -2,61 +2,57 @@
 title: "BayesA"
 ---
 
-BayesA assigns each marker its own variance, drawn independently from a
-scaled inverse-chi-square distribution. This is the key departure from
-GBLUP: instead of every marker being shrunk by the same amount, markers
-near large-effect QTLs are allowed to "escape" the prior pull while
-markers far from any QTL are shrunk hard toward zero.
+BayesA assigns each marker its own variance. That variance is drawn from a scaled inverse-chi-square distribution. This is the key departure from GBLUP, where this model shrinks every marker by the same amount. BayesA lets markers near large-effect QTLs escape the prior pull, and it shrinks markers far from any QTL hard toward zero.
 
 ## Prior
+
+The two-layer prior on the marker effects is:
 
 $$
 \beta_j \mid \sigma_{\beta_j}^2 \sim N(0,\, \sigma_{\beta_j}^2),
 \qquad
-\sigma_{\beta_j}^2 \sim \chi^{-2}(\nu,\, S).
+\sigma_{\beta_j}^2 \sim \chi^{-2}(\nu,\, S^2).
 $$ {#eq-bayesa-prior}
 
-Integrating out $\sigma_{\beta_j}^2$ gives a **Student-$t$ marginal** on
-$\beta_j$:
+Where:
+
+-   $\beta_j$ : the effect of marker column $j$ on the trait.
+-   $\sigma_{\beta_j}^2$ : the variance of $\beta_j$, drawn separately for every marker (this is the locus-specific part).
+-   $\nu$ : the degrees-of-freedom hyperparameter of the scaled inverse-chi-square. Larger $\nu$ makes the prior closer to normal. The masbayes default $\nu$ is $4.5$.
+-   $S^2$ : the squared-scale hyperparameter. It anchors the prior to a biologically interpretable variance (see @eq-bayesa-scale below). The masbayes implementation calls this quantity `s_squared` and uses the parametrisation $E[\sigma_{\beta_j}^2] = \nu S^2/(\nu-2)$.
+
+Integrating $\sigma_{\beta_j}^2$ out of the hierarchy gives a **Student-**$t$ marginal on $\beta_j$:
 
 $$
 \beta_j \;\sim\; t\!\left(\nu,\, 0,\, S\right).
 $$
 
-The Student-$t$ has heavier tails than a normal. In practice: SNPs near a
-QTL, whose posterior $\beta_j$ is large, pull their own $\sigma_{\beta_j}^2$
-upward through the Gibbs update — they are allowed to keep a large effect.
-SNPs far from any QTL, whose $\beta_j$ stays close to zero, face strong
-shrinkage. The shrinkage is *adaptive and marker-specific*, unlike the
-uniform ridge penalty of GBLUP.
+Here $t(\nu, 0, S)$ is the location-scale Student-$t$ with $\nu$ degrees of freedom, location $0$, and scale $S$ (the square root of $S^2$). The Student-$t$ has heavier tails than a normal. The practical consequence is adaptive, marker-specific shrinkage. A SNP near a QTL has a large posterior $\beta_j$. That large $\beta_j$ pulls its own $\sigma_{\beta_j}^2$ upward in the Gibbs update, and the marker is allowed to keep a large effect. For a SNP far from any QTL, $\beta_j$ stays close to zero. The shrinkage on such a marker is strong. masbayes does not apply a uniform rule here. The implementation sets the shrinkage marker by marker.
 
-**Hyperparameter $S$ — where it comes from.**
-The scale $S$ is derived so that the prior expectation of each per-marker
-variance equals total genetic variance divided by total design variance:
+We pick the squared scale $S^2$ so that the prior expectation of each per-marker variance matches a target ratio. That target is the total genetic variance over the total design variance:
 
 $$
-S \;=\; \frac{\sigma_g^2\,(\nu - 2)}{\nu \cdot \sum_{j} \mathrm{Var}(w_j)},
+S^2 \;=\; \frac{\sigma_g^2\,(\nu - 2)}{\nu \cdot \sum_{j} \mathrm{Var}(w_j)},
 $$ {#eq-bayesa-scale}
 
-giving $E[\sigma_{\beta_j}^2] = \sigma_g^2 / \sum_j \mathrm{Var}(w_j)$.
-This anchors the prior to a biologically interpretable value. The default
-degrees of freedom $\nu = 4.5$ gives heavy tails while keeping finite
-variance; increasing $\nu$ makes the prior more normal (less heavy-tailed).
+Where:
 
-::: {.callout-note}
-BayesA *never* shrinks $\beta_j$ exactly to zero — the Student-$t$
-marginal has support on the entire real line. This makes BayesA less
-appropriate than BayesR when the true architecture is genuinely sparse
-(many true zeros). Use BayesA when you expect a *continuum* of effect
-sizes from near-zero to moderate, with no hard cutoff between "zero"
-and "non-zero" markers.
+-   $\sigma_g^2$ : the total additive genetic variance of the trait.
+-   $\sum_j \mathrm{Var}(w_j)$: the sum of column variances of the marker design matrix $\mathbf{W}$, taken across all $j$ marker columns. This is the total design variance.
+
+We then substitute this $S^2$ into the masbayes parametrisation. The result is $E[\sigma_{\beta_j}^2] = \sigma_g^2 / \sum_j \mathrm{Var}(w_j)$. The prior is now tied to something we can interpret biologically. The default $\nu = 4.5$ keeps the tails heavy and the variance finite. Raising $\nu$ pulls the prior toward a normal and softens the heavy tail.
+
+::: callout-note
+BayesA *never* shrinks $\beta_j$ exactly to zero. The Student-$t$ marginal has positive density on the whole real line. BayesA is less suited than BayesR when the true architecture is genuinely sparse (many true zeros). Use BayesA when you expect a continuum of effect sizes from near-zero to moderate, with no hard cutoff between "zero" and "non-zero" markers.
 :::
 
----
+------------------------------------------------------------------------
 
-## SNP vs Multi-allelic: W Matrix Differences
+## SNP vs Multi-allelic: W matrix differences
 
-### SNP Design Matrix
+### SNP design matrix
+
+For a biallelic SNP $j$ with reference allele frequency $p_j$, the VanRaden-centred entry is:
 
 $$
 W_{ij}^{\text{SNP}} = M_{ij} - 2p_j,
@@ -64,66 +60,55 @@ W_{ij}^{\text{SNP}} = M_{ij} - 2p_j,
 \mathrm{Var}(w_j^{\text{SNP}}) = 2p_j(1-p_j).
 $$
 
-Each column represents one biallelic locus, centred on its allele
-frequency. The denominator in @eq-bayesa-scale is
-$\sum_j 2p_j(1-p_j)$ — summed across all SNPs.
+Where:
 
-### Microhaplotype Design Matrix
+-   $M_{ij}$ : the raw genotype dosage of individual $i$ at SNP $j$, coded $\{0, 1, 2\}$ for the count of reference-allele copies.
+-   $p_j$ : the population frequency of the reference allele at SNP $j$.
+-   $W_{ij}^{\text{SNP}}$ : the centred entry that enters $\mathbf{W}$.
+-   $\mathrm{Var}(w_j^{\text{SNP}}) = 2p_j(1-p_j)$ : the variance of column $j$ of $\mathbf{W}$ under Hardy–Weinberg, used as one term in the $\sum_j \mathrm{Var}(w_j)$ that appears in @eq-bayesa-scale.
+
+Each column of $\mathbf{W}$ represents one biallelic locus. The denominator in @eq-bayesa-scale is $\sum_j 2p_j(1-p_j)$, summed across all SNPs.
+
+### Microhaplotype design matrix
+
+For a microhaplotype block, masbayes follows the Da (2015) additive coding. For individual $i$ at microhaplotype $k$ with frequency $p_k$, the entry depends on how many copies of haplotype $k$ the individual carries:
 
 $$
-\mathbf{W}_{\alpha h} \;\text{(Da 2015 additive coding)},
-\qquad
-\mathrm{Var}(w_k^{\text{MH}}) = \text{function of haplotype frequencies}.
+W_{ah}^{ij,k} = \begin{cases}
+  -2(1-p_k), & \text{if } i = j = k \quad\text{(homozygous for } k\text{)} \\
+  -(1-2p_k), & \text{if } i = k \text{ or } j = k \quad\text{(heterozygous, one copy)} \\
+  2p_k, & \text{if } i, j \neq k \quad\text{(no copies of } k\text{)}
+\end{cases}
 $$
 
-Each column represents one haplotype contrast within a block — for a
-block with $h$ haplotypes, the block contributes $h - 1$ columns. The
-denominator in @eq-bayesa-scale becomes $\sum_k \mathrm{Var}(w_k^{\text{MH}})$,
-summed across all haplotype contrast columns.
+Where:
 
-**Consequence for $S$:** Haplotype columns for rare haplotypes have small
-variance — $\mathrm{Var}(w_k) \approx 0$ for $p_k \to 0$. The sum in the
-denominator is therefore smaller for a rare-haplotype-rich microhaplotype panel than
-for an equivalent SNP panel, so $S$ inflates slightly per column. This
-gives the prior more room for rare-haplotype effects to express — the
-adjustment is automatic, requiring no manual tuning.
+-   $i, j$ : the two haplotypes carried by the individual at this block (one from each parent).
+-   $k$ : the haplotype indexed by the current column.
+-   $p_k$ : the population frequency of haplotype $k$ in this block.
+-   $W_{ah}^{ij,k}$ : the entry placed into the column-$k$ slot for an individual whose genotype is $(i, j)$.
 
----
+Under Hardy–Weinberg genotype frequencies, the expectation of every column is zero. The column is then already allele-frequency-centred without an extra step. masbayes drops the haplotype with the highest frequency in each block as the baseline. This keeps $\mathbf{W}_{ah}$ full rank. The dropped effect is then absorbed into the intercept $\mu$. The column variance $\mathrm{Var}(w_k^{\text{MH}})$ is a function of the haplotype frequencies in the block.
+
+Each column of $\mathbf{W}_{ah}$ represents one haplotype contrast within a block. A block with $h$ haplotypes contributes $h - 1$ columns. The denominator in @eq-bayesa-scale becomes $\sum_k \mathrm{Var}(w_k^{\text{MH}})$, summed across all haplotype contrast columns in the panel.
+
+**Consequence for** $S$. Columns for rare haplotypes have small variance. As $p_k \to 0$, $\mathrm{Var}(w_k) \to 0$. As a result, the denominator sum is smaller for a microhaplotype block rich in rare haplotypes than for an equivalent SNP panel. The numerator of @eq-bayesa-scale does not change. Per column, $S$ then inflates slightly. The prior gains more room for rare-haplotype effects to express themselves. The adjustment falls out of the construction. We do not tune it by hand.
+
+------------------------------------------------------------------------
 
 ## Biological Implications of SNP vs microhaplotypes
 
-A SNP effect $\beta_j$ represents the average additive substitution effect
-of one allele copy at locus $j$. A microhaplotype effect $\beta_k$ represents the
-average additive substitution effect of one *haplotype* — a specific
-combination of 2–5 SNP alleles that are already in phase within a block
-of <200 bp.
+A SNP effect $\beta_j$ represents the average additive substitution effect of one allele copy at locus $j$. A microhaplotype effect $\beta_k$ represents the average additive substitution effect of one *haplotype*, which is a specific combination of 2–5 SNP alleles that are already in phase within a block of \<200 bp.
 
-**Effect concentration.** If a QTL is in LD with a specific haplotype,
-BayesA on microhaplotype markers concentrates the posterior on that haplotype's
-column: $\hat\beta_k$ is large and $\sigma_{\beta_k}^2$ adapts upward for
-that column, while the remaining $h - 2$ columns in the same block stay
-near zero. In contrast, BayesA on SNP markers spreads the QTL signal
-across 2–5 columns — the individual SNPs that together define the
-haplotype — producing several moderate effects rather than one large one.
-Microhaplotype effects are therefore fewer but more interpretable.
+Suppose a QTL is in LD with one specific haplotype. With microhaplotype markers, masbayes concentrates the per-QTL posterior on that haplotype's column. The estimate $\hat\beta_k$ is large, and the per-marker variance $\sigma_{\beta_k}^2$ adapts upward for that column. The remaining $h - 2$ columns in the same block stay near zero. With SNP markers, this is different. The same QTL signal is spread across the SNP columns that together define the haplotype.
 
-**Stability under selection.** A haplotype block of <200 bp is rarely
-broken by recombination within a single generation. The microhaplotype column tracking
-a QTL therefore maintains its effect estimate across generations of
-selection, whereas individual SNP columns in the same region gradually
-lose LD with the QTL as recombination reshuffles the haplotype — a
-process that reduces per-SNP $\hat\beta$ magnitudes and inflates the
-number of columns with non-negligible effects over time.
+A haplotype block of \<200 bp is rarely broken by recombination within a single generation. The microhaplotype column that tracks a QTL therefore keeps its effect estimate across generations of selection. Individual SNP columns in the same region gradually lose LD with the QTL as recombination reshuffles the haplotype. Per-SNP $\hat\beta$ magnitudes shift across generations. Prediction accuracy decays by roughly 5% per generation.
 
-::: {.callout-note}
-The BayesA prior, the Gibbs sampler, and the EM algorithm are identical
-for SNP and microhaplotype inputs. Only $\mathbf{W}$ changes:
-`construct_snp_matrix()` for SNP, `construct_wah_matrix()` for microhaplotypes. The
-`marker_type` argument in `run_bayesa()` signals which variance scaling
-convention to apply when computing $S$ internally.
+::: callout-note
+The BayesA prior, the Gibbs sampler, and the EM algorithm are identical for SNP and microhaplotype inputs. Only $\mathbf{W}$ changes: `construct_snp_matrix()` for SNP, `construct_wah_matrix()` for microhaplotypes. The `marker_type` argument in `run_bayesa()` signals which variance scaling convention to apply when computing $S$ internally.
 :::
 
----
+------------------------------------------------------------------------
 
 ## See it in Code
 
@@ -203,11 +188,5 @@ summary(fit_a_mh_mcmc)
 
 ## References
 
-- Meuwissen, T. H. E., Hayes, B. J. & Goddard, M. E. (2001). Prediction
-  of total genetic value using genome-wide dense marker maps. *Genetics*,
-  157(4), 1819–1829.
-  [doi:10.1093/genetics/157.4.1819](https://doi.org/10.1093/genetics/157.4.1819).
-- Da, Y. (2015). Multi-allelic haplotype model based on genetic partition
-  for genomic prediction and variance component estimation using SNP
-  markers. *BMC Genetics*, 16, 144.
-  [doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1).
+-   Meuwissen, T. H. E., Hayes, B. J. & Goddard, M. E. (2001). Prediction of total genetic value using genome-wide dense marker maps. *Genetics*, 157(4), 1819–1829. [doi:10.1093/genetics/157.4.1819](https://doi.org/10.1093/genetics/157.4.1819).
+-   Da, Y. (2015). Multi-allelic haplotype model based on genetic partition for genomic prediction and variance component estimation using SNP markers. *BMC Genetics*, 16, 144. [doi:10.1186/s12863-015-0301-1](https://doi.org/10.1186/s12863-015-0301-1).

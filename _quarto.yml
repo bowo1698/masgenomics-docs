@@ -53,6 +53,16 @@ website:
       collapse-level: 1
       contents:
         - theory/index.qmd
+        - section: "From Phenotype to Genome"
+          href: theory/from-phenotype-to-genome.qmd
+          contents:
+            - text: "Overview"
+              href: theory/from-phenotype-to-genome.qmd
+            - theory/fpg-traditional-and-mas.qmd
+            - theory/fpg-genomic-selection.qmd
+            - theory/fpg-method-bridge.qmd
+            - theory/fpg-livestock-implementation.qmd
+            - theory/fpg-future.qmd
         - theory/biallelic-and-multiallelic.qmd
         - section: "Mixed Model & BLUP Family"
           href: theory/mixed-model-blup-family.qmd

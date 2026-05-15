@@ -1,0 +1,109 @@
+---
+title: "Genomic Selection"
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+If complex traits in livestock are governed by thousands of genes of
+small effect, and almost none of them clear the significance threshold
+used by MAS, then there is no realistic way to capture the genetic
+variance one QTL at a time. Thus, it is recommended to estimate an
+effect for every marker in the SNP panel.
+
+Genomic Selection (GS) follows from that one shift. We estimate every
+SNP effect simultaneously and skip significance testing. If roughly
+10,000 genes affect a trait, those genes are spread across the genome
+and will be tagged by many thousands of SNPs. The assumption that every
+SNP carries some effect is therefore approximately correct. The
+statistical question changes from "which markers are significant?" to
+"what is the effect at each marker?".
+
+## The three breakthroughs
+
+There are three breakthroughs that turned the GS idea into operational
+practice:
+
+::: {.callout-tip title="The three breakthroughs"}
+1.  **The GS methodology itself**: the statistical proposal that all
+    marker effects could be estimated simultaneously by treating them as
+    random effects drawn from a known distribution (Meuwissen, Hayes &
+    Goddard, 2001).
+2.  **Massive SNP discovery**: second-generation sequencing of livestock
+    genomes uncovered millions of SNPs. In cattle, the 1,000-bulls
+    sequencing project alone revealed more than 30 million SNP markers
+    (Daetwyler et al., 2014).
+3.  **Cost-effective high-throughput genotyping**: SNP-chip platforms
+    from Illumina and Affymetrix, with first-generation chips typically
+    carry about 50,000 SNPs for each major livestock species.
+:::
+
+The methodology was already in print in 2001, but it sat unused in
+practice until the second and third pieces caught up. Without millions
+of SNPs to choose from, there is nothing to tile a chip with, and
+without a cheap chip there is no way to genotype the numbers of animals
+that GS needs.
+
+## The statistical model
+
+Assuming a 50,000 SNP panel, the regression model is:
+
+$$
+y_i \;=\; \mu \;+\; X_{1i}\,b_1 \;+\; X_{2i}\,b_2 \;+\; \cdots \;+\; X_{50000,\,i}\,b_{50000} \;+\; e_i
+$$ {#eq-snp-blup}
+
+where $y_i$ is the phenotype of animal $i$, $\mu$ is the overall mean,
+$X_{ki}$ is the genotype of animal $i$ at SNP $k$, $b_k$ is the effect
+of SNP $k$, and $e_i$ is the residual.
+
+A reference population of less than 50,000 animals cannot estimate
+50,000 fixed SNP effects, so GS treats the SNP effects as random draws
+from a known distribution. This is a Bayesian framework in which the
+prior on the effects is what makes the system identifiable. The default
+prior is normally distributed effects with mean zero and a constant
+variance equal to the total genetic variance divided by the number of
+SNPs.
+
+Once the effects have been estimated on the reference population, the
+genomic estimated breeding value (GEBV) for a selection candidate $j$ is
+simply the inner product of the candidate's genotype vector with the
+estimated effects:
+
+$$
+\widehat{\mathrm{GEBV}}_j \;=\; X_{1j}\,\hat{b}_1 \;+\; X_{2j}\,\hat{b}_2 \;+\; \cdots \;+\; X_{50000,\,j}\,\hat{b}_{50000}.
+$$
+
+## Why this is a paradigm shift, not an incremental upgrade
+
+There are two structural changes that follow from the GS workflow:
+
+-   **Pedigree becomes optional.** Traditional BLUP-EBV requires
+    pedigree recording. SNP-BLUP requires the SNP genotypes of the
+    animals in the reference population and the candidates, but not the
+    pedigree of either.
+-   **Elite breeding animals no longer need to be trait-recorded.**
+    Under traditional BLUP, the selection candidates were the animals
+    most carefully phenotyped, because their own records (or records of
+    their progeny) drove their EBVs. Under GS, accurate phenotypes are
+    needed only on the reference population. The selection candidates
+    can be genotyped and ranked without ever carrying records.
+
+The GS approach has the *potential* to decouple accurate recording from
+the elite breeding population, which makes it possible to redesign the
+breeding scheme from the ground up. Whether a given national or
+commercial scheme actually exercises that potential is a separate
+operational question. Breeders gather phenotypes wherever they are
+easiest to obtain, like commercial herds, progeny-tested historical
+bulls, slaughter lines, and then base selection decisions on genotyped
+young candidates that no one has measured.
+
+## References
+
+-   Daetwyler, H. D., Capitan, A., Pausch, H., Stothard, P., van
+    Binsbergen, R., Brøndum, R. F., Liao, X., et al. (2014).
+    Whole-genome sequencing of 234 bulls facilitates mapping of
+    monogenic and complex traits in cattle. *Nature Genetics*, 46(8),
+    858–865.
+-   Meuwissen, T., Hayes, B., & Goddard, M. (2001). Prediction of total
+    genetic value using genome-wide dense marker maps. *Genetics*, 157,
+    1819–1829.
