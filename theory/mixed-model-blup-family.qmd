@@ -2,8 +2,6 @@
 title: "Mixed Model & BLUP Family (Frequency-based)"
 ---
 
-## TL;DR
-
 ::: {.callout-tip}
 All four methods in this family solve the same mixed-model equations.
 The only thing that changes is **K** — the matrix that measures
@@ -19,7 +17,7 @@ genetic similarity between individuals.
 Same MME. Four relationship matrices.
 :::
 
-## 1. Assumptions
+## Assumptions
 
 The following assumptions apply to all four methods. Where an
 assumption becomes more specific for a particular method, it is
@@ -52,7 +50,7 @@ noted in that method's page.
    a sufficiently powered training-set GWAS — an underpowered GWAS
    produces noisy weights that underperform equal weighting.
 
-## 2. General Linear Mixed Model
+## General Linear Mixed Model
 
 All four methods fit the same linear mixed model:
 
@@ -106,17 +104,7 @@ haplotype-weighted, GWAS-weighted — is a statement about which
 definition of genetic similarity best captures the architecture of
 the trait.
 
-#### References {.unnumbered}
-
-- Henderson, C. R. (1975). Best linear unbiased estimation and
-  prediction under a selection model. *Biometrics*, 31(2), 423–447.
-  [doi:10.2307/2529430](https://doi.org/10.2307/2529430).
-- Patterson, H. D. & Thompson, R. (1971). Recovery of inter-block
-  information when block sizes are unequal. *Biometrika*, 58(3),
-  545–554.
-  [doi:10.1093/biomet/58.3.545](https://doi.org/10.1093/biomet/58.3.545).
-
-## 3. Methods
+## Methods
 
 Select a page from the sidebar to read the full mathematical detail
 and code examples.
@@ -128,7 +116,7 @@ and code examples.
 | [GBLUP](blup-gblup.qmd) | SNP-GBLUP (VanRaden 2008) and Microhaplotype-GBLUP (Da 2015) |
 | [GWABLUP](blup-gwablup.qmd) | GWAS-assisted weighted GRM (Meuwissen et al. 2024) |
 
-## 4. Variance Component & h²
+## Variance Component & h²
 
 The MME requires $\lambda = \sigma_e^2/\sigma_u^2$, but these
 variance components are unknown and must be estimated from the data.
@@ -168,8 +156,11 @@ $h^2$.
   information when block sizes are unequal. *Biometrika*, 58(3),
   545–554.
   [doi:10.1093/biomet/58.3.545](https://doi.org/10.1093/biomet/58.3.545).
+- Henderson, C. R. (1975). Best linear unbiased estimation and
+  prediction under a selection model. *Biometrics*, 31(2), 423–447.
+  [doi:10.2307/2529430](https://doi.org/10.2307/2529430).
 
-## 5. When to Use
+## When to Use
 
 | Situation | Recommended method |
 |-----------|-------------------|

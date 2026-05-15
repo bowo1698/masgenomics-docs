@@ -5,8 +5,8 @@ editor:
     wrap: 72
 ---
 
-In this section, you will learn about the statistical models implemented
-across `masreml` and `masbayes`.
+In this section, you will learn about selective breeding, particularly genomic selection along with 
+the statistical models implemented across the `masreml` and `masbayes` packages.
 
 ## Pages
 

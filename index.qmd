@@ -55,7 +55,7 @@ tools, programming languages, or input formats during the analysis.
 workflow.](assets/overview-workflow.svg){fig-align="center" width="80%"}
 
 ::: callout-note
-## What is my motivation?
+## Motivation
 
 Over the last few years, many great scientists have developed
 outstanding algorithms, prediction models, etc, but often rare of them

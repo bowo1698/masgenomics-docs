@@ -2,8 +2,6 @@
 title: "Bayesian Alphabet (Probabilistic)"
 ---
 
-## TL;DR
-
 ::: {.callout-tip}
 The Bayesian alphabet places **marker-specific shrinkage priors** on the
 additive-effects vector $\boldsymbol{\beta}$. `masbayes` ships two members:

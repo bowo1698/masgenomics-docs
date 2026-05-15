@@ -37,7 +37,7 @@ Sections 2–4 below explain that construction; the model itself is
 covered in [Mixed Model & BLUP Family](mixed-model-blup-family.qmd) and
 [Bayesian Alphabet](bayesian-alphabet.qmd).
 
-## 2. What is the form of raw data from SNPs and microhaplotypes?
+## How is the form of raw data from SNPs and microhaplotypes?
 
 ### SNP genotypes
 
@@ -195,7 +195,7 @@ is that $\boldsymbol{\beta}$ now has thousands or tens of thousands of
 parameters instead of hundreds of thousands of SNPs, but each parameter
 carries more biological information.
 
-## 3. Matrix for models
+## Matrix for models
 
 Different model families consume the marker matrix in different forms.
 
@@ -257,7 +257,7 @@ Bayesian methods sidestep the $\mathbf{G}^{-1}$ solve entirely, which
 matters when $p \gg n$ (BLUP gets a large dense inverse; Bayesian
 samplers iterate per marker).
 
-## 4. Important function
+## Important function
 
 Both packages expose builder functions for these matrices. The canonical
 demo dataset (`load_data("large")`) is used here; for detail, see [Input

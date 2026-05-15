@@ -5,14 +5,6 @@ editor:
     wrap: 72
 ---
 
-## What this section covers
-
-This section covers the understanding of *why* livestock genetic
-evaluation moved from pedigree-and-record systems to genome-wide
-markers, before we enter how the genotype matrix is built, how
-mixed-model and Bayesian methods consume it, and how the response scale
-changes for binary traits.
-
 Selective breeding aims to select animals with better performance for
 economically important traits, with breeding value estimates derived
 from phenotypic records on the animal and its relatives. Marker data
@@ -21,6 +13,12 @@ then more recently through genomic selection (GS). The 2010s turned GS
 into the default evaluation strategy across dairy cattle, beef cattle,
 pigs, poultry, crops, and aquaculture. The five sub-pages below trace
 that story and place the `masreml` / `masbayes` methods inside it.
+
+Therefore, the understanding of *why* livestock genetic
+evaluation moved from pedigree-and-record systems to genome-wide
+markers is crucial, before we enter how the genotype matrix is built, how
+mixed-model and Bayesian methods consume it, and how the response scale
+changes for binary traits.
 
 ## Pages
 

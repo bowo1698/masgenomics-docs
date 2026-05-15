@@ -2,7 +2,7 @@
 title: "Continuous and Binary trait"
 ---
 
-## 1. Traits in quantitative genetics
+## Traits in quantitative genetics
 
 A **trait** (or **phenotype**) is any measurable characteristic of an
 individual that may have a genetic basis. In quantitative genetics we
@@ -57,7 +57,7 @@ prevalence is 0.5 by construction. See
 [Input Data → Phenotype](../input-data/phenotype.qmd) for previews and
 downloads.
 
-## 2. How are traits calculated?
+## How are traits calculated?
 
 The two packages compute breeding values differently depending on the
 trait type.
@@ -143,7 +143,7 @@ The two routes give nearly identical GEBVs in the common-prevalence
 regime; Laplace is faster, Albert-Chib is more robust for rare
 outcomes and gives proper posterior intervals on $\hat{p}_i$.
 
-## 3. Variance component & h²
+## Variance component & h²
 
 For continuous traits, $h^2 = \sigma_u^2 / (\sigma_u^2 + \sigma_e^2)$ is
 the heritability and `masreml`'s `summary()` reports it directly.
@@ -193,7 +193,7 @@ the `RMSE` column is computed on the probability scale, so
 $\text{RMSE}^2 \approx \text{Brier}$. The calibration slope is a one-line
 `glm(y ~ phat, family = binomial)`.
 
-## 4. When to use
+## When to use
 
 | Outcome type | Use |
 |---|---|
@@ -203,7 +203,7 @@ $\text{RMSE}^2 \approx \text{Brier}$. The calibration slope is a one-line
 | Binary, need posterior intervals on per-marker effects | masbayes (`run_bayesr(response_type = "binary")` reports PIPs on the liability scale) |
 | Need observed-scale h² for a heterogeneous case-control sample | Compute liability-scale $h_\ell^2$ then transform via @eq-h2-observed — Falconer-Lush ascertainment correction is the user's responsibility |
 
-## 5. See it in code
+## See it in code
 
 ```{r}
 #| eval: false
@@ -265,7 +265,7 @@ metrics <- evaluate_prediction(
 metrics$AUC; metrics$RMSE
 ```
 
-## 6. References
+## References
 
 - Dempster, E. R. & Lerner, I. M. (1950). *Heritability of threshold
   characters.* Genetics, 35(2), 212–236.
