@@ -519,9 +519,10 @@ final <- final[order(final$Scenario, final$Trait, final$Marker, final$Model), ]
 #| echo: false
 knitr::kable(
   final,
-  digits  = 3,
-  align   = c("l", "l", "l", "l", "r", "r", "r", "r", "r", "r", "r", "l"),
-  caption = "Combined results: 2 QTL scenarios × 2 traits × 2 markers × 4 models = 32 model fits. Train n = 200, test n = 100, h² target = 0.3, n_QTL = 10."
+  digits    = 3,
+  align     = c("l", "l", "l", "l", "r", "r", "r", "r", "r", "r", "r", "l"),
+  row.names = FALSE,
+  caption   = "Combined results: 2 QTL scenarios × 2 traits × 2 markers × 4 models = 32 model fits. Train n = 200, test n = 100, h² target = 0.3, n_QTL = 10."
 )
 ```
 
