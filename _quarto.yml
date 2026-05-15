@@ -20,7 +20,7 @@ website:
     search: true
     logo: assets/MBGs.svg
     logo-alt: "masgenomics logo"
-    logo-href: https://bowo1698.github.io/masgenomics-docs/
+    logo-href: https://bowo1698.github.io/masgenomics-docs/index.html
     title: "masgenomics"
     left:
       - href: index.qmd
@@ -160,6 +160,7 @@ format:
     highlight-style: github-dark
     fig-cap-location: bottom
     tbl-cap-location: top
+    include-after-body: assets/navbar-brand-fix.html
     smooth-scroll: true
     anchor-sections: true
     link-external-newwindow: true

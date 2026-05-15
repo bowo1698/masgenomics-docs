@@ -1,0 +1,14 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var brand = document.querySelectorAll('.navbar-brand-container a.navbar-brand');
+  brand.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var href = a.getAttribute('href');
+      if (!href) return;
+      e.preventDefault();
+      // Hard navigation bypasses any cached state.
+      window.location.assign(href);
+    });
+  });
+});
+</script>
