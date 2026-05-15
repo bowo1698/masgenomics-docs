@@ -527,39 +527,10 @@ DT::datatable(
 
 ## Analysis
 
-The primary accuracy metric is $r_{\text{test},g}$, which is the correlation
-between predicted GEBV and the true breeding value on the held-out
-test set. In every cell of the grid the best result comes from the
-marker that matches the QTL scenario.
+Simulation results support the theory of marker-QTL unit congruence. When the QTL is a combined effect of microhaplotype blocks, the accuracy of microhaplotype-based BayesR prediction reaches 0.832 for continuous traits and 0.758 for binary traits, which is 20-30% higher than that of SNPs.  This phenomenon shows that when the QTL is a combined effect of multiple microhaplotype blocks, SNPs cannot capture the QTL signal, as it disperses across all blocks.
 
-The congruence prediction holds in all four cells. The gap is
-asymmetric. SNP markers stay competitive on `QTL@SNP` continuous, with a gap of just 3%. 
-Once the QTL shifts to the haplotype block, however, they lose 25-29%.
-Microhaplotypes, in contrast, already encode the underlying SNP information, so they
-hold up well on `QTL@SNP`. Splitting a haplotype effect
-across its component SNPs dilutes the signal, and Bayesian shrinkage
-trims more columns. Accuracy drops on `QTL@MH` as a result.
+When the QTL is only a single independent SNP variant, the prediction accuracy of SNP-based BayesR reaches 0.973 for continuous traits and 0.897 for binary traits. Interestingly, although SNPs appear superior in this scenario, microhaplotypes remain quite competitive, with a smaller accuracy gap for continuous traits. This phenomenon shows that microhaplotypes can still capture the QTL signal, even though the QTL is composed of independent SNPs. 
 
-BayesR wins in every scenario and BayesA is usually second. Meanwhile, GBLUP and GWABLUP trail by
-0.10–0.30 on $r_{\text{test},g}$. The simulated
-architecture has only 10 of 100–199 columns carrying effects, which
-is genuinely sparse. The BayesR mixture-of-normals with a point mass
-at zero fits that shape, while the GBLUP equal-variance prior is
-misspecified. GWABLUP behaves like GBLUP here because n_train = 200
-is too small for the GWAS scan to produce stable per-SNP weights.
-Calibration follows the same pattern: Bayesian slopes $\hat{b}$ sit
-near 1, while GBLUP / GWABLUP on binary traits return $\hat{b}$
-between 1.95 and 4.04, a strong under-dispersion. Posterior
-heritability also tracks the truth ($\hat{h}^2_{\text{post}} =$
-0.20–0.39 against target 0.3) for the Bayesian models in matched
-cells.
+In both scenarios, the Bayesian models (BayesR and BayesA) outperform GBLUP and GWABLUP in bias calibration. GBLUP exhibits severe bias inflation, with values ​​exceeding 2.0 to 4.0 under QTL@SNP, as variance is spread uniformly across all markers rather than concentrated at the true QTL. BayesR has more calibrated predictions (bias approaching 1.0) than BayesA, due to its mixture priors that more aggressively downscale non-QTL markers toward zero. GWABLUP offers only marginal improvement over GBLUP, with the GWAS weighting step insufficient to recover the rare QTL signal captured by the full mixture prior.
 
-Indeed, The dataset was intentionally small (n_train = 200, 2 SNPs/block,
-10 QTL, $h^2 = 0.3$). Two caveats matter for generalising. Larger
-haplotype blocks should widen the `QTL@MH` gap further. Real microhaplotypes
-carry richer multi-allelic structure than the 2-SNP contrasts used here. 
-A more infinitesimal architecture (many small effects
-rather than 10 sparse ones) would compress the BayesR advantage over
-GBLUP. These results highlight that aligning the marker unit with
-the QTL unit is the largest single lever, larger than the model
-choice.
+Indeed, the dataset is small, which may not fully explain the theory, so further investigation with a larger dataset or even the real on is crucial.
