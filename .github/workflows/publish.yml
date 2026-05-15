@@ -47,13 +47,12 @@ jobs:
           ), repos = "https://packagemanager.posit.co/cran/__linux__/jammy/latest")
         shell: Rscript {0}
 
-      - name: Cache Quarto freeze
-        uses: actions/cache@v4
-        with:
-          path: _freeze
-          key: ${{ runner.os }}-freeze-${{ hashFiles('**/*.qmd') }}
-          restore-keys: ${{ runner.os }}-freeze-
-
+      # NOTE: do NOT restore _freeze from actions/cache. The freeze cache is
+      # shipped via git (see CLAUDE.md: "Task tutorial chunks evaluate
+      # locally and ship outputs via the _freeze/tasks/ cache"). A
+      # stale actions/cache restore overwrites the committed cache and
+      # forces re-execution, which fails because masbayes / masreml are
+      # not installed in CI.
       - name: Render site
         run: quarto render
 
