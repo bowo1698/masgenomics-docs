@@ -43,6 +43,8 @@ on.exit(unlink(tmp_root, recursive = TRUE), add = TRUE)
 # Helper: add YAML frontmatter to a .qmd fragment from altdoc.
 # altdoc produces headerless markdown starting with ## Title {.unnumbered}.
 # We extract the title from that first line and add a proper YAML block.
+# Also normalises any `eval=TRUE` chunk option to `eval=FALSE` — CI does not
+# install masbayes/masreml, so reference example chunks must never execute.
 add_frontmatter <- function(src_file, dst_file) {
   lines <- readLines(src_file, warn = FALSE)
   # Find the title: first line matching ^## ... {.unnumbered}
@@ -55,6 +57,13 @@ add_frontmatter <- function(src_file, dst_file) {
   }
   # Escape any double-quotes in title for YAML
   title_yaml <- gsub('"', '\\\\"', title)
+  # Force eval=FALSE on every chunk header — CI lacks the sibling packages,
+  # so altdoc's default eval=TRUE (from unwrapped @examples) would break the
+  # build. Matches both `eval=TRUE` and `eval = TRUE` (any whitespace).
+  is_chunk_header <- grepl("^```\\{[rR][ ,}]", lines)
+  lines[is_chunk_header] <- gsub("eval\\s*=\\s*TRUE",
+                                 "eval=FALSE",
+                                 lines[is_chunk_header])
   frontmatter <- c(
     "---",
     sprintf('title: "%s"', title_yaml),

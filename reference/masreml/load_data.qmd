@@ -157,7 +157,7 @@ do not need to convert back to the per-SNP file representation.
 
 
 ### Examples
-```{r, warning=FALSE, message=FALSE, eval=TRUE}
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library("masreml")
 
 d <- load_data()
