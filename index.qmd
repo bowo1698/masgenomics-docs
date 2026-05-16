@@ -78,17 +78,17 @@ marker relevance, EBV calculation for cross population or generation, and GxE in
 The lead developer has only been learning and implementing Rust for over four years,
 mostly for the backend of websites or desktop applications, and yes, this is the
 largest Rust project we have ever built for the purpose of end-to-end genomic
-selection, specifically based on multi-allelic markers. Indeed, Rust isn't
+selection, specifically based on multi-allelic markers. Indeed, Rust is not
 widely used as a backend for many current R packages (most use C++), but this
 is a good opportunity to introduce Rust as a memory-safe programming language
 for processing large genomic datasets.
 
-Within the MasBayes or MasRemL, Heavy numerical operations, such as variance component estimation, Gibbs
+Within the MasBayes or MasRemL, all heavy numerical operations, such as variance component estimation, Gibbs
 sampling, and solving linear algebra in a dense matrix, are calculated
 within the Rust kernel, while you only face the R frontend with very
 simple syntax. The concept of ownership from Rust ensures that you can
 calculate all of those heavy operations without wasting computing
-resources. This is my motivation to build a system that enables anyone
+resources. This is our motivation to build a system that enables anyone
 with limited computational resources to learn and use genomic tools for
 selective breeding in a very efficient way.
 
