@@ -18,13 +18,17 @@ Quarto](https://img.shields.io/badge/Built%20with-Quarto-2780e3?style=flat-squar
 
 ::::: hero-cards
 ::: hero-card
-[![masbayes v0.5.0](assets/masbayes.svg)](reference/masbayes/index.qmd){.hero-logo}
+[![masbayes](assets/masbayes.svg)](reference/masbayes/index.qmd){.hero-logo}
+
+<a href="https://github.com/bowo1698/masbayes/releases"><img src="https://img.shields.io/github/v/release/bowo1698/masbayes?label=release&style=flat-square&color=2780e3" alt="masbayes release"></a>
 
 [GitHub ↗](https://github.com/bowo1698/masbayes){.hero-github}
 :::
 
 ::: hero-card
-[![masreml v0.3.1](assets/masreml.svg)](reference/masreml/index.qmd){.hero-logo}
+[![masreml](assets/masreml.svg)](reference/masreml/index.qmd){.hero-logo}
+
+<a href="https://github.com/bowo1698/masreml/releases"><img src="https://img.shields.io/github/v/release/bowo1698/masreml?label=release&style=flat-square&color=2780e3" alt="masreml release"></a>
 
 [GitHub ↗](https://github.com/bowo1698/masreml){.hero-github}
 :::
@@ -39,10 +43,10 @@ single API surface.
 
 ## Welcome
 
-MasBayes and MasReml were developed to make genomic prediction more
+MasBayes and MasRemL were developed to make genomic prediction more
 flexible and reproducible. These packages support multiple methods,
-including REML-BLUP for frequentist methods and Bayesian alphabet for
-Bayesian methods. The packages also work with two marker types (**SNPs**
+including REML-BLUP for frequentist-based methods and the Bayesian alphabet for
+Bayesian statistical methods. The packages also work with two marker types (**SNPs**
 and **microhaplotypes**) and can analyse both **continuous** and
 **binary** traits.
 
@@ -57,28 +61,29 @@ workflow.](assets/overview-workflow.svg){fig-align="center" width="80%"}
 ::: callout-note
 ## Motivation
 
-Over the last few years, many great scientists have developed
-outstanding algorithms, prediction models, etc, but often rare of them
+Over the last few years, many great scientists have developed outstanding
+algorithms, prediction models, etc, but often rare of them
 share the source codes directly for reproducible analysis. Hence, this
-project is open source and free, so anyone can provide evaluation and
-improvement. Through this project, I also plan to develop more
+project is open source and free, so anyone can reproduce the same results,
+as well as providing evaluation and improvement for MasBayes and MasRemL. 
+Through this project, we also plan to develop more
 prediction models and algorithms within the two frameworks, BLUPs &
-Bayesian, to answer current challenges in genomic selection.
+Bayesian, to answer current challenges in genomic selection, such as genetic
+marker relevance, EBV calculation for cross population or generation, and GxE interaction.
 :::
 
 ::: callout-note
-## Why do I use Rust?
+## Why do we use Rust?
 
-I have only understood and implemented Rust for more than 4 years,
-mostly just for website backends or desktop applications, and yes, this
-is the largest Rust project I have ever built for the purpose of
-end-to-end genomic selection, especially based on multi-allelic markers.
-Indeed, Rust is not yet widely used as a backend for many R packages
-today (the majority use C++), but this is a good opportunity to
-introduce Rust as a memory-safe programming language for processing
-large genomic data.
+The lead developer has only been learning and implementing Rust for over four years,
+mostly for the backend of websites or desktop applications, and yes, this is the
+largest Rust project we have ever built for the purpose of end-to-end genomic
+selection, specifically based on multi-allelic markers. Indeed, Rust isn't
+widely used as a backend for many current R packages (most use C++), but this
+is a good opportunity to introduce Rust as a memory-safe programming language
+for processing large genomic datasets.
 
-Heavy numerical operations, such as variance component estimation, Gibbs
+Within the MasBayes or MasRemL, Heavy numerical operations, such as variance component estimation, Gibbs
 sampling, and solving linear algebra in a dense matrix, are calculated
 within the Rust kernel, while you only face the R frontend with very
 simple syntax. The concept of ownership from Rust ensures that you can
@@ -105,7 +110,7 @@ both packages on Linux, macOS, and Windows.
 ::: {.callout-note appearance="minimal"}
 ## **Contact**
 
-Agus Wibowo
+Lead developer & maintainer: Agus Wibowo
 
 Email: aguswibowo1698\@gmail.com or agus.wibowo\@my.jcu.edu.au
 
