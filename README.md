@@ -3,14 +3,13 @@
 Documentation site for the **masgenomics** suite, companion R packages with
 shared Rust backends for genomic prediction on SNP and microhaplotype data.
 
-- [**masbayes**](https://github.com/bowo1698/masbayes): Bayesian genomic
-  prediction (BayesA, BayesR; MCMC and EM samplers).
-- [**masreml**](https://github.com/bowo1698/masreml): REML mixed models,
-  BLUP / GBLUP / GWABLUP, GWAS, cross-validation, threshold models for
-  binary traits.
 - [**maspipeline**](https://github.com/bowo1698/maspipeline): Rust CLI
   for phasing and microhaplotype discovery; produces inputs for the two
   R packages above.
+- [**masreml**](https://github.com/bowo1698/masreml): REML-BLUP, GWAS, and GWABLUP for
+  biallelic SNP and multi-allelic markers
+- [**masbayes**](https://github.com/bowo1698/masbayes): Bayesian genomic prediction for
+  biallelic SNP and multi-allelic markers
 
 Both R packages support **SNP** and **microhaplotype** genotypes natively
 and handle **continuous** and **binary** traits through a single unified
