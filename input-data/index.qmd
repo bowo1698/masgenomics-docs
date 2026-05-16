@@ -22,8 +22,8 @@ by both sibling packages. Two scales are bundled:
 
 | Size | Individuals | SNPs | Microhaplotype blocks | $W_{ah}$ columns | QTL | Use |
 |---|---:|---:|---:|---:|---:|---|
-| **`large`** (`main`) | 200 (10 sires × 20 offspring) | 100 | 50 | ~149 | 10 | All standard examples |
-| **`small`** (`toy`) | 100 (10 sires × 10 offspring) | 50  | 25 | ~75  | 5  | Quick-start (runs in seconds) |
+| **`large`** (`main`) | 200 (10 sires × 20 offspring) | 500 | 250 | ~735 | 20 | All standard examples |
+| **`small`** (`toy`) | 100 (10 sires × 10 offspring) | 50  | 25  | ~75  | 5  | Quick-start (runs in seconds) |
 
 Both are simulated with `set.seed(42)` for the genetic stream and
 `set.seed(41)` for the within-family train/test split; re-running

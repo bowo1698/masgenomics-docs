@@ -14,7 +14,7 @@ intended for examples, vignettes, and tests.
 
 ### Usage
 
-<pre><code class='language-R'>load_data(size = c("large", "small"))
+<pre><code class='language-R'>load_data(size = c("small", "large"))
 </code></pre>
 
 
@@ -23,15 +23,15 @@ intended for examples, vignettes, and tests.
 <table>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="size">size</code></td>
 <td>
-character, either <code>"large"</code> (default) or <code>"small"</code>.
+character, either <code>"small"</code> (default) or <code>"large"</code>.
 </td></tr>
 </table>
 
 
 ### Details
 
-Two scales are bundled: <code>size = "large"</code> (default; n=200, p=100,
-n_qtl=10) and <code>size = "small"</code> (n=100, p=50, n_qtl=5) that run
+Two scales are bundled: <code>size = "large"</code> (n=200, p=500,
+n_qtl=20) and <code>size = "small"</code> (default; n=100, p=50, n_qtl=5) that run
 during <code>R CMD check --examples</code>.
 Both have the same family structure (10 full-sib families) and the
 same 12-field shape, so consumer code does not have to branch on size.
@@ -54,13 +54,13 @@ A list with the following elements (dimensions shown for
 <dt><code>snp</code></dt><dd>Integer matrix $n \times p$ of biallelic SNP
 dosages (values <code>0/1/2</code>). Rownames are individual IDs
 <code>IND001..INDn</code>; colnames are <code>SNP001..SNPp</code>.
-Dimensions: 200 x 100 (large) / 100 x 50 (small).
+Dimensions: 200 x 500 (large) / 100 x 50 (small).
 </dd>
 <dt><code>mh</code></dt><dd>Integer matrix $n \times (2 \cdot n_{blocks})$ of
 microhaplotype allele codes. Columns alternate strand 1 / strand 2
 per block. The <code>attr(mh, "block_id")</code> attribute maps each column
 to its block. Consumable directly by
-<code>construct_wah_matrix()</code>. Dimensions: 200 x 100 with 50
+<code>construct_wah_matrix()</code>. Dimensions: 200 x 500 with 250
 blocks (large) / 100 x 50 with 25 blocks (small).
 </dd>
 <dt><code>allele_freq</code></dt><dd>List with parallel vectors
@@ -83,7 +83,7 @@ offspring with their sire/dam recorded. Columns: <code>id</code>,
 <code>sire</code>, <code>dam</code>.
 </dd>
 <dt><code>qtl</code></dt><dd>List with <code>snp_idx</code>, <code>mh_idx</code>,
-<code>effects_snp</code>, <code>effects_mh</code> (each length 10 for large, 5
+<code>effects_snp</code>, <code>effects_mh</code> (each length 20 for large, 5
 for small; effects drawn from <code>rnorm</code>, unit-normalised).
 </dd>
 <dt><code>meta</code></dt><dd>List with <code>n</code>, <code>n_snp</code>, <code>n_blocks</code>,
@@ -108,7 +108,7 @@ full-sibs in <code>train_idx</code>.
 of <code>snp</code> and with the design matrix from
 <code>construct_snp_matrix()</code>. Ready to pass as the
 <code>map</code> argument to <code>run_bayesr()</code> for GWAS.
-Dimensions: 100 x 3 (large) / 50 x 3 (small).
+Dimensions: 500 x 3 (large) / 50 x 3 (small).
 </dd>
 <dt><code>map_mh</code></dt><dd>Data frame with one row per MH block. Columns
 <code>block_id</code> (character, matches
@@ -119,7 +119,7 @@ Dimensions: 100 x 3 (large) / 50 x 3 (small).
 <code>map_mh</code> unchanged into <code>run_bayesr()</code>.
 Physical positions are synthetic (5 chromosomes, 100 kb intra-chr
 SNP spacing, 1 Mb chr base offset); each block spans the two
-consecutive SNPs that built it. Dimensions: 50 x 5 (large) /
+consecutive SNPs that built it. Dimensions: 250 x 5 (large) /
 25 x 5 (small).
 </dd>
 </dl>
@@ -157,7 +157,7 @@ the recomputation of allele frequencies.
 
 
 ### Examples
-```{r, warning=FALSE, message=FALSE, eval=FALSE}
+```{r, warning=FALSE, message=FALSE, eval=TRUE}
 library("masbayes")
 
 d <- load_data()

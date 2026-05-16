@@ -48,7 +48,7 @@ with one row per SNP:
 ## Example (from the demo dataset)
 
 Demo dimensions: `r nrow(d$snp)` × `r ncol(d$snp)` (main) and 100 × 50 (toy).
-Rownames are `IND001..IND200`; colnames are `SNP001..SNP100`.
+Rownames are `IND001..IND200`; colnames are `SNP001..SNP500`.
 
 First 8 individuals × first 10 SNPs of `main/demo_data.rds`:
 
@@ -59,7 +59,7 @@ preview <- cbind(id = rownames(preview), preview)
 dt_table(preview, page = 8, scroll_x = TRUE)
 ```
 
-The full $200 \times 100$ matrix is also written as a wide CSV with an
+The full $200 \times 500$ matrix is also written as a wide CSV with an
 `id` column for plain-CSV consumers:
 
 [Download geno_G1.csv (large)](../demo-data/main/geno_G1.csv){.btn .btn-sm .btn-primary}
@@ -90,7 +90,7 @@ the same byte-identical bundle:
 # Either package's load_data() returns the canonical list.
 library(masreml)
 d <- load_data("large")                   # or "small"
-str(d$snp)                                # int [1:200, 1:100] 1 2 2 ...
+str(d$snp)                                # int [1:200, 1:500] 1 2 2 ...
 head(d$map_snp)                           # SNP / CHROM / POS
 
 # Equivalent via masbayes:

@@ -14,7 +14,7 @@ intended for examples, vignettes, and tests.
 
 ### Usage
 
-<pre><code class='language-R'>load_data(size = c("large", "small"))
+<pre><code class='language-R'>load_data(size = c("small", "large"))
 </code></pre>
 
 
@@ -23,16 +23,16 @@ intended for examples, vignettes, and tests.
 <table>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="size">size</code></td>
 <td>
-character, either <code>"large"</code> (default) or <code>"small"</code>.
+character, either <code>"small"</code> (default) or <code>"large"</code>.
 </td></tr>
 </table>
 
 
 ### Details
 
-Two scales are bundled: <code>size = "large"</code> (default; n=200, p=100,
-n_qtl=10) and <code>size = "small"</code> (n=100, p=50, n_qtl=5) that run
-during <code>R CMD check --examples</code>.
+Two scales are bundled: <code>size = "large"</code> (n=200, p=500,
+n_qtl=20) and <code>size = "small"</code> (default; n=100, p=50, n_qtl=5) that
+runs during <code>R CMD check --examples</code>.
 Both have the same family structure (10 full-sib families) and the
 same 12-field shape, so consumer code does not have to branch on size.
 
@@ -56,7 +56,7 @@ A list with the following elements (dimensions shown for
 dosages (values <code>0/1/2</code>). Rownames are individual IDs
 <code>IND001..INDn</code>; colnames are <code>SNP001..SNPp</code>. Passes
 directly into <code>masreml(markers = list(snp_add = snp))</code>
-and <code>build_G_snp()</code>. Dimensions: 200 x 100 (large) /
+and <code>build_G_snp()</code>. Dimensions: 200 x 500 (large) /
 100 x 50 (small).
 </dd>
 <dt><code>mh</code></dt><dd>Integer matrix $n \times (2 \cdot n_{blocks})$ of
@@ -64,7 +64,7 @@ microhaplotype allele codes. Columns alternate strand 1 / strand 2
 per block. The <code>attr(mh, "block_id")</code> attribute maps each column
 to its block. Consumable directly by
 <code>build_G_mh(mh_list = mh)</code> via the haplotype-matrix
-auto-detection path. Dimensions: 200 x 100 with 50 blocks (large) /
+auto-detection path. Dimensions: 200 x 500 with 250 blocks (large) /
 100 x 50 with 25 blocks (small).
 </dd>
 <dt><code>allele_freq</code></dt><dd>List with parallel vectors
@@ -87,7 +87,7 @@ offspring with their sire/dam recorded. Passes directly into
 <code>dam</code>.
 </dd>
 <dt><code>qtl</code></dt><dd>List with <code>snp_idx</code>, <code>mh_idx</code>,
-<code>effects_snp</code>, <code>effects_mh</code> (each length 10 for large, 5
+<code>effects_snp</code>, <code>effects_mh</code> (each length 20 for large, 5
 for small; effects drawn from <code>rnorm</code>, unit-normalised).
 </dd>
 <dt><code>meta</code></dt><dd>List with <code>n</code>, <code>n_snp</code>, <code>n_blocks</code>,
@@ -111,7 +111,7 @@ full-sibs in <code>train_idx</code>.
 chromosome id, 1..5), <code>POS</code> (integer base-pair position).
 Synthetic 5-chromosome layout with 100 kb intra-chromosome spacing;
 deterministic, no RNG. Passes directly into GWAS / Manhattan-plot
-consumers (e.g. <span class="pkg">CMplot</span>). Dimensions: 100 x 3 (large) /
+consumers (e.g. <span class="pkg">CMplot</span>). Dimensions: 500 x 3 (large) /
 50 x 3 (small).
 </dd>
 <dt><code>map_mh</code></dt><dd>Data frame with one row per microhaplotype block.
@@ -119,7 +119,7 @@ Columns: <code>block_id</code> (matches <code>unique(attr(mh, "block_id"))</code
 <code>chr</code>, <code>start_pos</code>, <code>end_pos</code>, <code>n_snps</code>. Schema
 mirrors the <span class="pkg">maspipeline</span> output
 <code>microhaplotype_coordinates.csv</code> so production pipelines can
-consume <code>d\$map_mh</code> without translation. Dimensions: 50 x 5
+consume <code>d\$map_mh</code> without translation. Dimensions: 250 x 5
 (large) / 25 x 5 (small).
 </dd>
 </dl>
@@ -157,7 +157,7 @@ do not need to convert back to the per-SNP file representation.
 
 
 ### Examples
-```{r, warning=FALSE, message=FALSE, eval=FALSE}
+```{r, warning=FALSE, message=FALSE, eval=TRUE}
 library("masreml")
 
 d <- load_data()

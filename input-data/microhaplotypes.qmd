@@ -61,7 +61,7 @@ The companion **MH coordinate map** (`d$map_mh` /
 
 ## Example (from the demo dataset)
 
-`d$mh` is `r nrow(d$mh)` × `r ncol(d$mh)` (main; 50 blocks × 2 strands
+`d$mh` is `r nrow(d$mh)` × `r ncol(d$mh)` (main; 250 blocks × 2 strands
 × 200 individuals) and 100 × 50 (toy). Each value is one of `{4, 5, 7,
 8}` because each block has 2 SNPs and each SNP allele is in `{1, 2}` —
 the four possible encoded haplotype ids.
@@ -164,7 +164,7 @@ dt_table(af, page = 15)
 library(masreml)   # or masbayes
 d <- load_data("large")
 
-dim(d$mh)                       # 200 100
+dim(d$mh)                       # 200 500
 attr(d$mh, "block_id")[1:6]     # "block_1" "block_1" "block_2" "block_2" ...
 head(d$map_mh)
 ```
