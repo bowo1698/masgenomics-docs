@@ -2,25 +2,35 @@
 title: "masbayes Rust modules"
 ---
 
-## Module map
+The Rust kernel powering `masbayes` is split into eight focused modules.
+Each section below is the module-level documentation extracted directly
+from the corresponding `.rs` file by
+[`_scripts/extract-rust-docs.R`](https://github.com/bowo1698/masgenomics-docs/blob/main/_scripts/extract-rust-docs.R),
+so this page stays in sync with the source.
 
-::: {.callout-note}
-TODO: list of Rust files with one-line description each.
-:::
+For per-function signatures and private-item details, build the full
+`cargo doc` HTML locally:
 
-## Key entry points
+```bash
+cd masbayes/src/rust && cargo doc --no-deps --document-private-items --open
+```
 
-- {{< rust-src masbayes lib.rs >}} — extendr export macros
-- {{< rust-src masbayes bayesa.rs >}} — BayesA Gibbs sampler (MCMC)
-- {{< rust-src masbayes bayesa_em.rs >}} — BayesA EM (MAP estimate)
-- {{< rust-src masbayes bayesr.rs >}} — BayesR Gibbs sampler (MCMC, 4-class mixture)
-- {{< rust-src masbayes bayesr_em.rs >}} — BayesR EM (MAP with soft class responsibilities)
-- {{< rust-src masbayes matrix.rs >}} — W matrix builders (W, W_alpha_h)
-- {{< rust-src masbayes types.rs >}} — shared types / fit-result structs
-- {{< rust-src masbayes utils.rs >}} — RNG, log-density helpers
+## Package overview
 
-## FFI boundary
+{{< include _extracted/masbayes/lib.qmd >}}
 
-::: {.callout-note}
-TODO: describe what types cross R↔Rust and why.
-:::
+## Module reference
+
+{{< include _extracted/masbayes/matrix.qmd >}}
+
+{{< include _extracted/masbayes/bayesa.qmd >}}
+
+{{< include _extracted/masbayes/bayesa_em.qmd >}}
+
+{{< include _extracted/masbayes/bayesr.qmd >}}
+
+{{< include _extracted/masbayes/bayesr_em.qmd >}}
+
+{{< include _extracted/masbayes/utils.qmd >}}
+
+{{< include _extracted/masbayes/types.qmd >}}

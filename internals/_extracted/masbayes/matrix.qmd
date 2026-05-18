@@ -1,0 +1,42 @@
+### `matrix.rs` {#sec-masbayes-matrix}
+
+{{< rust-src masbayes matrix.rs >}}
+
+Design-matrix construction for multi-allelic microhaplotype markers.
+
+#### Pipeline
+
+1. **Per-block encoding** — for each haplotype locus (block) and each
+   non-baseline microhaplotype $k$, the entry $W_{i,k}$ for individual
+   $i$ is filled with the Da (2015) three-value coding rule (Eqs.
+   22–24): $-2(1-p_k)$ when the individual is homozygous for $k$,
+   $-(1-2p_k)$ when heterozygous, $+2p_k$ when $k$ is absent.
+2. **Baseline drop** — the most frequent microhaplotype per locus is
+   used as the contrast reference and excluded from the columns; its
+   effect is absorbed by the intercept $\mu$ in downstream models.
+3. **Frequency-weighted row shrinkage** — see
+   [`frequency_weighted_row_shrinkage`]. Applied per locus after
+   encoding; partially reduces the alignment between each individual
+   row and the locus's allele-frequency vector.
+
+#### Equivalence with VanRaden
+
+Da's three-value rule can be written in closed form as
+$W_{i,k} = 2 p_k - n_{i,k}$, where $n_{i,k} \in \{0,1,2\}$ is the dosage
+of microhaplotype $k$ in individual $i$. This is the per-allele
+VanRaden centering with the sign flipped, stacked across all
+non-baseline microhaplotypes within the locus.
+
+#### Train / test alignment
+
+`WMatrixBuilder` accepts a `ReferenceStructure` for test-set encoding so
+that allele frequencies and the choice of baseline microhaplotype come
+from the training set, not the test set itself. Re-estimating $p_k$ on
+test data would shift the centering and bias GEBVs — never do that.
+
+#### Reference
+
+Da, Y. (2015). Multi-allelic haplotype model based on genetic partition
+for genomic prediction and variance component estimation using SNP
+markers. *BMC Genetics*, 16:144.
+

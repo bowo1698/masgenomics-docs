@@ -2,25 +2,68 @@
 title: "masreml Rust modules"
 ---
 
-## Module map
+The Rust kernel powering `masreml` is organised into four top-level
+groups (`matrix/`, `reml/`, `solver/`, `gwas/`) plus a thin `lib.rs`
+binding layer. Each section below is the module-level documentation
+extracted directly from the corresponding `.rs` file by
+[`_scripts/extract-rust-docs.R`](https://github.com/bowo1698/masgenomics-docs/blob/main/_scripts/extract-rust-docs.R),
+so this page stays in sync with the source.
 
-::: {.callout-note}
-TODO: list of Rust files with one-line description each.
-:::
+For per-function signatures and private-item details, build the full
+`cargo doc` HTML locally:
 
-## Key entry points
+```bash
+cd masreml/src/rust && cargo doc --no-deps --document-private-items --open
+```
 
-- {{< rust-src masreml lib.rs >}} — extendr export macros
-- {{< rust-src masreml reml/mod.rs >}} — REML solver dispatch (HE, EM, AI, HI, adaptive)
-- {{< rust-src masreml reml/ai_reml.rs >}} — Average-Information REML iteration
-- {{< rust-src masreml reml/em_reml.rs >}} — Expectation-Maximisation REML iteration
-- {{< rust-src masreml reml/he_regression.rs >}} — Haseman-Elston regression
-- {{< rust-src masreml solver/mod.rs >}} — MME solver dispatch (Cholesky, PCG)
-- {{< rust-src masreml matrix/mod.rs >}} — relationship-matrix builders (G_snp, G_mh, A_ped, D_snp)
-- {{< rust-src masreml gwas/mod.rs >}} — GWAS implementation (EMMAX + smoothing)
+## Package overview
 
-## FFI boundary
+{{< include _extracted/masreml/lib.qmd >}}
 
-::: {.callout-note}
-TODO: describe what types cross R↔Rust and why.
-:::
+## Relationship matrices (`matrix/`)
+
+{{< include _extracted/masreml/matrix-mod.qmd >}}
+
+{{< include _extracted/masreml/matrix-snp_additive.qmd >}}
+
+{{< include _extracted/masreml/matrix-snp_dominance.qmd >}}
+
+{{< include _extracted/masreml/matrix-mh_additive.qmd >}}
+
+{{< include _extracted/masreml/matrix-pedigree.qmd >}}
+
+## Variance-component estimation (`reml/`)
+
+{{< include _extracted/masreml/reml-mod.qmd >}}
+
+{{< include _extracted/masreml/reml-he_regression.qmd >}}
+
+{{< include _extracted/masreml/reml-ai_reml.qmd >}}
+
+{{< include _extracted/masreml/reml-em_reml.qmd >}}
+
+{{< include _extracted/masreml/reml-adaptive.qmd >}}
+
+## EBV / BLUP solvers (`solver/`)
+
+{{< include _extracted/masreml/solver-mod.qmd >}}
+
+{{< include _extracted/masreml/solver-cholesky.qmd >}}
+
+{{< include _extracted/masreml/solver-pcg.qmd >}}
+
+{{< include _extracted/masreml/solver-factorized.qmd >}}
+
+## GWAS (`gwas/`)
+
+{{< include _extracted/masreml/gwas-mod.qmd >}}
+
+{{< include _extracted/masreml/gwas-emmax.qmd >}}
+
+{{< include _extracted/masreml/gwas-smoother.qmd >}}
+
+## Utilities (`utils/`)
+
+{{< include _extracted/masreml/utils-mod.qmd >}}
+
+{{< include _extracted/masreml/utils-linalg.qmd >}}

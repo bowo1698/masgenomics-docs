@@ -1,0 +1,52 @@
+### `bayesr.rs` {#sec-masbayes-bayesr}
+
+{{< rust-src masbayes bayesr.rs >}}
+
+BayesR Gibbs sampler.
+
+#### Model
+
+Marker effects follow a four-component mixture of normals (a spike at
+zero plus three slab components scaled relative to the total genetic
+variance):
+
+```text
+y = 1·μ + X·α + W·β + ε,             ε ~ N(0, σ²_e · I)
+β_j | γ_j = c ~ N(0, vᶜ · σ²_g),     vᶜ ∈ {0, 1e-4, 1e-3, 1e-2}
+γ_j        ~ Categorical(π),          γ_j ∈ {1, 2, 3, 4}
+π          ~ Dirichlet(α₀)
+σ²_e, σ²_g ~ InvGamma(·, ·)
+```
+
+Component 1 is the spike (`vᶜ = 0`, exactly zero effect); components 2–4
+are slabs of increasing variance. Sparsity comes from the high prior
+mass on the spike under the Dirichlet, while large-effect markers
+escape into one of the slabs.
+
+#### Sampling steps (per Gibbs iteration)
+
+1. For each marker $j$, draw the mixture label $\gamma_j$ from its
+   full conditional categorical (probabilities proportional to the
+   marginal likelihood under each component × $\pi_c$).
+2. Conditional on $\gamma_j = c$, draw $\beta_j$ from its normal
+   full conditional (zero when `vᶜ = 0`).
+3. Update $\pi$ via Dirichlet–Multinomial conjugacy:
+   $\pi \mid \gamma \sim \mathrm{Dirichlet}(\alpha_0 + n_c)$ with
+   $n_c$ tabulated by `tabulate(gamma, 4)`.
+4. Update $\sigma²_g$ and $\sigma²_e$ from their inverse-gamma full
+   conditionals.
+5. Update the intercept $\mu$ and (optional) fixed effects $\alpha$.
+6. (Binary trait) Albert–Chib augmentation step on latent liabilities.
+
+#### State management
+
+Identical strategy to BayesA: keep an incremental working residual
+`yadj` updated after every coordinate move so $W\beta$ is never
+recomputed from scratch within a sweep.
+
+#### Output
+
+`BayesRRunner::run` returns [`BayesRResults`] with posterior samples
+of all parameters, mixture allocations $\gamma$, mixture weights $\pi$,
+and derived quantities (genetic variance, heritability).
+

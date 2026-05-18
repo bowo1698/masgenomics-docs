@@ -1,9 +1,12 @@
 project:
   type: website
   output-dir: _site
+  pre-render:
+    - Rscript _scripts/extract-rust-docs.R
   render:
     - "*.qmd"
     - "!_scripts/"
+    - "!internals/_extracted/"
 
 website:
   title: "masgenomics"

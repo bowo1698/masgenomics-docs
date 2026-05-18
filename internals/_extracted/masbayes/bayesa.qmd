@@ -1,0 +1,52 @@
+### `bayesa.rs` {#sec-masbayes-bayesa}
+
+{{< rust-src masbayes bayesa.rs >}}
+
+BayesA Gibbs sampler.
+
+#### Model
+
+For a continuous trait,
+
+```text
+y = 1·μ + X·α + W·β + ε,        ε ~ N(0, σ²_e · I)
+β_j | σ²_j ~ N(0, σ²_j)
+σ²_j      ~ InvChi2(ν, S²),     S² = σ²_β / L  (scaled)
+σ²_e      ~ InvGamma(a₀_e, b₀_e)
+```
+
+Marginalising the per-marker variance yields a $t_\nu$-shrunk effect
+distribution, which is the defining feature of BayesA relative to
+ridge regression / BayesC. The prior on `σ²_j` is informative
+(default `ν = 4.5`) so the posterior contracts toward small effects
+unless data demand otherwise.
+
+#### Sampling steps (per Gibbs iteration)
+
+1. Update marker effects $\beta_j$ one at a time from their full
+   conditionals (Normal with mean and variance involving `wtw_diag[j]`,
+   `σ²_e`, `σ²_j`, and the working residual `yadj`).
+2. Update per-marker variances $\sigma²_j$ from
+   $\mathrm{InvChi2}(\nu + 1, (\nu S² + \beta_j²) / (\nu + 1))$.
+3. Update residual variance $\sigma²_e$ from
+   $\mathrm{InvGamma}(a_0 + n/2,\, b_0 + \|y - \hat{y}\|^2 / 2)$.
+4. Update intercept $\mu$ from its normal full conditional given the
+   residual mean.
+5. (Optional) Update fixed effects $\alpha$ component-wise from normal
+   full conditionals using `xtx_diag`.
+6. (Binary trait) Albert–Chib step: sample latent liabilities $z$ from
+   truncated normals consistent with the observed binary response.
+
+#### State management
+
+`BayesARunner` keeps a single working residual vector `yadj = y - μ -
+X·α - W·β` (or `z - …` for binary traits) updated incrementally after
+every coordinate move. This avoids recomputing the full $W\beta$
+product at each iteration, which is the main reason the kernel is fast.
+
+#### Output
+
+`BayesARunner::run` returns [`BayesAResults`] containing posterior
+samples (after burn-in / thinning) of all parameters, plus posterior
+means and derived quantities (`sigma2_g`, `h2`).
+

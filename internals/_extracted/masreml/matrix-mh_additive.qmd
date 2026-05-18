@@ -1,0 +1,42 @@
+### `matrix/mh_additive.rs` {#sec-masreml-matrix-mh_additive}
+
+{{< rust-src masreml matrix/mh_additive.rs >}}
+
+Multi-allelic additive relationship matrix $G_{\alpha h}$ (Da, 2015).
+
+Builds the $n \times n$ additive G matrix from phased microhaplotype
+data, locus by locus:
+
+1. Compute training-set allele frequencies $p_k$ per locus.
+2. Choose the most frequent microhaplotype as the baseline and drop it
+   from the design matrix (identifiability constraint).
+3. Encode the remaining $h - 1$ microhaplotypes with the Da (2015)
+   three-value rule into a per-locus $W_l$ matrix.
+4. Apply the per-locus
+   [`frequency_weighted_row_shrinkage`] — see its docstring for the
+   precise definition; identical to the equivalent step in `masbayes`.
+5. Optionally scale each locus by `sqrt(weight_l)` for GWABLUP.
+6. Accumulate $G_{\alpha h} = \sum_l W_l W_l^\top$ and the scaling
+   constant $k_{\alpha h} = \mathrm{tr}(G_{\alpha h}) / n$, returning
+   the normalised matrix $G_{\alpha h} / k_{\alpha h}$.
+
+#### Train / test alignment
+
+Allele frequencies and baseline microhaplotypes are taken from the
+reference (training) data when `ref_hap1` / `ref_hap2` are supplied;
+otherwise they are computed from the data being encoded. Always pass
+training references when encoding a test set — see the discussion in
+[`crate::matrix::snp_additive`] for the analogous SNP case.
+
+#### Parallelism
+
+Locus-level $W_l$ encoding is parallelised over individuals via rayon.
+The outer loop over loci is sequential because each locus accumulates
+into the shared $G$ matrix.
+
+#### Reference
+
+Da, Y. (2015). Multi-allelic haplotype model based on genetic partition
+for genomic prediction and variance component estimation using SNP
+markers. *BMC Genetics*, 16:144.
+
