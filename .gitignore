@@ -3,9 +3,6 @@ _site/
 .quarto/
 
 # Freeze cache: generally regenerated locally on render.
-# EXCEPT: tutorial chunks under tasks/ call masreml/masbayes which CI does not
-# install. Their freeze cache (cached chunk outputs + figures) must be shipped
-# alongside the qmd source so CI renders from cache. See CLAUDE.md, rule 7.
 _freeze/*
 !_freeze/tasks
 
