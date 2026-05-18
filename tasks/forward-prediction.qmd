@@ -296,7 +296,11 @@ marker_colors <- c(SNP = "#56B4E9", MH = "#E69F00")
 ```{r}
 #| label: forward-prediction-accuracy
 #| eval: true
-#| echo: false
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show plot code"
+#| message: false
+#| warning: false
 #| fig-width: 9
 #| fig-height: 6
 #| fig-cap: "Forward prediction accuracy r(GEBV, TBV) +/- bootstrap SE per (scenario, architecture, model, marker). Significance markers next to the microhaplotype error bar (right edge) test whether the microhaplotype and SNP correlation differs significantly within the same (scenario, architecture, model) triplet: * p<0.05, ** p<0.01, *** p<0.001, ns otherwise."
@@ -330,7 +334,11 @@ ggplot(plot_df, aes(x = r_test_g, y = Model, color = Marker)) +
 ```{r}
 #| label: forward-prediction-reliability
 #| eval: true
-#| echo: false
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show plot code"
+#| message: false
+#| warning: false
 #| fig-width: 9
 #| fig-height: 6
 #| fig-cap: "Reliability (r²) of the microhaplotype cell relative to its SNP-marker baseline within the same (scenario, architecture, model) triplet. 1.0 = SNP baseline (dashed line); >1.0 = microhaplotype explains more variance, <1.0 = SNP explains more. Dot-only; uncertainty is reported on the accuracy panel above."
