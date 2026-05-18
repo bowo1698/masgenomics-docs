@@ -30,10 +30,6 @@ suppressPackageStartupMessages({
   library(masbayes)
 })
 
-# Same two configurations as ../tools/make_demo_data.R. Kept verbatim so
-# `main` / `toy` outputs here remain byte-identical to the upstream
-# `inst/extdata/demo_data{,_small}.rds`. If upstream changes, sync the
-# values here in lockstep.
 CONFIGS <- list(
   main = list(
     n_sires            = 10L,
@@ -597,6 +593,418 @@ out_root <- if (basename(script_dir) == "demo-data") {
   file.path(script_dir, "demo-data")
 }
 
+# ──────────────────────────────────────────────────────────────────────────
+# Multi-generation extension
+#
+# Loads AlphaSimR + optiSel + masbayes, then defines:
+#   * mg3_*() helpers — naming-prefixed to avoid clashing with the
+#     single-generation helpers above
+#   * mg3_generate(cfg) — full 3-generation pipeline
+# Called inside the per-size loop to attach `$multigen` to the local RDS.
+# AlphaSimR 2.0.0 / optiSel 2.1.0 idioms used (load-bearing — see
+# tools/make_demo_data_3gen.R for the rationale and discovery history):
+#   * runMacs2() not runMacs() for Ne control
+#   * SP$switchGenMap(list_of_named_vectors) — `SP$genMap` is read-only
+#   * AlphaSimR functions inside a non-global function need
+#     `simParam = SP` explicitly; gv() is the exception
+#   * pedigree `Born` column must be integer generation index (1L, 2L, 3L)
+#   * `cand$mean$sKin` (scalar) for average kinship
+# ──────────────────────────────────────────────────────────────────────────
+suppressPackageStartupMessages({
+  library(AlphaSimR); library(optiSel)
+})
+
+
+MG3_CONFIGS <- list(
+  small = list(
+    n_founders = 50L,
+    n_gen1_crosses = 10L, n_gen1_progeny = 10L,
+    n_gen2_crosses = 10L, n_gen2_progeny = 10L,
+    n_gen3_crosses = 10L, n_gen3_progeny = 10L,
+    n_chr = 5L, n_snp_per_chr = 10L,
+    n_blocks = 25L, n_snp_per_block = 2L,
+    n_qtl = 5L, h2 = 0.5,
+    Ne = 100L, target_dF = 0.01, seed = 42L
+  ),
+  large = list(
+    n_founders = 100L,
+    n_gen1_crosses = 10L, n_gen1_progeny = 20L,
+    n_gen2_crosses = 20L, n_gen2_progeny = 10L,
+    n_gen3_crosses = 20L, n_gen3_progeny = 10L,
+    n_chr = 5L, n_snp_per_chr = 100L,
+    n_blocks = 250L, n_snp_per_block = 2L,
+    n_qtl = 20L, h2 = 0.5,
+    Ne = 100L, target_dF = 0.01, seed = 42L
+  )
+)
+
+mg3_encode_hap <- function(mat) {
+  apply(mat, 1L, function(x) sum(x * 3L ^ (seq_along(x) - 1L)))
+}
+mg3_standardise <- function(x) (x - mean(x)) / sd(x)
+mg3_standardise_to <- function(x, ref) (x - mean(ref)) / sd(ref)
+mg3_simulate_y <- function(tbv, sex_codes, sigma2_e,
+                            sex_effect_target = 0.5) {
+  e <- rnorm(length(tbv), 0, sqrt(sigma2_e))
+  y_base <- tbv + e
+  y_base + sex_codes * (sex_effect_target * sd(y_base))
+}
+
+mg3_haplo_to_hap_block <- function(haplo, n_blocks, n_snp_per_block) {
+  n_ind <- nrow(haplo) %/% 2L
+  s1 <- haplo[seq(1, nrow(haplo), by = 2), , drop = FALSE]
+  s2 <- haplo[seq(2, nrow(haplo), by = 2), , drop = FALSE]
+  hap_block <- matrix(0L, n_ind, 2L * n_blocks)
+  af_h <- character(); af_a <- integer(); af_f <- numeric()
+  block_id <- character(2L * n_blocks)
+  for (b in seq_len(n_blocks)) {
+    rng <- ((b - 1L) * n_snp_per_block + 1L):(b * n_snp_per_block)
+    h1 <- mg3_encode_hap(s1[, rng, drop = FALSE])
+    h2 <- mg3_encode_hap(s2[, rng, drop = FALSE])
+    hap_block[, 2L * b - 1L] <- h1
+    hap_block[, 2L * b]      <- h2
+    block_id[c(2L * b - 1L, 2L * b)] <- paste0("block_", b)
+    tbl <- table(c(h1, h2))
+    af_h <- c(af_h, rep(paste0("block_", b), length(tbl)))
+    af_a <- c(af_a, as.integer(names(tbl)))
+    af_f <- c(af_f, as.numeric(tbl) / sum(tbl))
+  }
+  storage.mode(hap_block) <- "integer"
+  attr(hap_block, "block_id") <- block_id
+  list(hap_block = hap_block,
+       allele_freq = data.frame(haplotype = af_h, allele = af_a,
+                                 freq = af_f, stringsAsFactors = FALSE),
+       block_id = block_id)
+}
+
+mg3_run_ocs <- function(pop, phenotype, kinship_mat, target_dF) {
+  phen <- data.frame(
+    Indiv = pop@id,
+    Sex   = ifelse(pop@sex == "M", "male", "female"),
+    yBV   = as.numeric(phenotype),
+    isCandidate = TRUE, stringsAsFactors = FALSE)
+  cand <- candes(phen = phen, sKin = kinship_mat, quiet = TRUE)
+  cur <- cand$mean$sKin
+  oc <- opticont(method = "max.yBV", cand = cand,
+                 con = list(ub.sKin = cur + target_dF),
+                 quiet = TRUE, trace = FALSE)
+  list(contributions = oc$parent,
+       current_aveKin = cur, target_aveKin = cur + target_dF,
+       realised_aveKin = oc$mean$sKin)
+}
+
+mg3_cross_plan <- function(oc, n_crosses, seed) {
+  set.seed(seed)
+  ctab <- oc$contributions
+  sires <- ctab[ctab$Sex == "male"   & ctab$oc > 0, ]
+  dams  <- ctab[ctab$Sex == "female" & ctab$oc > 0, ]
+  cbind(sample(sires$Indiv, n_crosses, replace = TRUE, prob = sires$oc),
+        sample(dams$Indiv,  n_crosses, replace = TRUE, prob = dams$oc))
+}
+
+mg3_extract_geno <- function(pop, SP, cfg) {
+  snp_g <- pullSegSiteGeno(pop, simParam = SP)
+  storage.mode(snp_g) <- "integer"
+  rownames(snp_g) <- pop@id
+  colnames(snp_g) <- sprintf("SNP%03d", seq_len(ncol(snp_g)))
+  hap_g <- pullSegSiteHaplo(pop, simParam = SP)
+  storage.mode(hap_g) <- "integer"
+  hb <- mg3_haplo_to_hap_block(hap_g, cfg$n_blocks,
+                                cfg$n_snp_per_block)$hap_block
+  rownames(hb) <- pop@id
+  list(snp = snp_g, hap_block = hb)
+}
+
+mg3_combined_ref <- function(hap_block_g1, hap_block_g2, cfg, block_id) {
+  hap_combined <- rbind(hap_block_g1, hap_block_g2)
+  af_h <- character(); af_a <- integer(); af_f <- numeric()
+  for (b in seq_len(cfg$n_blocks)) {
+    alleles_b <- as.vector(hap_combined[, c(2L * b - 1L, 2L * b)])
+    tbl <- table(alleles_b)
+    af_h <- c(af_h, rep(paste0("block_", b), length(tbl)))
+    af_a <- c(af_a, as.integer(names(tbl)))
+    af_f <- c(af_f, as.numeric(tbl) / sum(tbl))
+  }
+  af <- data.frame(haplotype = af_h, allele = af_a, freq = af_f,
+                   stringsAsFactors = FALSE)
+  wah <- construct_wah_matrix(hap_combined, block_id, af, NULL, TRUE)
+  list(allele_freq = af, wah = wah)
+}
+
+
+mg3_generate <- function(cfg) {
+
+  set.seed(cfg$seed)
+
+  founderPop <- runMacs2(nInd = cfg$n_founders, nChr = cfg$n_chr,
+                         segSites = cfg$n_snp_per_chr, Ne = cfg$Ne)
+
+  SP <- SimParam$new(founderPop)
+  n_blocks_per_chr <- cfg$n_blocks %/% cfg$n_chr
+  block_offset <- seq(0, by = 0.05, length.out = n_blocks_per_chr)
+  new_pos <- rep(block_offset, each = cfg$n_snp_per_block)
+  gen_map_list <- lapply(seq_len(cfg$n_chr), function(chr) {
+    v <- new_pos; names(v) <- names(SP$genMap[[chr]]); v
+  })
+  SP$switchGenMap(gen_map_list)
+  SP$setSexes("yes_sys")
+  SP$addTraitA(nQtlPerChr = cfg$n_qtl %/% cfg$n_chr, mean = 0, var = 1)
+  SP$setVarE(h2 = cfg$h2)
+
+  pop0 <- newPop(founderPop, simParam = SP)
+  pop1 <- randCross(pop0, nCrosses = cfg$n_gen1_crosses,
+                    nProgeny = cfg$n_gen1_progeny, simParam = SP)
+  pop1 <- setPheno(pop1, h2 = cfg$h2, simParam = SP)
+
+  snp_gen1 <- pullSegSiteGeno(pop1, simParam = SP)
+  storage.mode(snp_gen1) <- "integer"
+  rownames(snp_gen1) <- pop1@id
+  colnames(snp_gen1) <- sprintf("SNP%03d", seq_len(ncol(snp_gen1)))
+  y_qtl_snp_gen1   <- as.numeric(pheno(pop1)[, 1])
+  tbv_qtl_snp_gen1 <- as.numeric(gv(pop1)[, 1])
+
+  haplo_gen1 <- pullSegSiteHaplo(pop1, simParam = SP)
+  storage.mode(haplo_gen1) <- "integer"
+  mh_pack <- mg3_haplo_to_hap_block(haplo_gen1, cfg$n_blocks,
+                                     cfg$n_snp_per_block)
+  hap_block_gen1 <- mh_pack$hap_block
+  rownames(hap_block_gen1) <- pop1@id
+  allele_freq_gen1 <- mh_pack$allele_freq
+  block_id <- mh_pack$block_id
+
+  wah_gen1 <- construct_wah_matrix(hap_block_gen1, block_id,
+                                    allele_freq_gen1, NULL, TRUE)
+  W_ah_gen1 <- wah_gen1$W_ah
+
+  set.seed(cfg$seed + 100L)
+  qtl_mh_idx <- sort(sample.int(ncol(W_ah_gen1), cfg$n_qtl))
+  effects_mh <- { r <- rnorm(cfg$n_qtl); r / sqrt(sum(r ^ 2)) }
+  beta_mh    <- rep(0, ncol(W_ah_gen1)); beta_mh[qtl_mh_idx] <- effects_mh
+  tbv_mh_raw_gen1 <- as.numeric(W_ah_gen1 %*% beta_mh)
+  tbv_qtl_mh_gen1 <- mg3_standardise(tbv_mh_raw_gen1)
+
+  sigma2_e <- (1 - cfg$h2) / cfg$h2
+  sex_codes_gen1 <- as.integer(pop1@sex == "M")
+  set.seed(cfg$seed + 200L)
+  y_qtl_mh_gen1 <- mg3_simulate_y(tbv_qtl_mh_gen1, sex_codes_gen1, sigma2_e)
+
+  ped_ocs1 <- data.frame(
+    Indiv = c(pop0@id, pop1@id),
+    Sire = c(rep(NA_character_, pop0@nInd),
+             ifelse(pop1@father == "0", NA_character_, pop1@father)),
+    Dam  = c(rep(NA_character_, pop0@nInd),
+             ifelse(pop1@mother == "0", NA_character_, pop1@mother)),
+    Sex  = c(ifelse(pop0@sex == "M", "male", "female"),
+             ifelse(pop1@sex == "M", "male", "female")),
+    Born = c(rep(1L, pop0@nInd), rep(2L, pop1@nInd)),
+    stringsAsFactors = FALSE
+  )
+  K_ocs1 <- pedIBD(ped_ocs1)
+  ocs1_snp <- mg3_run_ocs(pop1, y_qtl_snp_gen1, K_ocs1, cfg$target_dF)
+  ocs1_mh  <- mg3_run_ocs(pop1, y_qtl_mh_gen1,  K_ocs1, cfg$target_dF)
+
+  cp_snp <- mg3_cross_plan(ocs1_snp, cfg$n_gen2_crosses, cfg$seed + 1000L)
+  cp_mh  <- mg3_cross_plan(ocs1_mh,  cfg$n_gen2_crosses, cfg$seed + 2000L)
+  pop2_snp <- makeCross(pop1, crossPlan = cp_snp,
+                        nProgeny = cfg$n_gen2_progeny, simParam = SP)
+  pop2_mh  <- makeCross(pop1, crossPlan = cp_mh,
+                        nProgeny = cfg$n_gen2_progeny, simParam = SP)
+
+  g2_snp_geno <- mg3_extract_geno(pop2_snp, SP, cfg)
+  g2_mh_geno  <- mg3_extract_geno(pop2_mh,  SP, cfg)
+
+  wah_gen2_mh <- construct_wah_matrix(g2_mh_geno$hap_block, block_id, NULL,
+                                       reference_structure = wah_gen1)
+
+  tbv_qtl_snp_gen2_std <- mg3_standardise_to(
+    as.numeric(gv(pop2_snp)[, 1]), tbv_qtl_snp_gen1)
+  tbv_qtl_mh_gen2_std <- mg3_standardise_to(
+    as.numeric(wah_gen2_mh$W_ah %*% beta_mh), tbv_mh_raw_gen1)
+
+  sex_codes_g2_snp <- as.integer(pop2_snp@sex == "M")
+  sex_codes_g2_mh  <- as.integer(pop2_mh@sex  == "M")
+  set.seed(cfg$seed + 3000L)
+  y_qtl_snp_gen2 <- mg3_simulate_y(tbv_qtl_snp_gen2_std, sex_codes_g2_snp,
+                                    sigma2_e)
+  set.seed(cfg$seed + 4000L)
+  y_qtl_mh_gen2 <- mg3_simulate_y(tbv_qtl_mh_gen2_std, sex_codes_g2_mh,
+                                   sigma2_e)
+
+  ref_combined_snp <- mg3_combined_ref(hap_block_gen1, g2_snp_geno$hap_block,
+                                        cfg, block_id)
+  ref_combined_mh  <- mg3_combined_ref(hap_block_gen1, g2_mh_geno$hap_block,
+                                        cfg, block_id)
+
+  snp_centring_mean_gen1          <- colMeans(snp_gen1)
+  snp_centring_mean_gen1_gen2_snp <- colMeans(rbind(snp_gen1, g2_snp_geno$snp))
+  snp_centring_mean_gen1_gen2_mh  <- colMeans(rbind(snp_gen1, g2_mh_geno$snp))
+
+  build_ped_ocs2 <- function(pop2, base_ped) {
+    rbind(base_ped, data.frame(
+      Indiv = pop2@id,
+      Sire  = ifelse(pop2@father == "0", NA_character_, pop2@father),
+      Dam   = ifelse(pop2@mother == "0", NA_character_, pop2@mother),
+      Sex   = ifelse(pop2@sex    == "M", "male", "female"),
+      Born = 3L, stringsAsFactors = FALSE))
+  }
+  K_ocs2_snp <- pedIBD(build_ped_ocs2(pop2_snp, ped_ocs1))
+  K_ocs2_mh  <- pedIBD(build_ped_ocs2(pop2_mh,  ped_ocs1))
+  ocs2_snp <- mg3_run_ocs(pop2_snp, y_qtl_snp_gen2, K_ocs2_snp,
+                           cfg$target_dF)
+  ocs2_mh  <- mg3_run_ocs(pop2_mh,  y_qtl_mh_gen2,  K_ocs2_mh,
+                           cfg$target_dF)
+
+  cp3_snp <- mg3_cross_plan(ocs2_snp, cfg$n_gen3_crosses, cfg$seed + 5000L)
+  cp3_mh  <- mg3_cross_plan(ocs2_mh,  cfg$n_gen3_crosses, cfg$seed + 6000L)
+  pop3_snp <- makeCross(pop2_snp, crossPlan = cp3_snp,
+                        nProgeny = cfg$n_gen3_progeny, simParam = SP)
+  pop3_mh  <- makeCross(pop2_mh,  crossPlan = cp3_mh,
+                        nProgeny = cfg$n_gen3_progeny, simParam = SP)
+
+  g3_snp_geno <- mg3_extract_geno(pop3_snp, SP, cfg)
+  g3_mh_geno  <- mg3_extract_geno(pop3_mh,  SP, cfg)
+
+  # TBV gen-3 MH uses W_αh aligned to gen-1 ref (β_mh column space).
+  wah_gen3_mh_via_gen1ref <- construct_wah_matrix(
+    g3_mh_geno$hap_block, block_id, NULL, reference_structure = wah_gen1)
+
+  tbv_qtl_snp_gen3_std <- mg3_standardise_to(
+    as.numeric(gv(pop3_snp)[, 1]), tbv_qtl_snp_gen1)
+  tbv_qtl_mh_gen3_std <- mg3_standardise_to(
+    as.numeric(wah_gen3_mh_via_gen1ref$W_ah %*% beta_mh), tbv_mh_raw_gen1)
+
+  sex_codes_g3_snp <- as.integer(pop3_snp@sex == "M")
+  sex_codes_g3_mh  <- as.integer(pop3_mh@sex  == "M")
+  set.seed(cfg$seed + 7000L)
+  y_qtl_snp_gen3 <- mg3_simulate_y(tbv_qtl_snp_gen3_std, sex_codes_g3_snp,
+                                    sigma2_e)
+  set.seed(cfg$seed + 8000L)
+  y_qtl_mh_gen3 <- mg3_simulate_y(tbv_qtl_mh_gen3_std, sex_codes_g3_mh,
+                                   sigma2_e)
+
+  realised_h2_fn <- function(tbv, y) var(tbv) / var(y)
+
+  pedigree <- data.frame(
+    id   = c(pop0@id, pop1@id, pop2_snp@id, pop2_mh@id,
+             pop3_snp@id, pop3_mh@id),
+    sire = c(rep(NA_character_, pop0@nInd),
+             ifelse(pop1@father     == "0", NA, pop1@father),
+             ifelse(pop2_snp@father == "0", NA, pop2_snp@father),
+             ifelse(pop2_mh@father  == "0", NA, pop2_mh@father),
+             ifelse(pop3_snp@father == "0", NA, pop3_snp@father),
+             ifelse(pop3_mh@father  == "0", NA, pop3_mh@father)),
+    dam  = c(rep(NA_character_, pop0@nInd),
+             ifelse(pop1@mother     == "0", NA, pop1@mother),
+             ifelse(pop2_snp@mother == "0", NA, pop2_snp@mother),
+             ifelse(pop2_mh@mother  == "0", NA, pop2_mh@mother),
+             ifelse(pop3_snp@mother == "0", NA, pop3_snp@mother),
+             ifelse(pop3_mh@mother  == "0", NA, pop3_mh@mother)),
+    stringsAsFactors = FALSE
+  )
+
+  list(
+    gen1 = list(
+      snp = snp_gen1, mh = hap_block_gen1, allele_freq = allele_freq_gen1,
+      pheno = data.frame(id = pop1@id,
+                         sex = factor(c("F","M")[sex_codes_gen1 + 1L]),
+                         y_cont_qtl_snp = y_qtl_snp_gen1,
+                         y_cont_qtl_mh  = y_qtl_mh_gen1,
+                         tbv_qtl_snp    = tbv_qtl_snp_gen1,
+                         tbv_qtl_mh     = tbv_qtl_mh_gen1,
+                         stringsAsFactors = FALSE),
+      sire_of = pop1@father, dam_of = pop1@mother),
+    gen2_snp = list(
+      snp = g2_snp_geno$snp, mh = g2_snp_geno$hap_block,
+      allele_freq = allele_freq_gen1,
+      pheno = data.frame(id = pop2_snp@id,
+                         sex = factor(c("F","M")[sex_codes_g2_snp + 1L]),
+                         y_cont_qtl_snp = y_qtl_snp_gen2,
+                         tbv_qtl_snp_true = tbv_qtl_snp_gen2_std,
+                         stringsAsFactors = FALSE),
+      sire_of = pop2_snp@father, dam_of = pop2_snp@mother),
+    gen2_mh = list(
+      snp = g2_mh_geno$snp, mh = g2_mh_geno$hap_block,
+      allele_freq = allele_freq_gen1,
+      pheno = data.frame(id = pop2_mh@id,
+                         sex = factor(c("F","M")[sex_codes_g2_mh + 1L]),
+                         y_cont_qtl_mh = y_qtl_mh_gen2,
+                         tbv_qtl_mh_true = tbv_qtl_mh_gen2_std,
+                         stringsAsFactors = FALSE),
+      sire_of = pop2_mh@father, dam_of = pop2_mh@mother),
+    gen3_snp = list(
+      snp = g3_snp_geno$snp, mh = g3_snp_geno$hap_block,
+      allele_freq = ref_combined_snp$allele_freq,
+      pheno = data.frame(id = pop3_snp@id,
+                         sex = factor(c("F","M")[sex_codes_g3_snp + 1L]),
+                         y_cont_qtl_snp = y_qtl_snp_gen3,
+                         tbv_qtl_snp_true = tbv_qtl_snp_gen3_std,
+                         stringsAsFactors = FALSE),
+      sire_of = pop3_snp@father, dam_of = pop3_snp@mother),
+    gen3_mh = list(
+      snp = g3_mh_geno$snp, mh = g3_mh_geno$hap_block,
+      allele_freq = ref_combined_mh$allele_freq,
+      pheno = data.frame(id = pop3_mh@id,
+                         sex = factor(c("F","M")[sex_codes_g3_mh + 1L]),
+                         y_cont_qtl_mh = y_qtl_mh_gen3,
+                         tbv_qtl_mh_true = tbv_qtl_mh_gen3_std,
+                         stringsAsFactors = FALSE),
+      sire_of = pop3_mh@father, dam_of = pop3_mh@mother),
+    qtl = list(
+      mh_idx = qtl_mh_idx, effects_mh = effects_mh, beta_mh = beta_mh,
+      snp_centring_mean_gen1          = snp_centring_mean_gen1,
+      snp_centring_mean_gen1_gen2_snp = snp_centring_mean_gen1_gen2_snp,
+      snp_centring_mean_gen1_gen2_mh  = snp_centring_mean_gen1_gen2_mh),
+    reference_structure_gen1          = wah_gen1,
+    reference_structure_gen1_gen2_snp = ref_combined_snp$wah,
+    reference_structure_gen1_gen2_mh  = ref_combined_mh$wah,
+    pedigree = pedigree,
+    ocs = list(
+      snp = list(gen1_to_gen2 = ocs1_snp, gen2_to_gen3 = ocs2_snp),
+      mh  = list(gen1_to_gen2 = ocs1_mh,  gen2_to_gen3 = ocs2_mh)),
+    meta = list(
+      n_gen1 = pop1@nInd,
+      n_gen2_snp = pop2_snp@nInd, n_gen2_mh = pop2_mh@nInd,
+      n_gen3_snp = pop3_snp@nInd, n_gen3_mh = pop3_mh@nInd,
+      n_snp = ncol(snp_gen1), n_blocks = cfg$n_blocks,
+      n_snp_per_block = cfg$n_snp_per_block, n_qtl = cfg$n_qtl,
+      h2_target = cfg$h2,
+      realised_h2_gen1_snp = realised_h2_fn(tbv_qtl_snp_gen1,
+                                             y_qtl_snp_gen1),
+      realised_h2_gen1_mh  = realised_h2_fn(tbv_qtl_mh_gen1,
+                                             y_qtl_mh_gen1),
+      realised_h2_gen2_snp = realised_h2_fn(tbv_qtl_snp_gen2_std,
+                                             y_qtl_snp_gen2),
+      realised_h2_gen2_mh  = realised_h2_fn(tbv_qtl_mh_gen2_std,
+                                             y_qtl_mh_gen2),
+      realised_h2_gen3_snp = realised_h2_fn(tbv_qtl_snp_gen3_std,
+                                             y_qtl_snp_gen3),
+      realised_h2_gen3_mh  = realised_h2_fn(tbv_qtl_mh_gen3_std,
+                                             y_qtl_mh_gen3),
+      target_dF = cfg$target_dF, seed = cfg$seed,
+      package_versions = list(
+        AlphaSimR = as.character(packageVersion("AlphaSimR")),
+        optiSel   = as.character(packageVersion("optiSel")),
+        masbayes  = as.character(packageVersion("masbayes")))
+    )
+  )
+}
+
+mg3_label_for <- function(size_label) {
+  if (size_label == "main") "large" else "small"
+}
+
+merge_multigen_layer <- function(local_path, size_label) {
+  mg3_cfg <- MG3_CONFIGS[[mg3_label_for(size_label)]]
+  cat(sprintf("  multigen          : building (%s) ...\n",
+              mg3_label_for(size_label)))
+  demo_3gen <- mg3_generate(mg3_cfg)
+  local_data <- readRDS(local_path)
+  local_data$multigen <- demo_3gen
+  saveRDS(local_data, local_path)
+  cat("  multigen          : merged into local RDS\n")
+  invisible(TRUE)
+}
+
 for (size_label in sizes) {
   cfg <- CONFIGS[[size_label]]
   out_dir <- file.path(out_root, size_label)
@@ -631,5 +1039,6 @@ for (size_label in sizes) {
               cfg$n_train_per_family, cfg$n_test_per_family))
   cat(sprintf("  written           : %s\n",
               file.path(out_dir, cfg$out_file)))
+  merge_multigen_layer(file.path(out_dir, cfg$out_file), size_label)
   cat("\n")
 }

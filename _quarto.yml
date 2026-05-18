@@ -113,6 +113,7 @@ website:
             - tasks/gwas/masreml.qmd
             - tasks/gwas/masbayes.qmd
         - tasks/marker-qtl-congruency.qmd
+        - tasks/forward-prediction.qmd
     - title: "Internals"
       collapse-level: 1
       contents:

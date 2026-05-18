@@ -55,10 +55,17 @@ d    <- readRDS(path)
 d    <- readRDS("demo-data/main/demo_data.rds")
 ```
 
-`d` is a named list with 12 slots: `snp`, `mh`, `allele_freq`, `pheno`,
+`d` is a named list with 13 slots. Twelve carry the
+single-generation demo (`snp`, `mh`, `allele_freq`, `pheno`,
 `pedigree`, `qtl`, `meta`, `family_id`, `train_idx`, `test_idx`,
-`map_snp`, `map_mh`. The four subpages describe each slot's schema and
-common ways to construct it from your own data.
+`map_snp`, `map_mh`) — the four subpages describe each schema and
+common ways to construct it from your own data. The thirteenth slot,
+`multigen`, holds a 3-generation forward-prediction extension
+(`gen1`, `gen2_snp`, `gen2_mh`, `gen3_snp`, `gen3_mh`, three
+`reference_structure_*` objects, plus an OCS log) used by
+[`tasks/forward-prediction.qmd`](../tasks/forward-prediction.qmd).
+Single-generation tasks are unaffected: legacy code that touches
+`d$snp` etc. ignores the nested `d$multigen` entirely.
 
 ## Within-family train/test split
 
@@ -97,8 +104,10 @@ on the subpages.
 
 ## Regenerating locally
 
-`demo-data/generate.R` requires `library(masbayes)` (uses
-`construct_wah_matrix()`):
+`demo-data/generate.R` is self-contained — it builds both the
+single-generation layer and the multi-generation `$multigen`
+extension end-to-end in one pass. Requires `masbayes` (uses
+`construct_wah_matrix()`), `AlphaSimR`, and `optiSel`:
 
 ```bash
 Rscript demo-data/generate.R main toy   # both sizes
@@ -107,4 +116,6 @@ Rscript demo-data/generate.R toy        # small only
 ```
 
 Re-running emits the same `.rds` byte-for-byte (`set.seed()` at the
-top of every config).
+top of every config). The combined dual-layer file matches what the
+sibling packages ship under `inst/extdata/`, so `load_data()` from
+either `masbayes` or `masreml` returns the same list.

@@ -534,4 +534,6 @@ When the QTL is only a single independent SNP variant, the prediction accuracy o
 
 In both scenarios, the Bayesian models (BayesR and BayesA) outperform GBLUP and GWABLUP in bias calibration. GBLUP exhibits severe bias inflation, with values ​​exceeding 2.0 to 4.0 under QTL@SNP, as variance is spread uniformly across all markers rather than concentrated at the true QTL. BayesR has more calibrated predictions (bias approaching 1.0) than BayesA, due to its mixture priors that more aggressively downscale non-QTL markers toward zero. GWABLUP offers only marginal improvement over GBLUP, with the GWAS weighting step insufficient to recover the rare QTL signal captured by the full mixture prior.
 
-Indeed, the dataset is small, which may not fully explain the theory, so further investigation with a larger dataset or even the real on is crucial.
+::: callout-note
+It should be noted, however, that the genotype data used in this analysis were generated through simulation and may not fully reflect the properties of empirical genotype data. In practice, the number of microhaplotype blocks that can be constructed depends on the density of SNPs within short physical windows (i.e., 150 bp), and regions containing only a single SNP within the defined window length cannot form a valid microhaplotype block. The effective marker density and genomic coverage of a microhaplotype panel may therefore differ considerably across species, sequencing platforms, and target enrichment designs, which could influence the magnitude of the advantages reported here.
+:::
