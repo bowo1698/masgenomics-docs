@@ -1,0 +1,411 @@
+---
+title: "Genomic prediction with masbayes"
+---
+
+📐 **Theory:** [Bayesian Alphabet](../../theory/bayesian-alphabet.qmd) ·
+[BayesA](../../theory/bayes-bayesa.qmd) ·
+[BayesR](../../theory/bayes-bayesr.qmd) ·
+[MCMC & EM](../../theory/bayes-mcmc-em.qmd) ·
+[Continuous and Binary Trait](../../theory/continuous-and-binary-trait.qmd)
+
+This tutorial fits Bayesian genomic prediction with `masbayes`:
+BayesA (Student-$t$ prior, continuous shrinkage) and BayesR (4-class
+mixture prior, sparse selection), via both MCMC and EM, on SNP and
+phased microhaplotype data. Cross-validation in `masbayes` is **manual**
+— the package exposes single-fit functions only — so a worked-out CV
+loop is included.
+
+## Setup
+
+```{r}
+#| message: false
+#| warning: false
+library(masbayes)
+library(masreml)         # for evaluate_prediction() — reused on Bayesian GEBVs
+library(ggplot2)
+library(knitr)
+
+d <- load_data("large")
+
+y       <- setNames(d$pheno$y_cont_qtl_snp, d$pheno$id)
+X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
+
+# Tutorial-scale MCMC params (same as masbayes/examples/04_gwas.R).
+# Production runs should use n_iter = 20000, n_burn = 5000, n_thin = 5L.
+mcmc <- list(n_iter = 2000L, n_burn = 1000L, n_thin = 5L, seed = 42L)
+```
+
+::: {.callout-note}
+**Production MCMC**. The chunks below use `n_iter = 2000` for fast
+tutorial rendering. For published analyses on real-data scale, use
+`n_iter = 20000`, `n_burn = 5000`, `n_thin = 5L` (or longer) and
+inspect trace plots before trusting posterior summaries.
+:::
+
+## SNP workflow
+
+### Build the design matrix W
+
+The Bayesian fitters take a pre-standardised design matrix $\mathbf{W}$;
+the per-column sum-of-squares $\mathbf{w}'\mathbf{w}$ is computed internally,
+so you no longer pass it. `construct_snp_matrix()` returns a list — extract `$W`.
+
+```{r}
+snp_pack <- construct_snp_matrix(d$snp, encoding = "vanRaden")
+W_snp    <- snp_pack$W
+str(snp_pack)
+```
+
+### BayesA — full fit (MCMC)
+
+BayesA assigns each SNP its own variance drawn from a scaled
+inverse-$\chi^2$. The marginal prior on $\beta_j$ is Student-$t$ with
+heavy tails — markers in real QTL regions are allowed to keep large
+effects, while distant markers are shrunk hard.
+
+```{r}
+fit_a_mcmc <- run_bayesa(
+  w             = W_snp,
+  y             = y,
+  X             = X_fixed,
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian",
+  mcmc_params   = mcmc,
+  verbose       = FALSE
+)
+
+summary(fit_a_mcmc)
+```
+
+Inspect the posterior mean of marker effects:
+
+```{r}
+#| fig-width: 7
+#| fig-height: 3.5
+ggplot(data.frame(idx = seq_along(fit_a_mcmc$beta_hat),
+                  beta = fit_a_mcmc$beta_hat),
+       aes(x = idx, y = beta)) +
+  geom_point(alpha = 0.7, size = 1) +
+  labs(x = "SNP index", y = expression(hat(beta)),
+       title = "BayesA — posterior-mean SNP effects") +
+  theme_minimal()
+```
+
+```{r}
+kable(data.frame(metric = c("Heritability (h²)",
+                            "Residual variance",
+                            "Genetic variance"),
+                 value  = c(fit_a_mcmc$h2,
+                            fit_a_mcmc$sigma2_e,
+                            fit_a_mcmc$sigma2_g)),
+      digits  = 4,
+      caption = "BayesA — variance components and h²")
+```
+
+### Predict on held-out candidates
+
+```{r}
+train_idx <- d$train_idx
+test_idx  <- d$test_idx
+
+fit_a_train <- run_bayesa(
+  w             = W_snp[train_idx, , drop = FALSE],
+  y             = y[train_idx],
+  X             = X_fixed[train_idx, , drop = FALSE],
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = var(y[train_idx]) * 0.5,
+  sigma2_e_init = var(y[train_idx]) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian",
+  mcmc_params   = mcmc,
+  verbose       = FALSE
+)
+
+pred_a <- predict(
+  fit_a_train,
+  newdata = W_snp[test_idx, , drop = FALSE],
+  X_new   = X_fixed[test_idx, , drop = FALSE],
+  y_new   = y[test_idx]
+)
+
+kable(as.data.frame(pred_a$metrics),
+      digits  = 4,
+      caption = "BayesA — held-out test accuracy")
+```
+
+### BayesA — EM (MAP, faster)
+
+For point estimates without posterior samples, switch `method = "em"`.
+EM converges in tens of iterations; MCMC typically wants thousands.
+
+```{r}
+fit_a_em <- run_bayesa(
+  w             = W_snp,
+  y             = y,
+  X             = X_fixed,
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "em",
+  response_type = "gaussian",
+  verbose       = FALSE
+)
+summary(fit_a_em)
+```
+
+EM returns the MAP $\hat\beta$ and point estimates of variance
+components, but no posterior intervals. Use MCMC when you need
+uncertainty quantification (or PIPs, for BayesR).
+
+### BayesR — full fit (MCMC)
+
+BayesR replaces the heavy-tailed continuous prior with a discrete
+4-class mixture (zero / small / medium / large). `pi_vec` is the
+prior mixture proportions; the conventional starting point is
+`c(0.95, 0.02, 0.02, 0.01)`. `sigma2_ah` sets the total genetic
+variance scale.
+
+```{r}
+fit_r_mcmc <- run_bayesr(
+  w             = W_snp,
+  y             = y,
+  X             = X_fixed,
+  marker_type   = "snp",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian",
+  mcmc_params   = mcmc,
+  verbose       = FALSE
+)
+
+summary(fit_r_mcmc)
+```
+
+The posterior of $\pi$ tells you how concentrated the trait
+architecture is — a high $\hat\pi_0$ (fraction in the zero class)
+indicates a sparse architecture; a low $\hat\pi_0$ a polygenic one:
+
+```{r}
+kable(as.data.frame(fit_r_mcmc$variance_components),
+      digits  = 4,
+      caption = "BayesR — class-wise variance components")
+```
+
+For per-marker GWAS-style output (PIPs and WPPA windows), pass
+`map` and one of `windsize` / `windnum` — see the
+[GWAS with masbayes](../gwas/masbayes.qmd) page.
+
+### BayesR — EM
+
+```{r}
+fit_r_em <- run_bayesr(
+  w             = W_snp,
+  y             = y,
+  X             = X_fixed,
+  marker_type   = "snp",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = var(y) * 0.5,
+  sigma2_e_init = var(y) * 0.5,
+  method        = "em",
+  response_type = "gaussian",
+  verbose       = FALSE
+)
+summary(fit_r_em)
+```
+
+EM-BayesR returns hard class assignments and a MAP $\hat\beta$. It is
+the right choice for very large $p$ where MCMC mixing is the
+bottleneck, but loses PIP and posterior intervals.
+
+### Cross-validation (manual loop)
+
+`masbayes` does not provide a `cv_*` wrapper — write the loop
+explicitly. The pattern below uses BayesA but swap to `run_bayesr()`
+without changing the scaffold (add `pi_vec` / `sigma2_ah`).
+
+```{r}
+set.seed(42L)
+n      <- nrow(W_snp)
+K      <- 5L
+folds  <- sample(rep(seq_len(K), length.out = n))
+
+gebv_test  <- rep(NA_real_, n)
+
+for (k in seq_len(K)) {
+  tr <- which(folds != k)
+  te <- which(folds == k)
+
+  W_tr   <- W_snp[tr, , drop = FALSE]
+
+  fit_k <- run_bayesa(
+    w             = W_tr,
+    y             = y[tr],
+    X             = X_fixed[tr, , drop = FALSE],
+    marker_type   = "snp",
+    nu            = 4.5,
+    sigma2_g      = var(y[tr]) * 0.5,
+    sigma2_e_init = var(y[tr]) * 0.5,
+    method        = "mcmc",
+    response_type = "gaussian",
+    mcmc_params   = list(n_iter = 1000L, n_burn = 500L, n_thin = 5L,
+                         seed = 42L + k),
+    verbose       = FALSE
+  )
+
+  pred_k <- predict(
+    fit_k,
+    newdata = W_snp[te, , drop = FALSE],
+    X_new   = X_fixed[te, , drop = FALSE]
+  )
+
+  gebv_test[te] <- pred_k$GEBV
+}
+
+kable(evaluate_prediction(gebv = gebv_test, y = y),
+      digits  = 4,
+      caption = "Manual 5-fold CV — BayesA")
+```
+
+The chunk uses a shortened `n_iter = 1000` to keep the CV loop fast.
+Each fold sets a different seed so the chains explore independently.
+
+### Binary trait
+
+For 0/1 phenotypes, set `response_type = "binary"`. Albert-Chib data
+augmentation samples a latent liability variable; the fit object
+carries `prob_train` and (after `predict()`) `prob_test` with
+$\hat{p}_i = P(y_i = 1)$.
+
+```{r}
+y_bin <- setNames(as.double(d$pheno$y_bin_qtl_snp), d$pheno$id)
+
+fit_a_bin <- run_bayesa(
+  w             = W_snp,
+  y             = y_bin,
+  X             = X_fixed,
+  marker_type   = "snp",
+  nu            = 4.5,
+  sigma2_g      = 1.0,
+  sigma2_e_init = 1.0,
+  method        = "mcmc",
+  response_type = "binary",
+  mcmc_params   = mcmc,
+  verbose       = FALSE
+)
+
+summary(fit_a_bin)
+```
+
+```{r}
+fit_r_bin <- run_bayesr(
+  w             = W_snp,
+  y             = y_bin,
+  X             = X_fixed,
+  marker_type   = "snp",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = 1.0,
+  sigma2_e_init = 1.0,
+  method        = "mcmc",
+  response_type = "binary",
+  mcmc_params   = mcmc,
+  verbose       = FALSE
+)
+summary(fit_r_bin)
+```
+
+::: {.callout-important}
+**EM is gaussian-only.** Both `run_bayesa()` and `run_bayesr()` error
+when `method = "em"` is combined with `response_type = "binary"` —
+the EM derivation does not extend to the Albert-Chib augmentation.
+Use `method = "mcmc"` for binary traits.
+:::
+
+## Microhaplotype workflow
+
+For phased microhaplotype data, the design matrix is built with
+`construct_wah_matrix()` (W~αh~ coding from Da 2015), and
+`marker_type = "multiallelic"` selects the corresponding variance
+scaling for $S$ (BayesA) and per-class scaling (BayesR).
+
+```{r}
+y_mh <- setNames(d$pheno$y_cont_qtl_mh, d$pheno$id)
+
+wah    <- construct_wah_matrix(
+  hap_matrix           = d$mh,
+  colnames             = attr(d$mh, "block_id"),
+  allele_freq_filtered = d$allele_freq
+)
+W_mh   <- wah$W_ah
+
+# BayesA — MCMC
+fit_a_mh <- run_bayesa(
+  w             = W_mh,
+  y             = y_mh,
+  X             = X_fixed,
+  marker_type   = "multiallelic",
+  nu            = 4.5,
+  sigma2_g      = var(y_mh) * 0.5,
+  sigma2_e_init = var(y_mh) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian",
+  mcmc_params   = mcmc,
+  verbose       = FALSE
+)
+summary(fit_a_mh)
+```
+
+```{r}
+# BayesR — MCMC
+fit_r_mh <- run_bayesr(
+  w             = W_mh,
+  y             = y_mh,
+  X             = X_fixed,
+  marker_type   = "multiallelic",
+  pi_vec        = c(0.95, 0.02, 0.02, 0.01),
+  sigma2_ah     = var(y_mh) * 0.5,
+  sigma2_e_init = var(y_mh) * 0.5,
+  method        = "mcmc",
+  response_type = "gaussian",
+  mcmc_params   = mcmc,
+  verbose       = FALSE
+)
+summary(fit_r_mh)
+```
+
+## Working with the fit object
+
+Key accessors on the returned object:
+
+```{r}
+#| eval: false
+fit_r_mcmc$beta_hat              # posterior-mean marker effects (length p)
+fit_r_mcmc$GEBV                  # aggregated total GEBV (length n)
+fit_r_mcmc$alpha_hat             # fixed-effect estimates
+fit_r_mcmc$h2                    # heritability
+fit_r_mcmc$variance_components   # per-class variance posterior
+fit_r_mcmc$beta_samples          # MCMC trace, n_kept x p (MCMC only)
+```
+
+`summary.masbayes_bayesr` formats these into a one-screen banner;
+`predict.masbayes_bayesr(object, newdata, X_new, y_new)` returns the
+test-set GEBV and (for binary) `prob`.
+
+## See also
+
+- [`run_bayesa()`](../../reference/masbayes/run_bayesa.qmd) ·
+  [`run_bayesr()`](../../reference/masbayes/run_bayesr.qmd) ·
+  [`construct_snp_matrix()`](../../reference/masbayes/construct_snp_matrix.qmd) ·
+  [`construct_wah_matrix()`](../../reference/masbayes/construct_wah_matrix.qmd)
+- [Theory → BayesA](../../theory/bayes-bayesa.qmd) and
+  [BayesR](../../theory/bayes-bayesr.qmd)
+- [Genomic prediction with masreml](masreml.qmd) — frequentist counterpart
+- [GWAS with masbayes](../gwas/masbayes.qmd) — extract PIPs from a BayesR fit
+
