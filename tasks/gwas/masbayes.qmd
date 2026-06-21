@@ -39,6 +39,11 @@ d <- load_data("large")
 
 # Tutorial-scale MCMC params; production should use n_iter = 20000+
 mcmc <- list(n_iter = 2000L, n_burn = 1000L, n_thin = 5L, seed = 42L)
+
+# Manhattan label cap. BayesR PIP/WPPA saturate on this demo data (most
+# markers exceed 0.5), so labelling every one above the threshold makes
+# CMplot's text placement hang. Label only the top-n peaks instead.
+n_label <- 10L
 ```
 
 ## SNP-based variable selection with BayesR
@@ -107,8 +112,8 @@ snp_wppa_df <- data.frame(
   `1-WPPA` = 1 - pmin(fit_snp$gwas$WPPA, wppa_cap),
   check.names = FALSE
 )
-snp_wppa_hl <- as.character(fit_snp$gwas$Wind[fit_snp$gwas$WPPA > 0.5])
-if (length(snp_wppa_hl) == 0L) snp_wppa_hl <- NULL
+snp_wppa_hl <- as.character(
+  fit_snp$gwas$Wind[order(-fit_snp$gwas$WPPA)][seq_len(min(n_label, nrow(fit_snp$gwas)))])
 
 CMplot::CMplot(
   snp_wppa_df,
@@ -143,8 +148,8 @@ snp_pip_df <- data.frame(
   `1-PIP` = 1 - pmin(fit_snp$pip, wppa_cap),
   check.names = FALSE
 )
-snp_pip_hl <- as.character(map_snp$SNP[fit_snp$pip > 0.5])
-if (length(snp_pip_hl) == 0L) snp_pip_hl <- NULL
+snp_pip_hl <- as.character(
+  map_snp$SNP[order(-fit_snp$pip)][seq_len(min(n_label, length(fit_snp$pip)))])
 
 CMplot::CMplot(
   snp_pip_df,
@@ -237,8 +242,8 @@ mh_wppa_df <- data.frame(
   `1-WPPA` = 1 - pmin(fit_mh$gwas$WPPA, wppa_cap),
   check.names = FALSE
 )
-mh_wppa_hl <- as.character(fit_mh$gwas$Wind[fit_mh$gwas$WPPA > 0.5])
-if (length(mh_wppa_hl) == 0L) mh_wppa_hl <- NULL
+mh_wppa_hl <- as.character(
+  fit_mh$gwas$Wind[order(-fit_mh$gwas$WPPA)][seq_len(min(n_label, nrow(fit_mh$gwas)))])
 
 CMplot::CMplot(
   mh_wppa_df,
@@ -271,8 +276,8 @@ mh_pip_df <- data.frame(
   `1-PIP_max` = 1 - pmin(max_pip_block, wppa_cap),
   check.names = FALSE
 )
-mh_pip_hl <- as.character(map_mh$block_id[max_pip_block > 0.5])
-if (length(mh_pip_hl) == 0L) mh_pip_hl <- NULL
+mh_pip_hl <- as.character(
+  map_mh$block_id[order(-max_pip_block)][seq_len(min(n_label, length(max_pip_block)))])
 
 CMplot::CMplot(
   mh_pip_df,
