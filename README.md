@@ -19,7 +19,7 @@ API.
 
 The site covers theory (mixed models, Bayesian alphabet), task tutorials
 (genomic prediction, GWAS), input data formats with bundled demo, function
-reference, and Rust internals.
+reference, and Rust internals..
 
 ## Citation
 
