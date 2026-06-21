@@ -447,13 +447,11 @@ names(y) <- d$pheno$id
 X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
 
 W       <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
-wtw     <- colSums(W^2)
 
 # BayesA — MCMC: full posterior with credible intervals
 fit_a_mcmc <- run_bayesa(
   w             = W,
   y             = y,
-  wtw_diag      = wtw,
   X             = X_fixed,
   marker_type   = "snp",
   nu            = 4.5,
@@ -467,7 +465,6 @@ fit_a_mcmc <- run_bayesa(
 fit_a_em <- run_bayesa(
   w             = W,
   y             = y,
-  wtw_diag      = wtw,
   X             = X_fixed,
   marker_type   = "snp",
   nu            = 4.5,
@@ -482,7 +479,6 @@ fit_a_em <- run_bayesa(
 fit_r_mcmc <- run_bayesr(
   w             = W,
   y             = y,
-  wtw_diag      = wtw,
   X             = X_fixed,
   marker_type   = "snp",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),
@@ -496,7 +492,6 @@ fit_r_mcmc <- run_bayesr(
 fit_r_em <- run_bayesr(
   w             = W,
   y             = y,
-  wtw_diag      = wtw,
   X             = X_fixed,
   marker_type   = "snp",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),

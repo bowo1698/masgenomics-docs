@@ -242,7 +242,6 @@ W <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
 fit_bin_bayesr <- run_bayesr(
   w             = W,
   y             = y_bin,
-  wtw_diag      = colSums(W ^ 2),
   X             = X_fixed,
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),
   sigma2_ah     = 1.0,             # liability-scale total genetic variance

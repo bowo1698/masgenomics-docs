@@ -317,8 +317,8 @@ wah <- construct_wah_matrix(
 W_mh <- wah$W_ah                     # n x ~149
 
 # Feed into BayesA / BayesR (see Bayesian Alphabet page for full call):
-# masbayes::run_bayesa(w = W_snp, y = ..., wtw_diag = colSums(W_snp^2), ...)
-# masbayes::run_bayesr(w = W_mh,  y = ..., wtw_diag = colSums(W_mh ^2), ...)
+# masbayes::run_bayesa(w = W_snp, y = ..., ...)
+# masbayes::run_bayesr(w = W_mh,  y = ..., ...)
 ```
 
 ## References

@@ -205,7 +205,6 @@ W   <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
 fit <- run_bayesa(
   w             = W,
   y             = y,
-  wtw_diag      = colSums(W^2),
   X             = X_fixed,
   marker_type   = "snp",
   nu            = 4.5,

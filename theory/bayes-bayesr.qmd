@@ -220,13 +220,11 @@ names(y) <- d$pheno$id
 X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
 
 W_snp   <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
-wtw_snp <- colSums(W_snp^2)
 
 # pi_vec: prior sparsity — 95% of markers start in the zero class
 fit_r_snp_mcmc <- run_bayesr(
   w             = W_snp,
   y             = y,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),
@@ -245,7 +243,6 @@ summary(fit_r_snp_mcmc)
 fit_r_snp_em <- run_bayesr(
   w             = W_snp,
   y             = y,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),
@@ -265,13 +262,11 @@ wah    <- construct_wah_matrix(
   colnames             = attr(d$mh, "block_id"),
   allele_freq_filtered = d$allele_freq
 )
-wtw_mh <- colSums(wah$W_ah^2)
 
 # marker_type = "multiallelic": W_alpha_h columns, richer per-column information
 fit_r_mh_mcmc <- run_bayesr(
   w             = wah$W_ah,
   y             = y,
-  wtw_diag      = wtw_mh,
   X             = X_fixed,
   marker_type   = "multiallelic",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),

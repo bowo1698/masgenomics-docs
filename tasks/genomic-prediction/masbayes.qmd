@@ -44,16 +44,15 @@ inspect trace plots before trusting posterior summaries.
 
 ## SNP workflow
 
-### Build the design matrix W and wtw
+### Build the design matrix W
 
-Unlike `masreml`, the Bayesian fitters take a pre-standardised design
-matrix $\mathbf{W}$ plus the per-column sum-of-squares $\mathbf{w}'\mathbf{w}$.
-`construct_snp_matrix()` returns a list — extract `$W`.
+The Bayesian fitters take a pre-standardised design matrix $\mathbf{W}$;
+the per-column sum-of-squares $\mathbf{w}'\mathbf{w}$ is computed internally,
+so you no longer pass it. `construct_snp_matrix()` returns a list — extract `$W`.
 
 ```{r}
 snp_pack <- construct_snp_matrix(d$snp, encoding = "vanRaden")
 W_snp    <- snp_pack$W
-wtw_snp  <- colSums(W_snp^2)
 str(snp_pack)
 ```
 
@@ -68,7 +67,6 @@ effects, while distant markers are shrunk hard.
 fit_a_mcmc <- run_bayesa(
   w             = W_snp,
   y             = y,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   nu            = 4.5,
@@ -117,7 +115,6 @@ test_idx  <- d$test_idx
 fit_a_train <- run_bayesa(
   w             = W_snp[train_idx, , drop = FALSE],
   y             = y[train_idx],
-  wtw_diag      = colSums(W_snp[train_idx, , drop = FALSE]^2),
   X             = X_fixed[train_idx, , drop = FALSE],
   marker_type   = "snp",
   nu            = 4.5,
@@ -150,7 +147,6 @@ EM converges in tens of iterations; MCMC typically wants thousands.
 fit_a_em <- run_bayesa(
   w             = W_snp,
   y             = y,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   nu            = 4.5,
@@ -179,7 +175,6 @@ variance scale.
 fit_r_mcmc <- run_bayesr(
   w             = W_snp,
   y             = y,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),
@@ -214,7 +209,6 @@ For per-marker GWAS-style output (PIPs and WPPA windows), pass
 fit_r_em <- run_bayesr(
   w             = W_snp,
   y             = y,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),
@@ -250,12 +244,10 @@ for (k in seq_len(K)) {
   te <- which(folds == k)
 
   W_tr   <- W_snp[tr, , drop = FALSE]
-  wtw_tr <- colSums(W_tr^2)
 
   fit_k <- run_bayesa(
     w             = W_tr,
     y             = y[tr],
-    wtw_diag      = wtw_tr,
     X             = X_fixed[tr, , drop = FALSE],
     marker_type   = "snp",
     nu            = 4.5,
@@ -298,7 +290,6 @@ y_bin <- setNames(as.double(d$pheno$y_bin_qtl_snp), d$pheno$id)
 fit_a_bin <- run_bayesa(
   w             = W_snp,
   y             = y_bin,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   nu            = 4.5,
@@ -317,7 +308,6 @@ summary(fit_a_bin)
 fit_r_bin <- run_bayesr(
   w             = W_snp,
   y             = y_bin,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),
@@ -354,13 +344,11 @@ wah    <- construct_wah_matrix(
   allele_freq_filtered = d$allele_freq
 )
 W_mh   <- wah$W_ah
-wtw_mh <- colSums(W_mh^2)
 
 # BayesA — MCMC
 fit_a_mh <- run_bayesa(
   w             = W_mh,
   y             = y_mh,
-  wtw_diag      = wtw_mh,
   X             = X_fixed,
   marker_type   = "multiallelic",
   nu            = 4.5,
@@ -379,7 +367,6 @@ summary(fit_a_mh)
 fit_r_mh <- run_bayesr(
   w             = W_mh,
   y             = y_mh,
-  wtw_diag      = wtw_mh,
   X             = X_fixed,
   marker_type   = "multiallelic",
   pi_vec        = c(0.95, 0.02, 0.02, 0.01),

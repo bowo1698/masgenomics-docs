@@ -1,0 +1,14 @@
+### `bayesa_snp.rs` {#sec-masbayes-bayesa_snp}
+
+{{< rust-src masbayes bayesa_snp.rs >}}
+
+BayesA Gibbs MCMC for biallelic SNP markers.
+
+Per-marker variance σ²_j ~ scaled-Inv-χ²(ν, S²) drawn from
+  InvGamma( (ν+1)/2, (ν·S² + β²)/2 )
+BEFORE β_i each iter. Per-iteration:
+  yadj = y - μ - X·α - W·β  (maintained incrementally)
+  u    = W·β                (maintained incrementally)
+σ²_g per iter = var(u); reported as mean over saved iter.
+Binary traits use Albert-Chib augmentation with σ²_e fixed at 1.
+

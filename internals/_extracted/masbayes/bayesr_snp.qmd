@@ -1,0 +1,13 @@
+### `bayesr_snp.rs` {#sec-masbayes-bayesr_snp}
+
+{{< rust-src masbayes bayesr_snp.rs >}}
+
+BayesR Gibbs MCMC for biallelic SNP markers.
+
+Mixture prior with 4 effect-size classes (zero, small, medium, large).
+Per-iteration:
+  yadj  = y - μ - X·α - W·β  (maintained incrementally)
+  u     = W·β                (maintained incrementally)
+σ²_g per iter = var(u); reported as mean over saved iter.
+Binary traits use Albert-Chib augmentation with σ²_e fixed at 1.
+

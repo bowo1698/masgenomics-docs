@@ -334,3 +334,4 @@ fit_snp$beta_samples   # full posterior trace, n_kept x ncol(W) (MCMC only)
 - [Genomic prediction with masbayes](../genomic-prediction/masbayes.qmd) —
   use the same BayesR fit for prediction
 - [`masbayes/examples/04_gwas.R`](https://github.com/bowo1698/masbayes/blob/main/examples/04_gwas.R) — full source for this tutorial
+

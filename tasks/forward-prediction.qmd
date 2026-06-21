@@ -183,8 +183,8 @@ build_marker_matrices <- function(scenario, arch, marker) {
 }
 
 fit_bayesa <- function(p) {
-  wtw <- colSums(p$W_tr ^ 2); vy <- var(p$y_tr)
-  fit <- run_bayesa(w = p$W_tr, X = p$X_tr, y = p$y_tr, wtw_diag = wtw,
+  vy <- var(p$y_tr)
+  fit <- run_bayesa(w = p$W_tr, X = p$X_tr, y = p$y_tr, 
                     marker_type = p$marker_type,
                     nu = 4.5, sigma2_g = vy * 0.5, sigma2_e_init = vy * 0.5,
                     prior_params = list(a0_e = 10), mcmc_params = MCMC_P,
@@ -192,8 +192,8 @@ fit_bayesa <- function(p) {
   predict(fit, p$W_te, p$y_te, X_new = p$X_te)$GEBV
 }
 fit_bayesr <- function(p) {
-  wtw <- colSums(p$W_tr ^ 2); vy <- var(p$y_tr)
-  fit <- run_bayesr(w = p$W_tr, X = p$X_tr, y = p$y_tr, wtw_diag = wtw,
+  vy <- var(p$y_tr)
+  fit <- run_bayesr(w = p$W_tr, X = p$X_tr, y = p$y_tr, 
                     marker_type = p$marker_type,
                     pi_vec = c(0.90, 0.05, 0.03, 0.02),
                     sigma2_e_init = vy * 0.5, sigma2_ah = vy * 0.5,

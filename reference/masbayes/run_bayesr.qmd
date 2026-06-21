@@ -21,7 +21,6 @@ fast stochastic-EM point estimates (Gaussian only) (Wang et al., 2015).
 <pre><code class='language-R'>run_bayesr(
   w,
   y,
-  wtw_diag,
   X = NULL,
   marker_type = c("auto", "snp", "multiallelic"),
   pi_vec = c(0.95, 0.02, 0.02, 0.01),
@@ -58,10 +57,6 @@ or the <code>\$W</code> element returned by <code>construct_snp_matrix</code>.
 Phenotype vector (length <code>n</code>). For binary traits use 0/1
 coding.
 </td></tr>
-<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="wtw_diag">wtw_diag</code></td>
-<td>
-Pre-computed <code>colSums(w^2)</code>, length <code>p</code>.
-</td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="X">X</code></td>
 <td>
 Optional fixed-effects design matrix (<code>n x q</code>). When
@@ -73,12 +68,10 @@ of ones for the intercept; $\mu$ is sampled separately.
 <td>
 One of <code>"auto"</code> (default), <code>"snp"</code>, or
 <code>"multiallelic"</code>. <code>"auto"</code> resolves to
-<code>"multiallelic"</code>. Setting <code>"snp"</code> (a) rescales
-<code>variance_class</code> by <code>p / sum_2pq</code> so that the per-class
-variance denominator becomes <code>sum_2pq</code> instead of <code>p</code>, and
-(b) switches the default residual-variance prior to a flat
-<code>InvGamma(1, 0)</code> (<code>a0_e = 1, b0_e = 0</code>). Supplying
-<code>prior_params\$a0_e</code> is always honoured.
+<code>"multiallelic"</code>. Selects the default prior for the BayesR
+sampler — see <code>sigma2_ah</code>, <code>sigma2_e_init</code>,
+<code>prior_params</code>. SNP path additionally rescales
+<code>variance_class</code> by <code>ncol(w) / sum(apply(w, 2, var))</code>.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="pi_vec">pi_vec</code></td>
 <td>
@@ -88,28 +81,32 @@ small, medium, large). Must sum to 1. Default
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="sigma2_e_init">sigma2_e_init</code></td>
 <td>
-Initial residual variance. Typically
-<code>var(y) * 0.5</code>; for binary traits fix at <code>1.0</code>.
+Initial residual variance. Default for
+<code>"snp"</code>: <code>var(y) / 2</code>. <code>"multiallelic"</code>: required
+(typically <code>var(y) * 0.5</code>; for binary use <code>1.0</code>).
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="sigma2_ah">sigma2_ah</code></td>
 <td>
-Prior total genetic variance (required). Typically
-<code>var(y) * 0.5</code>; for binary traits use <code>1.0</code>.
+Prior total genetic variance. Default for
+<code>"snp"</code>: <code>var(y) / 4</code>. <code>"multiallelic"</code>: required
+(typically <code>var(y) * 0.5</code>; for binary use <code>1.0</code>).
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="sigma2_vec">sigma2_vec</code></td>
 <td>
 Optional explicit variance vector for EM; if
 <code>NULL</code> it is derived from <code>sigma2_ah</code>, <code>pi_vec</code>, and
-<code>prior_params\$variance_class</code> (with the
-<code>marker_type = "snp"</code> rescaling applied when applicable).
+<code>prior_params\$variance_class</code>.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="prior_params">prior_params</code></td>
 <td>
-Optional named list overriding defaults: <code>a0_e</code>
-(10 for <code>"multiallelic"</code>, 1 for <code>"snp"</code> when not supplied),
-<code>a0_g</code> (10), <code>variance_class</code>
-(<code>c(0, 0.001, 0.01, 0.1)</code>). <code>b0_e</code> and <code>b0_g</code> are
-computed internally.
+Optional named list overriding defaults. User-
+supplied fields always win. Recognised: <code>a0_e</code>, <code>a0_g</code>,
+<code>variance_class</code>. Defaults for <code>"snp"</code>:
+<code>a0_e = -1</code>, <code>a0_g = 2</code>,
+<code>variance_class = c(0, 0.0001, 0.001, 0.01)</code>. For
+<code>"multiallelic"</code>: <code>a0_e = 10</code>, <code>a0_g = 10</code>,
+<code>variance_class = c(0, 0.001, 0.01, 0.1)</code>. <code>b0_e</code> and
+<code>b0_g</code> are computed internally.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="mcmc_params">mcmc_params</code></td>
 <td>
@@ -166,8 +163,9 @@ columns <code>block_id</code>, <code>chr</code>, <code>start_pos</code>, <code>e
 (one row per unique block_id in <code>attr(w, "block_id")</code>); this
 matches the schema of <code>microhaplotype_coordinates.csv</code> from the
 <code>maspipeline</code> tool. Marker type is auto-detected from
-<code>attr(w, "block_id")</code>. <code>map = NULL</code> (default) leaves the
-fit object byte-identical to v1.4.0 output.
+<code>attr(w, "block_id")</code>. <code>map = NULL</code> (default) skips the
+GWAS branch and returns a fit object with no <code>pip</code>/<code>gwas</code>
+fields.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="windsize">windsize</code></td>
 <td>
@@ -202,29 +200,18 @@ is the allele-effect vector. When fixed effects are supplied via <code>X</code>:
 
 
 <strong>BayesR mixture prior.</strong>
-Each allele effect is drawn from a four-component mixture (Erbe et al., 2012):
 
 <p style="text-align: center;"><code class="reqn">\beta_j \mid \pi,\,\sigma_\beta^2 \;\sim\;
   \pi_0\,\mathcal{N}(0,0)
-  + \pi_1\,\mathcal{N}(0,\,0.001\sigma_\beta^2)
-  + \pi_2\,\mathcal{N}(0,\,0.01\sigma_\beta^2)
-  + \pi_3\,\mathcal{N}(0,\,0.1\sigma_\beta^2)</code>
+  + \pi_1\,\mathcal{N}(0,\,c_1\sigma_\beta^2)
+  + \pi_2\,\mathcal{N}(0,\,c_2\sigma_\beta^2)
+  + \pi_3\,\mathcal{N}(0,\,c_3\sigma_\beta^2)</code>
 
 
-where $\pi = (\pi_0, \pi_1, \pi_2, \pi_3)$ are mixture proportions
-(default 0.95, 0.02, 0.02, 0.01), updated each MCMC iteration by
-Dirichlet sampling.
-
-<strong>Heritability.</strong>
-$h^2$ is estimated as:
-
-<p style="text-align: center;"><code class="reqn">h^2 = \frac{\mathrm{Var}(W\hat{\beta})}
-  {\mathrm{Var}(W\hat{\beta}) + \hat{\sigma}_e^2}</code>
-
-
-This estimator is identical for SNP and multi-allelic markers,
-treating heritability as a trait-and-population property rather than
-a marker-panel property.
+where $(c_1,c_2,c_3)$ are the nonzero classes of
+<code>variance_class</code> and $\pi$ is updated each MCMC iteration via
+Dirichlet posterior. Residual: $\sigma_e^2 \sim \mathrm{InvGamma}(a_{0e},\,b_{0e})$.
+Genetic base scale: $\sigma_g^2 \sim \mathrm{InvGamma}(a_{0g},\,b_{0g})$.
 
 <strong>Algorithm choice.</strong> MCMC uses marginalised Gibbs sampling and
 returns full posterior chains; recommended when posterior uncertainty,
@@ -255,26 +242,6 @@ returns in-sample metrics.
     k</code>, then <code>predict()</code> on each held-out fold.
 
 </li></ul>
-
-<strong>Derived hyperparameters.</strong> The wrapper computes
-<code>b0_e = sigma2_e_init * (a0_e - 1)</code> and
-<code>b0_g = sigma2_ah * (a0_g - 2) / (a0_g * (1 - pi_vec[1]))</code> before
-calling the Rust engine. For EM, a <code>sigma2_vec</code> is derived as
-<code>variance_class * sigma2_ah / ((1 - pi_vec[1]) * p)</code>.
-
-<strong>Marker-type-aware parameterisation.</strong> When <code>marker_type =
-"snp"</code> the wrapper rescales <code>variance_class</code> by
-<code>ncol(w) / sum(apply(w, 2, var))</code> before passing it to the engine.
-Combined with the engine's hardcoded division by <code>ncol(w)</code>, this
-substitutes <code>sum_2pq</code> for <code>p</code> as the denominator in the
-per-class variance, matching the alternative biallelic-SNP convention
-where rare markers contribute proportionally to allele-frequency
-variance. The default <code>marker_type = "multiallelic"</code> preserves
-the <code>1 / p</code> parameterisation bit-identically.
-
-<strong>Marker-specific heritability note.</strong> The $h^2$ estimator in
-the Statistical model section above is applied regardless of
-<code>marker_type</code>.
 
 
 
@@ -374,7 +341,7 @@ window. Windows never cross chromosome boundaries.
 posterior samples). <code>run_bayesa</code> accepts the same
 arguments for API symmetry but errors out (BayesA has no zero-effect
 mixture mass, so PIP / WPPA are ill-defined). <code>map = NULL</code>
-(default) leaves the fit object byte-identical to pre-v0.5.0 output.
+(default) skips the GWAS branch entirely.
 
 
 
@@ -421,7 +388,6 @@ X_train   <- model.matrix(~ sex - 1, data = d$pheno[d$train_idx, ])
 fit_snp <- run_bayesr(
   w             = W_train,
   y             = y_train,
-  wtw_diag      = colSums(W_train^2),
   X             = X_train,
   marker_type   = "snp",
   sigma2_e_init = var(y_train) * 0.5,
@@ -453,7 +419,6 @@ map_snp <- data.frame(
 fit_gwas <- run_bayesr(
   w             = W_train,
   y             = y_train,
-  wtw_diag      = colSums(W_train^2),
   marker_type   = "snp",
   sigma2_e_init = var(y_train) * 0.5,
   sigma2_ah     = var(y_train) * 0.5,
@@ -467,7 +432,6 @@ head(fit_gwas$gwas[order(-fit_gwas$gwas$WPPA), ], 5)
 fit_mh <- run_bayesr(
   w             = W_mh,
   y             = y_mh,
-  wtw_diag      = colSums(W_mh^2),
   X             = X_train,
   sigma2_e_init = var(y_mh) * 0.5,
   sigma2_ah     = var(y_mh) * 0.5,

@@ -20,7 +20,6 @@ stochastic-EM point estimates (Gaussian only).
 <pre><code class='language-R'>run_bayesa(
   w,
   y,
-  wtw_diag,
   X = NULL,
   marker_type = c("auto", "snp", "multiallelic"),
   nu = 4.5,
@@ -55,10 +54,6 @@ or the <code>\$W</code> element returned by <code>construct_snp_matrix</code>.
 <td>
 Phenotype vector (length <code>n</code>). Use 0/1 for binary traits.
 </td></tr>
-<tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="wtw_diag">wtw_diag</code></td>
-<td>
-Pre-computed <code>colSums(w^2)</code>.
-</td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="X">X</code></td>
 <td>
 Optional fixed-effects design matrix (<code>n x q</code>). When
@@ -70,36 +65,36 @@ of ones for the intercept; $\mu$ is sampled separately.
 <td>
 One of <code>"auto"</code> (default), <code>"snp"</code>, or
 <code>"multiallelic"</code>. <code>"auto"</code> resolves to
-<code>"multiallelic"</code>. Setting <code>"snp"</code> switches the default
-residual-variance prior to a flat <code>InvGamma(1, 0)</code>
-(<code>a0_e = 1, b0_e = 0</code>); the per-marker prior scale
-<code>s_squared</code> is unaffected because it already adapts via
-<code>sum_2pq</code>. Custom supply of <code>prior_params\$a0_e</code> is always
-honoured and overrides the SNP-mode flat default.
+<code>"multiallelic"</code>. Selects the default prior for the BayesA
+sampler — see <code>nu</code>, <code>sigma2_g</code>, <code>sigma2_e_init</code>,
+<code>prior_params</code>.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="nu">nu</code></td>
 <td>
-Degrees of freedom for the scaled inverse chi-squared prior on
-marker variances. Smaller values allow heavier tails. Must be &gt; 2.
-Default <code>4.5</code>.
+Degrees of freedom for the scaled inverse chi-squared prior
+on marker variances. Smaller values give heavier tails. Must be &gt; 2.
+Default: <code>4</code> for <code>"snp"</code>, <code>4.5</code> for <code>"multiallelic"</code>.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="sigma2_g">sigma2_g</code></td>
 <td>
-Prior total genetic variance. Typically
-<code>var(y) * 0.5</code>; for binary traits use <code>1.0</code>.
+Prior total genetic variance. Default for
+<code>"snp"</code>: <code>var(y) / 4</code>. <code>"multiallelic"</code>: required
+(typically <code>var(y) * 0.5</code>; for binary use <code>1.0</code>).
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="sigma2_e_init">sigma2_e_init</code></td>
 <td>
-Initial residual variance. For binary traits fix
-at <code>1.0</code>.
+Initial residual variance. Default for
+<code>"snp"</code>: <code>var(y) / 2</code>. <code>"multiallelic"</code>: required
+(typically <code>var(y) * 0.5</code>; for binary use <code>1.0</code>).
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="prior_params">prior_params</code></td>
 <td>
 Optional named list. Only <code>a0_e</code> is used;
-<code>b0_e</code> is derived as <code>sigma2_e_init * (a0_e - 1)</code>. Default
-<code>a0_e</code> is 10 for <code>marker_type = "multiallelic"</code> and 1 for
-<code>marker_type = "snp"</code> (with <code>b0_e = 0</code>); supplying
-<code>a0_e</code> explicitly always overrides the default.
+<code>b0_e</code> is computed as <code>sigma2_e_init * (a0_e - 1)</code>,
+except when SNP-mode flat default applies (<code>a0_e = -1</code>,
+<code>b0_e = 0</code>). User-supplied <code>a0_e</code> always wins. Default
+<code>a0_e</code>: <code>-1</code> for <code>"snp"</code>, <code>10</code> for
+<code>"multiallelic"</code>.
 </td></tr>
 <tr><td style = "white-space: collapse; font-family: monospace; vertical-align: top"><code id="mcmc_params">mcmc_params</code></td>
 <td>
@@ -172,30 +167,12 @@ is the allele-effect vector. When fixed effects are supplied via <code>X</code>:
 
 
 <strong>BayesA prior.</strong>
-Each allele effect has a marker-specific variance drawn from a scaled
-inverse chi-squared distribution (Meuwissen et al., 2001):
 
 <p style="text-align: center;"><code class="reqn">\beta_j \mid \sigma_{\beta_j}^2 \;\sim\; \mathcal{N}(0,\,\sigma_{\beta_j}^2),
   \quad \sigma_{\beta_j}^2 \;\sim\; \chi^{-2}(\nu,\,S^2)</code>
 
 
-where $\nu$ is the degrees-of-freedom hyperparameter (<code>nu</code>,
-default 4.5) and $S^2 = \sigma_\beta^2 / L$ is the scale, with
-$L$ denoting the total number of alleles (columns of $W$).
-The wrapper derives <code>s_squared</code> as
-<code>sigma2_g * (nu - 2) / (nu * sum_2pq)</code>, which sets
-$E[\sigma_{\beta_j}^2] = \sigma_\beta^2 / \sum_j \mathrm{Var}(w_j)$.
-
-<strong>Heritability.</strong>
-$h^2$ is estimated as:
-
-<p style="text-align: center;"><code class="reqn">h^2 = \frac{\mathrm{Var}(W\hat{\beta})}
-  {\mathrm{Var}(W\hat{\beta}) + \hat{\sigma}_e^2}</code>
-
-
-This estimator is identical for SNP and multi-allelic markers,
-treating heritability as a trait-and-population property rather than
-a marker-panel property.
+Residual: $\sigma_e^2 \sim \mathrm{InvGamma}(a_{0e},\,b_{0e})$.
 
 <strong>Algorithm choice.</strong> MCMC uses marginalised Gibbs sampling and
 returns full posterior chains. EM is much faster but provides no
@@ -210,17 +187,6 @@ for CV loops.
 <code>summary()</code> + <code>predict()</code> support full-data fits,
 train-test splits, and k-fold CV uniformly. See
 <code>run_bayesr</code> for example loops.
-
-<strong>Derived parameter.</strong> The wrapper computes
-<code>s_squared = sigma2_g * (nu - 2) / (nu * sum(apply(w, 2, var)))</code>
-so the prior expectation of each marker variance equals
-<code>sigma2_g / sum_2pq</code>. This adapts to the supplied design matrix
-and is therefore the same formula under both
-<code>marker_type = "multiallelic"</code> and <code>marker_type = "snp"</code>.
-
-<strong>Marker-specific heritability note.</strong> The $h^2$ estimator in
-the Statistical model section above is applied regardless of
-<code>marker_type</code>.
 
 
 
@@ -300,7 +266,6 @@ X_train   <- model.matrix(~ sex - 1, data = d$pheno[d$train_idx, ])
 fit_snp <- run_bayesa(
   w             = W_train,
   y             = y_train,
-  wtw_diag      = colSums(W_train^2),
   X             = X_train,
   marker_type   = "snp",
   nu            = 4.5,
@@ -321,7 +286,6 @@ y_mh   <- d$pheno$y_cont_qtl_mh[d$train_idx]
 fit_mh <- run_bayesa(
   w             = W_mh,
   y             = y_mh,
-  wtw_diag      = colSums(W_mh^2),
   X             = X_train,
   nu            = 4.5,
   sigma2_g      = var(y_mh) * 0.5,

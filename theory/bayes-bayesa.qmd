@@ -124,12 +124,10 @@ names(y) <- d$pheno$id
 X_fixed <- stats::model.matrix(~ sex, data = d$pheno)
 
 W_snp  <- construct_snp_matrix(d$snp, encoding = "vanRaden")$W
-wtw_snp <- colSums(W_snp^2)
 
 fit_a_snp_mcmc <- run_bayesa(
   w             = W_snp,
   y             = y,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   nu            = 4.5,
@@ -148,7 +146,6 @@ summary(fit_a_snp_mcmc)
 fit_a_snp_em <- run_bayesa(
   w             = W_snp,
   y             = y,
-  wtw_diag      = wtw_snp,
   X             = X_fixed,
   marker_type   = "snp",
   nu            = 4.5,
@@ -168,13 +165,11 @@ wah    <- construct_wah_matrix(
   colnames             = attr(d$mh, "block_id"),
   allele_freq_filtered = d$allele_freq
 )
-wtw_mh <- colSums(wah$W_ah^2)
 
 # marker_type = "multiallelic" uses the W_alpha_h variance scaling for S
 fit_a_mh_mcmc <- run_bayesa(
   w             = wah$W_ah,
   y             = y,
-  wtw_diag      = wtw_mh,
   X             = X_fixed,
   marker_type   = "multiallelic",
   nu            = 4.5,
