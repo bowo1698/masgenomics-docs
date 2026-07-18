@@ -101,7 +101,6 @@ both packages on Linux, macOS, and Windows.
 | You are... | Start here |
 |------------------------------------|------------------------------------|
 | Setting up for the first time | [Installation](installation/index.qmd) |
-| New to genomic prediction | [Theory → Mixed Model & BLUP Family](theory/mixed-model-blup-family.qmd) |
 | Looking for code examples | [Tasks → Genomic Prediction](tasks/genomic-prediction/index.qmd) |
 | Looking for input-data formats and the bundled demo | [Input Data](input-data/index.qmd) |
 | Looking for function docs | [Reference → masreml](reference/masreml/index.qmd) · [masbayes](reference/masbayes/index.qmd) |

@@ -30,3 +30,4 @@ docs/
 # Local backups (created before edits to source files; never commit)
 *.bak
 *.bak.*
+_quarto.yml.bak

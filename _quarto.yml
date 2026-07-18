@@ -7,6 +7,7 @@ project:
     - "*.qmd"
     - "!_scripts/"
     - "!internals/_extracted/"
+    # theory hidden from site: folder renamed to _theory/ (Quarto ignores _-prefixed dirs)
 
 website:
   title: "masgenomics"
@@ -30,8 +31,6 @@ website:
         text: Home
       - href: installation/index.qmd
         text: Installation
-      - href: theory/index.qmd
-        text: Theory
       - href: tasks/index.qmd
         text: Task
       - href: input-data/index.qmd
@@ -52,40 +51,6 @@ website:
         aria-label: GitHub
 
   sidebar:
-    - title: "Theory"
-      style: docked
-      collapse-level: 1
-      contents:
-        - theory/index.qmd
-        - section: "From Phenotype to Genome"
-          href: theory/from-phenotype-to-genome.qmd
-          contents:
-            - text: "Overview"
-              href: theory/from-phenotype-to-genome.qmd
-            - theory/fpg-traditional-and-mas.qmd
-            - theory/fpg-genomic-selection.qmd
-            - theory/fpg-method-bridge.qmd
-            - theory/fpg-livestock-implementation.qmd
-            - theory/fpg-future.qmd
-        - theory/biallelic-and-multiallelic.qmd
-        - section: "Mixed Model & BLUP Family"
-          href: theory/mixed-model-blup-family.qmd
-          contents:
-            - text: "Overview"
-              href: theory/mixed-model-blup-family.qmd
-            - theory/blup-reml.qmd
-            - theory/blup-pblup.qmd
-            - theory/blup-gblup.qmd
-            - theory/blup-gwablup.qmd
-        - section: "Bayesian Alphabet"
-          href: theory/bayesian-alphabet.qmd
-          contents:
-            - text: "Overview"
-              href: theory/bayesian-alphabet.qmd
-            - theory/bayes-mcmc-em.qmd
-            - theory/bayes-bayesa.qmd
-            - theory/bayes-bayesr.qmd
-        - theory/continuous-and-binary-trait.qmd
     - title: "Input Data"
       collapse-level: 1
       contents:
