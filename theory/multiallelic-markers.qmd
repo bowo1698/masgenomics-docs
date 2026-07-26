@@ -8,22 +8,24 @@ editor:
 ## From two versions to many
 
 We know that genomic selection reads genetic markers to predict traits.
-The most common marker is the SNP. A SNP is a single position in the
-genome where only two versions are possible. At that spot, some
-individuals carry an A allele, and the rest carry a G allele. Because
-there are only two allele versions, we call a SNP bi-allelic.
+The most common marker is the [**SNP**](https://doi.org/10.1016/S0378-1119(99)00219-X),
+a single position in the genome where only two versions are possible. At
+that spot, some individuals carry an A allele and the rest carry a G
+allele. Because there are only two allele versions, we call a SNP
+**bi-allelic**.
 
 This is simple, but simple comes at a price. With only two versions, we
 can sort individuals into just two groups. That is a very rough way to
-tell them apart. A single letter carries very little information on its
-own.
+tell them apart, and a single letter carries very little information on
+its own.
 
-Remember that a marker only works because it sits close to a QTL, so the
-two are usually passed down together. But this pairing can break. When a
-parent passes DNA to its offspring, the chromosome is cut and rejoined
-in new places. Each time this happens, a marker and its QTL can end up
-separated. Once they are apart, the marker no longer points to anything.
-A single SNP is easy to separate in this way.
+Remember that a marker only works because it sits close to a **QTL**, so
+the two are usually passed down together. But this pairing can break.
+When a parent passes DNA to its offspring, the chromosome is cut and
+rejoined in new places, a process called **recombination**. Each time
+this happens, a marker and its QTL can end up separated. Once they are
+apart, the marker no longer points to anything, and a single SNP is easy
+to separate in this way.
 
 ## Reading words instead of letters
 
@@ -33,19 +35,19 @@ read a few nearby positions together.
 Consider a short piece of DNA, only about 125 letters long, that
 contains a few SNPs. Instead of treating each SNP on its own, we read
 all of them as one unit. This small combined marker is called a
-microhaplotype.
+[**microhaplotype**](https://doi.org/10.1016/j.fsigen.2014.06.014).
 
 ![A microhaplotype consists of several SNPs within a short DNA
 segment.](../assets/microhaplotype.png){fig-alt="Microhaplotype built from several SNPs"}
 
 Now look at what happens to the number of versions. A single SNP has
-only two. But a short piece of DNA with several SNPs can be written in
+only two, but a short piece of DNA with several SNPs can be written in
 many different ways. Where a SNP gives us two options, a microhaplotype
 gives us many. Because it can take many values instead of two, we call
-it multi-allelic.
+it **multi-allelic**.
 
 Think of it as the difference between a single letter and a short word.
-The letter "A" is just one letter. But a three-letter word can be one of
+The letter "A" is just one letter, but a three-letter word can be one of
 thousands. The word holds far more information.
 
 ## When two individuals share the same version
@@ -53,16 +55,18 @@ thousands. The word holds far more information.
 Here is something worth noticing. When two individuals carry the same
 version of a marker, there are two possible reasons.
 
-The first reason is coincidence. They happen to carry the same letter,
-but they got it from different places, with no shared history.
-Geneticists call this a match by state, or identity-by-state.
+The first is coincidence. They happen to carry the same letter, but they
+got it from different places, with no shared history. Geneticists call
+this a match by state, or [**identity-by-state
+(IBS)**](https://doi.org/10.1038/nrg2865).
 
-The second reason is shared inheritance. Both individuals inherited the
-very same piece of DNA from a common ancestor. Geneticists call this a
-match by descent, or identity-by-descent.
+The second is shared inheritance. Both individuals inherited the very
+same piece of DNA from a common ancestor. Geneticists call this a match
+by descent, or [**identity-by-descent
+(IBD)**](https://doi.org/10.1038/nrg2865).
 
 The difference matters a lot. A coincidental match tells us almost
-nothing. But a match by descent is powerful. If two individuals
+nothing, but a match by descent is powerful. If two individuals
 inherited the same stretch of DNA from an ancestor, they very likely
 inherited the same nearby QTL along with it. That is exactly the link we
 are after.
@@ -79,18 +83,19 @@ turns more matches into the meaningful kind.
 
 ## Why more versions help
 
-More versions means each marker tells us more.
+More versions mean each marker tells us more.
 
-Go back to the signpost from the last section. A bi-allelic marker is
-like a signpost that can only point left or right. A multi-allelic
-marker is like a signpost that can show many different messages. It
-tells us where the QTL is much more precisely.
+Go back to the signpost analogy from the [previous
+page](genomic-selection.qmd). A bi-allelic marker is like a signpost
+that can only point left or right. A multi-allelic marker is like a
+signpost that can show many different messages, so it tells us where the
+QTL is much more precisely.
 
 It also stays linked to its QTL more reliably. Because it reads more of
-the DNA around the QTL, it is harder to separate the two when a
-chromosome is cut and rejoined. And it is better at tracking rare
-versions of a trait. A single letter often misses these, but a longer
-word can still catch them.
+the DNA around the QTL, the two are harder to separate when a chromosome
+is cut and rejoined. It is also better at tracking rare versions of a
+trait: a single letter often misses these, but a longer word can still
+catch them.
 
 There is a bonus too. Because each microhaplotype carries so much
 information, we need fewer markers to get the same picture, or an even
@@ -102,13 +107,16 @@ The best part of this approach is that it asks for almost nothing new.
 
 Microhaplotypes are built from SNPs we already have. If a piece of DNA
 has already been sequenced, its SNPs are already there. We just choose
-to read them together instead of one by one. So the extra information
+to read them together instead of one by one, so the extra information
 costs nothing more. There is no new machine to buy and no new sample to
 collect.
 
 It is worth being honest about the limits. Microhaplotypes are not a
-magic fix. Their advantage is clearest with certain prediction methods
-and certain traits, and smaller in other cases. But the main lesson
-holds. Moving from two versions to many gives us markers that carry more
-information, stay linked to the traits we care about, and cost nothing
-extra to build.
+magic fix. Their advantage [depends on how haplotypes are defined and
+which prediction method is
+used](https://doi.org/10.1534/genetics.107.080838), and it is clearest
+for some traits and [smaller for
+others](https://doi.org/10.1016/j.aquaculture.2024.740779). But the main
+lesson holds. Moving from two versions to many gives us markers that
+carry more information, stay linked to the traits we care about, and
+cost nothing extra to build.
