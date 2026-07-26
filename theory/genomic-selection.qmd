@@ -1,0 +1,127 @@
+---
+title: "Genomic Selection"
+editor:
+  markdown:
+    wrap: 72
+---
+
+## The objective of selective breeding
+
+![Selective breeding has reshaped production animals over
+generations.](../assets/mussle_cow.png){fig-alt="Muscular cow"}
+
+Modern dairy cows produce many times more milk than their ancestors did
+a century ago. Broiler chickens grow faster, and farmed salmon reach
+market size sooner. We might think these improvements result from
+genetically modified organisms (GMOs) that we worry about. Yet, these
+changes are actually the result of selective breeding.
+
+Selective breeding aims to produce offspring with specific desired
+traits by choosing individuals as potential parents who already carry
+those traits and breeding those individuals. Thus, selective breeding
+can only work with the traits and genetic variation that already exist
+in a population. This is why diversity matters. So, if there are no
+traits or genetic diversity in a population, there is nothing to select
+as potential parents.
+
+## Challenges in traditional selection
+
+Traditional selection chooses parents by looking only at their own
+visible traits. This works very well for simple traits, but it struggles
+with several important ones. Some traits appear late in life, so we must
+wait years before we can measure them. Some traits can only be measured
+after an animal is slaughtered, such as meat quality. Some traits are
+expressed in only one sex, such as milk yield in females.
+
+Disease resistance is a good example. To find individuals that tolerate
+a certain disease, we have to expose them to it. Only the survivors are
+kept as candidate parents. This is wasteful, slow, and destructive. We
+may lose valuable individuals to the test itself, and the benefit of
+selection can take a very long time to arrive.
+
+## Advances in molecular biology enable genomic selection
+
+New molecular technologies, particularly genomic sequencing
+technologies, can now read an individual's genome sequence. This has
+shifted breeding from traditional selection toward genomic selection.
+
+The idea rests on a simple assumption. Certain genetic variants in the
+genome are linked to certain traits. These variants are called
+quantitative trait loci (QTLs), and they are passed from parents to
+offspring.
+
+However, in practice, we never know exactly where the QTLs are. They may
+be many, and they may be scattered across the genome. So genotyping them
+directly is almost impossible.
+
+![A single-nucleotide polymorphism (SNP): a one-base difference between
+individuals.](../assets/SNP.png){fig-alt="SNP diagram"}
+
+Instead, we use genetic markers to point to QTLs. The most common
+markers are single-nucleotide polymorphisms (SNPs). A marker works
+because it sits physically close to a QTL on the chromosome. Because
+they are neighbours, the marker and the QTL tend to be inherited
+together as a package. This tendency is called linkage disequilibrium
+(LD).
+
+![A marker sits close enough to a QTL that the two are inherited
+together.](../assets/QTL.png){fig-alt="Marker and QTL in linkage disequilibrium"}
+
+A marker is like a signpost on a road. The signpost is not the
+destination itself. But because it always stands right next to the
+destination, it tells us the destination is there. In the same way, a
+marker is not the QTL, but it tells us a QTL is nearby.
+
+So instead of measuring the trait itself, we can read or genotype an
+individual's markers and use them to predict how that individual will
+perform.
+
+## How does genomic selection actually work?
+
+Let's start with a simple case: a single marker.
+
+Consider two individuals. One carries the allele ATC, and the other
+carries AGC. The individual with ATC has very low resistance to a
+disease. The individual with AGC has very high resistance, and this
+pattern is consistent across the whole population.
+
+From this, we can assume that any individual carrying AGC will resist
+the disease better than one that does not. So we can select AGC carriers
+as parents and pass that allele on to their offspring.
+
+In reality, it is rare for a single allele to control a trait. Most
+production traits, such as disease resistance, growth rate, meat
+quality, are driven by many QTLs at once. This means many markers are
+involved, and each one may be a small effect.
+
+To handle this, we first need to learn how much each marker matters. We
+do this using a training population. This is a group of individuals for
+which we know both the marker genotypes and the actual measured traits.
+A statistical model studies the training population and estimates the
+effect of each marker within this population.
+
+Once the model is trained, we can apply it to a population that only has
+genotype data. The model adds up the small effects of all their markers
+into a single score. This score is called the genomic estimated breeding
+value (GEBV). It is what we use to rank and select candidates.
+
+By using genomic-based approach, we no longer have to wait for a trait
+to appear, slaughter an animal, or run a destructive disease test. We
+can read an individual's DNA and obtain the SNP genotypes at birth and
+predict its future performance. That prediction then becomes the basis
+for selection.
+
+## Why genomic selection matters
+
+Genomic selection is now used across many food industries, including
+livestock, poultry, crops, and aquaculture.
+
+The effect is real. Selective breeding has improved these industries for
+many decades, and genomic selection has accelerated that progress in
+recent years. Dairy cattle adopted it in the late 2000s, and aquaculture
+species such as salmon followed later. As a result, production cycles
+have shortened, and growth performance has improved.
+
+It is also becoming available to smaller producers. The cost of
+genotyping an individual has decreased over time, which puts genomic
+selection within reach of industries that could not afford it before.

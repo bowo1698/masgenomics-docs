@@ -1,6 +1,7 @@
 # Quarto build output
 _site/
 .quarto/
+_theory/
 
 # Freeze cache: generally regenerated locally on render.
 _freeze/*

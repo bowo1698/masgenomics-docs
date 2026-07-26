@@ -7,7 +7,8 @@ project:
     - "*.qmd"
     - "!_scripts/"
     - "!internals/_extracted/"
-    # theory hidden from site: folder renamed to _theory/ (Quarto ignores _-prefixed dirs)
+    # theory drafts stay hidden in _theory/ (Quarto ignores _-prefixed dirs);
+    # published theory pages live in theory/
 
 website:
   title: "masgenomics"
@@ -29,6 +30,8 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: theory/index.qmd
+        text: Theory
       - href: installation/index.qmd
         text: Installation
       - href: tasks/index.qmd
@@ -51,6 +54,12 @@ website:
         aria-label: GitHub
 
   sidebar:
+    - title: "Theory"
+      collapse-level: 1
+      contents:
+        - theory/index.qmd
+        - theory/genomic-selection.qmd
+        - theory/multiallelic-markers.qmd
     - title: "Input Data"
       collapse-level: 1
       contents:

@@ -1,0 +1,17 @@
+---
+title: "Theory"
+---
+
+Background on the ideas behind `masreml` and `masbayes` — why breeding
+moved from measuring traits to reading genomes, and why the markers we
+read do not have to be single letters. These pages explain
+the reasoning that the [tasks](../tasks/index.qmd) then put to work on
+real data.
+
+| Page | What it covers |
+|---|---|
+| [**Genomic Selection**](genomic-selection.qmd) | Why selective breeding hits a wall on late, destructive, or sex-limited traits, and how markers, LD, and GEBVs get around it |
+| [**From Bi-allelic to Multi-allelic Markers**](multiallelic-markers.qmd) | Why reading several nearby SNPs as one microhaplotype carries more information than reading them one at a time |
+
+Read them in order if you are new to genomic prediction — the second
+page assumes the marker/QTL picture built in the first.
