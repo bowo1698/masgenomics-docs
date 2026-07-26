@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Phenotype – masgenomics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../input-data/pedigree.html" rel="next">
+<link href="../input-data/microhaplotypes.html" rel="prev">
+<link href="../assets/MBGs.svg" rel="icon" type="image/svg+xml">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-f0e62160eaaacfa521cd4395bf9d9768.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": true,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>html{ scroll-behavior: smooth; }</style>
+<link href="../site_libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+<script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="../site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="../site_libs/datatables-binding-0.34.0/datatables.js"></script><script src="../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><link href="../site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="../site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="../site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script><link href="../site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="../site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+</head>
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="https://bowo1698.github.io/masgenomics-docs/index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo light-content"><img src="../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo dark-content"></a>
+    <a class="navbar-brand" href="https://bowo1698.github.io/masgenomics-docs/index.html">
+    <span class="navbar-title">masgenomics</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../theory/index.html"> 
+<span class="menu-text">Theory</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../installation/index.html"> 
+<span class="menu-text">Installation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tasks/index.html"> 
+<span class="menu-text">Task</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../input-data/index.html" aria-current="page"> 
+<span class="menu-text">Input Data</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-reference" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Reference</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-reference">
+<li>
+    <a class="dropdown-item" href="../reference/maspipeline/index.html">
+ <span class="dropdown-text">maspipeline</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/masreml/index.html">
+ <span class="dropdown-text">masreml</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/masbayes/index.html">
+ <span class="dropdown-text">masbayes</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../internals/index.html"> 
+<span class="menu-text">Internals</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../input-data/phenotype.html">Phenotype</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../input-data/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Input Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../input-data/snp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SNP genotypes</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../input-data/microhaplotypes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Microhaplotypes</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../input-data/phenotype.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Phenotype</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../input-data/pedigree.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pedigree</span></a>
+  </div>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#schema" id="toc-schema" class="nav-link active" data-scroll-target="#schema">Schema</a></li>
+  <li>
+<a href="#example-from-the-demo-dataset" id="toc-example-from-the-demo-dataset" class="nav-link" data-scroll-target="#example-from-the-demo-dataset">Example (from the demo dataset)</a>
+  <ul class="collapse">
+<li><a href="#continuous-trait-pheno_continuous_g1.csv" id="toc-continuous-trait-pheno_continuous_g1.csv" class="nav-link" data-scroll-target="#continuous-trait-pheno_continuous_g1.csv">Continuous trait (<code>pheno_continuous_G1.csv</code>)</a></li>
+  <li><a href="#binary-trait-pheno_binary_g1.csv" id="toc-binary-trait-pheno_binary_g1.csv" class="nav-link" data-scroll-target="#binary-trait-pheno_binary_g1.csv">Binary trait (<code>pheno_binary_G1.csv</code>)</a></li>
+  <li><a href="#casecontrol-balance" id="toc-casecontrol-balance" class="nav-link" data-scroll-target="#casecontrol-balance">Case/control balance</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#qtl-ground-truth" id="toc-qtl-ground-truth" class="nav-link" data-scroll-target="#qtl-ground-truth">QTL ground truth</a>
+  <ul class="collapse">
+<li><a href="#causal-snps" id="toc-causal-snps" class="nav-link" data-scroll-target="#causal-snps">Causal SNPs</a></li>
+  <li><a href="#causal-microhaplotype-blocks" id="toc-causal-microhaplotype-blocks" class="nav-link" data-scroll-target="#causal-microhaplotype-blocks">Causal microhaplotype blocks</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#loading" id="toc-loading" class="nav-link" data-scroll-target="#loading">Loading</a>
+  <ul class="collapse">
+<li><a href="#passing-phenotypes-to-each-package" id="toc-passing-phenotypes-to-each-package" class="nav-link" data-scroll-target="#passing-phenotypes-to-each-package">Passing phenotypes to each package</a></li>
+  </ul>
+</li>
+  <li><a href="#common-pitfalls" id="toc-common-pitfalls" class="nav-link" data-scroll-target="#common-pitfalls">Common pitfalls</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/input-data/phenotype.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Phenotype</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><section id="schema" class="level2"><h2 class="anchored" data-anchor-id="schema">Schema</h2>
+<p>Both packages consume phenotypes as a <strong>data frame</strong> with one row per individual and at least three column kinds:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead><tr class="header">
+<th>Column kind</th>
+<th>Type</th>
+<th>Required by</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Identifier</td>
+<td>character</td>
+<td>both</td>
+<td>Joins to <code>rownames(snp)</code> / <code>rownames(mh)</code>
+</td>
+</tr>
+<tr class="even">
+<td>Fixed-effect covariates</td>
+<td>numeric or factor</td>
+<td>both</td>
+<td>e.g.&nbsp;<code>sex</code>, <code>age</code>, batch</td>
+</tr>
+<tr class="odd">
+<td>Response(s)</td>
+<td>numeric or integer 0/1</td>
+<td>both</td>
+<td>One column per trait — continuous OR binary</td>
+</tr>
+<tr class="even">
+<td>(Optional) <code>tbv_*</code>
+</td>
+<td>numeric</td>
+<td>none</td>
+<td>True breeding values; only meaningful for simulation studies</td>
+</tr>
+</tbody>
+</table>
+<p>The demo dataset bundles <strong>both</strong> continuous and binary versions of two traits (SNP-architecture and microhaplotype-architecture). Standalone CSVs split them out:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead><tr class="header">
+<th>File</th>
+<th>Columns</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>pheno_continuous_G1.csv</code></td>
+<td><code>id, sex, y_cont_qtl_snp, y_cont_qtl_mh, tbv_qtl_snp, tbv_qtl_mh</code></td>
+</tr>
+<tr class="even">
+<td><code>pheno_binary_G1.csv</code></td>
+<td><code>id, sex, y_bin_qtl_snp, y_bin_qtl_mh, tbv_qtl_snp, tbv_qtl_mh</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>d$pheno</code> carries all eight columns in one frame.</p>
+</section><section id="example-from-the-demo-dataset" class="level2"><h2 class="anchored" data-anchor-id="example-from-the-demo-dataset">Example (from the demo dataset)</h2>
+<section id="continuous-trait-pheno_continuous_g1.csv" class="level3"><h3 class="anchored" data-anchor-id="continuous-trait-pheno_continuous_g1.csv">Continuous trait (<code>pheno_continuous_G1.csv</code>)</h3>
+<p>Columns: <code>id, sex, y_cont_qtl_snp, y_cont_qtl_mh, tbv_qtl_snp, tbv_qtl_mh</code>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-6139bed2ff48080718e2" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6139bed2ff48080718e2">{"x":{"filter":"none","vertical":false,"data":[["IND001","IND002","IND003","IND004","IND005","IND006","IND007","IND008","IND009","IND010","IND011","IND012","IND013","IND014","IND015","IND016","IND017","IND018","IND019","IND020","IND021","IND022","IND023","IND024","IND025","IND026","IND027","IND028","IND029","IND030","IND031","IND032","IND033","IND034","IND035","IND036","IND037","IND038","IND039","IND040","IND041","IND042","IND043","IND044","IND045","IND046","IND047","IND048","IND049","IND050","IND051","IND052","IND053","IND054","IND055","IND056","IND057","IND058","IND059","IND060","IND061","IND062","IND063","IND064","IND065","IND066","IND067","IND068","IND069","IND070","IND071","IND072","IND073","IND074","IND075","IND076","IND077","IND078","IND079","IND080","IND081","IND082","IND083","IND084","IND085","IND086","IND087","IND088","IND089","IND090","IND091","IND092","IND093","IND094","IND095","IND096","IND097","IND098","IND099","IND100","IND101","IND102","IND103","IND104","IND105","IND106","IND107","IND108","IND109","IND110","IND111","IND112","IND113","IND114","IND115","IND116","IND117","IND118","IND119","IND120","IND121","IND122","IND123","IND124","IND125","IND126","IND127","IND128","IND129","IND130","IND131","IND132","IND133","IND134","IND135","IND136","IND137","IND138","IND139","IND140","IND141","IND142","IND143","IND144","IND145","IND146","IND147","IND148","IND149","IND150","IND151","IND152","IND153","IND154","IND155","IND156","IND157","IND158","IND159","IND160","IND161","IND162","IND163","IND164","IND165","IND166","IND167","IND168","IND169","IND170","IND171","IND172","IND173","IND174","IND175","IND176","IND177","IND178","IND179","IND180","IND181","IND182","IND183","IND184","IND185","IND186","IND187","IND188","IND189","IND190","IND191","IND192","IND193","IND194","IND195","IND196","IND197","IND198","IND199","IND200"],["M","F","M","M","M","F","F","F","F","M","F","M","F","F","M","M","F","M","M","M","M","F","M","F","F","M","F","F","M","M","F","F","F","F","M","F","F","M","M","F","M","F","M","M","M","M","F","M","F","F","F","M","M","F","F","M","M","F","F","F","M","F","M","F","M","M","M","F","F","M","M","F","M","M","M","M","F","F","F","M","F","F","M","F","M","F","F","F","F","M","F","M","M","M","M","F","M","F","M","F","M","F","M","F","M","F","M","M","F","M","M","F","M","F","M","F","F","F","F","M","F","M","M","M","M","M","M","M","F","M","M","M","M","M","M","M","F","F","F","F","M","F","M","F","F","F","M","F","F","F","F","M","F","M","F","F","F","F","F","M","F","M","F","F","F","F","M","M","M","M","M","M","F","M","M","F","M","F","F","M","M","F","M","F","F","M","M","M","F","M","F","F","M","F","F","M","F","F","F","M"],[-1.11336798271031,-3.4564618270626,-2.12478593068093,0.760347995690036,-1.65624152284066,-1.77879551555493,-0.138570876017092,-0.722184198495853,-0.587480953328718,-1.84059571316905,0.60604639823944,-1.84534055000884,-1.4594747669594,1.1408733669536,-1.06200212035558,1.50040289281272,0.207281596061643,-0.72608705144195,-0.0051095112344316,-0.375007914318072,0.860097759540204,0.222920542413418,-1.21036599825625,0.325875368752377,1.69559512260383,0.5351159943811969,-1.63008595394684,0.231244441017197,-0.767253018962284,-0.591880607472125,2.31373870677078,1.31634167197178,0.931097976699081,1.10083319636335,-1.15435388916408,-1.22730444059971,0.569156562104423,2.29418304086424,0.391979048809454,-0.674638615344376,2.23306677380085,0.66782821695784,0.5067900902617271,1.70789776147165,0.821001312063211,1.70014816291202,0.387910970486544,1.26013187986971,0.312430685465413,1.32444999168827,1.3329849833965,0.311864173934895,-0.6516707513532159,0.621627186551145,-1.43107704123736,-1.94560100914462,0.378536509531152,0.791271792900557,-0.0671484474679042,-0.311790075470843,0.828352726450084,-0.499200521324109,-1.21819452850639,0.439715022382095,0.80912256293519,-1.2129645557369,-0.301958672307129,-0.376514722965738,-2.50243200012778,0.886522286819682,1.19840613605377,-0.517687139188296,-0.485397328915147,-0.245242230243344,-0.349939864707121,2.28709290781178,0.225038076448758,-1.11658310573692,-0.797206619963023,1.23831291180814,0.0438139906452474,-0.114275647906016,0.507125063954166,-0.329793933012159,1.40680281208834,2.86779436875832,3.30713616969633,1.26850125827184,-1.40616366453319,1.2178979703652,2.07072586199521,3.4356747158269,2.12045900280526,1.93050019085735,1.22073893406749,-0.471280169644688,1.42423317018333,3.62088910895664,2.10951963378122,3.8063632031123,1.65060122967929,1.24485902864155,-0.241764077329517,1.46651455242345,3.20571038067381,1.62863444018027,1.98500159274294,1.6963789090715,-0.0691872531179175,2.24505466716105,2.36096505345063,0.282634101765825,1.27228148352343,1.28774703441796,2.91316696401512,1.95943173528682,0.681302719887611,2.54594315259734,-0.773610223853135,1.00194761195175,-1.22674909431422,-1.85834376604876,0.600303525380898,0.59785955580137,0.992163843306697,-0.86042874769956,-1.14404739299062,-0.7839334151035871,0.0743695612408031,-0.971673934037859,0.976711020958218,-1.23186157479224,0.143733531628187,0.458912514276773,0.106467458299359,-0.452332506153181,-0.987521664329957,-0.0554174060585559,-1.69553914925774,0.655232027346313,1.37131527052187,-1.61406054070063,0.815088276834379,0.866238606760964,-2.20117919889009,1.38924342736079,-0.377276743264661,-1.64800570623591,1.00885325586109,-0.32101908542114,0.690452783785189,0.710473941476385,-0.323162870063453,2.74209748138666,-2.2137129402787,-1.78254129551339,0.149936403316936,0.26692796618036,1.78634761711082,0.890217305388693,-1.24139669968565,3.10966704352056,0.498634559216435,1.22647600697233,1.10465797095181,1.05150532182538,3.70548071720996,1.10279121354789,-0.00778722377043806,0.831958232277228,0.960012392498296,2.42475738939223,1.06129055826687,-0.25484093533751,-0.775235751906049,1.64865458463257,1.69920721950236,-0.418424167343997,-0.844714305414743,1.86370369617911,0.0239275574602282,0.35030579171551,-0.400093699128652,0.89290981709272,-0.597856513673208,0.281670564013038,1.41049513876255,1.79356410076687,0.112783128519199,0.397646711873715,0.813999100978578,-0.0427744876677612,-0.667372395608971,1.39972413236066,1.14900890548289,0.7966613844492419,-0.925830653679292,0.521749432961223,0.551406233829599,2.49180894308715],[0.8458509224452569,0.146762202647147,-1.47280591027488,-0.579648682257967,-0.457599981250166,-0.31220897331579,2.17250188771725,0.0448436845160886,-0.230899951135844,0.316031915119329,0.568313315647618,-0.133197392213128,-1.23556142649435,-1.1437852382448,-0.368571936470027,0.252779417179833,1.10365688814844,0.5164436436804249,3.03846612291944,1.80223335466956,0.239820441455127,0.823688430722725,-0.438067822136425,0.115555826179278,-0.401143526470994,-1.23486610189573,-0.6268635374111809,1.02038499508144,2.81676699341407,0.989698465343655,1.02826413206735,1.12812110198542,1.94320427266417,-0.918570619247163,-1.12799017624431,-0.622227543975693,-0.303205013525785,0.101299945562286,1.9523615858806,-2.16055888179039,0.645941591984167,-0.926881720730248,-1.17789112950796,-0.261326762718978,2.61908944323358,-0.793732900277705,-1.99533295823307,-1.73323411692575,-0.334907890116815,-0.995177400129312,-4.21477026082311,0.715361014278691,-0.5788351784851981,-1.98698457534,0.449303137728152,0.268301660612912,0.508627881991778,-2.81026967779892,-1.00440841129953,-2.59824938583187,1.95258307010224,-1.6043272961924,-1.97129151515758,0.09171251650285139,2.04093051003464,-0.974464785794889,0.772730915865637,1.34378198365443,-0.513938296926605,1.9728564767952,2.45755772624772,-0.63376070537596,-0.312994820732979,1.20977507619092,1.11892245258555,0.16318469232718,-0.140292635928576,-0.137883197632716,-1.94276427783695,2.52391448874379,0.605836410435025,0.64296361784334,-2.70038461613818,-1.08752869852506,2.32482593235189,0.917827555086605,-0.175976070721663,1.98417187625415,1.31541350085126,1.81067830534502,0.9851746920157231,2.6042581812182,3.85929126742046,2.12043083611449,0.655273098937717,0.90326130542835,-0.891269487877111,0.226215754773557,2.77953140813529,0.303423620753076,0.132900721267542,2.60993297059664,-1.2143978559257,0.725704147153737,0.588675768902126,2.3016322185937,0.547132510641645,1.44562918104761,-0.6386492539500011,1.39522189321163,0.321455607931083,-1.1158151287672,-1.18811184754877,-0.207474107874156,0.594599840567272,-1.27903369630446,-1.19476604684509,2.53694221492887,-0.195011017777396,1.64561608923315,-1.56970784443505,0.720027203510843,0.610278504892331,0.711673436238067,0.672848394269585,2.36775296773403,-2.58307791816846,2.52706645046418,-1.19010695628253,1.61115557709334,-0.0146949527988125,-1.8396690932782,0.719274283019711,-2.35459385709479,-1.75204537558137,-2.29442478079308,-2.52938101150041,-2.4938191305823,-0.306986383527513,-2.07035971204223,1.46307560635858,0.924026715291102,0.948488545378148,-0.0536359060126582,-0.391012478598765,0.247372355582486,1.97468091593041,1.72370241583124,1.86313575165362,1.64166555413149,1.4679347567614,1.49620450316744,-0.0934841083913415,0.641466978113685,-0.41796579630336,0.416680137711166,-0.8316433459388199,-1.64188068965268,1.52841579372292,2.00948078198014,-0.842438672990047,0.421365052460241,-1.86624803373255,-0.735755458543208,0.0777666052425198,-1.49617974147478,1.02948992858128,0.270380191964312,-0.833625916957204,0.773195784013846,0.0164406933187714,1.3400734721537,-3.05221817489559,2.47163576175888,0.434669399518729,-0.00953908307312451,0.517189178063802,-0.183523310778473,3.42135420651744,-1.04680444493411,-1.88235383650728,1.76244214678539,0.936302628678907,-0.760452778837179,1.38292897282126,0.940814918919509,0.513543696399527,3.20017579430924,2.39512121512733,2.25978521515303,1.75483692244788,0.266027695702392,1.50755614498607,-0.21537723178301,2.1796108032819,0.6371885799752161,1.48923117092805,-0.0572807644787692,1.75162332967945,0.723924291544334],[-1.74074179484771,-1.88185741296409,-2.30370598121553,-0.369725804862786,-1.41703102384693,-1.50136271744914,-0.525005290855687,-0.661780081361944,0.098698807836081,-0.599346499177452,-1.19771335561084,-1.54335524155175,-1.10635650916225,0.0339358739448926,-2.29321407544872,-1.22879341157876,-1.261996195703,0.26052553432115,-0.872633558034302,-0.318915653813799,0.354252413574176,-0.511327862514488,-1.51195033777948,0.335969399161385,1.11279923207894,0.163516757209803,-0.235703568082785,0.316326153369205,-0.74404524556845,-0.480246233529367,0.569506315902515,0.859786159234309,1.04927424696877,-0.574578675770136,-0.660279591173231,-1.18669510696627,-0.519753067423683,0.117162179216464,-1.15859489238367,-0.989207560539237,-0.3141815515082,1.08230866330715,0.75596520713564,0.494521278577278,0.9645000968723439,0.506523764116484,-0.000188390818152927,0.8386447556241871,0.8113652122956539,1.29038853968126,1.03919392270554,-0.753590678871486,-1.14204113093664,0.381527639386645,-0.19002453929493,-0.523133154692053,0.222682834091414,0.778061934014027,0.938483338326804,-1.35739296768693,0.292502652783594,-0.5261820694320301,-1.8227794921026,-0.104813229012103,-0.636702117789486,-0.678585658089608,0.33354235391719,-0.566235714036312,-1.45815313926399,-0.377258712630526,-0.392344914341828,-1.11636669360742,-1.41579815615804,-0.629480238611609,-1.20837508503366,-0.0769057872897536,0.0913428242848625,0.143584949506716,-0.945529468351476,-0.171035029399088,0.123699308144704,0.548942797439668,0.959819105119759,1.66308215780593,-0.0275172373372478,1.75704206713815,1.68991337360717,0.702193419086832,0.207993763328058,1.25317695723051,0.827096056390584,1.03431441059453,1.31246766954545,0.730352369988479,1.18941007496515,-0.0968570158643917,1.06260705705589,1.57383877890733,1.52153106647285,1.18941007496515,1.83833978683181,1.2254470881788,1.46418903280264,0.611472295979075,1.15480224140665,0.769754022720376,1.09227514729184,1.04882239163089,0.183705066530248,0.9745102911450499,0.683276839860411,1.35762010376292,0.479732881016204,0.200411659007985,0.129539234712132,1.63563625752613,1.49841146055887,0.78678608881304,0.823986318143957,1.15639468805156,-0.758640653651746,-1.8783085334092,-0.09239448166498,-1.13768155777753,-0.393467700332841,-1.07947010001592,-0.973934179335158,-1.70154693385536,-0.359446598548517,-1.55182411905535,-0.155335042065181,-2.45948817686656,-2.26238564927066,-0.731483312481234,-0.769670397108223,-1.54080033132248,-2.00999525734786,-2.07371448615432,-1.13846634141742,-0.513004377908592,0.164026136606298,0.15188026811939,1.04956208006809,-0.602962594567614,-1.88579699514168,0.0382771129949872,-0.163992827183889,-0.498512757000977,1.08070766581419,0.408056006265661,0.0124490282810339,-0.49316100906992,0.4662247488978,0.8559427056947519,-0.606549799622583,-1.53788209890321,-0.584422660041394,-0.153105021892348,0.454229891183826,-0.8035099273021989,-0.512720290216321,1.67077237003768,1.34587693751546,1.09943798493672,1.84997896879792,0.260962720076368,0.932739356262329,0.918649783939684,0.56232153620006,1.09638441049818,0.247367840485575,0.825504915922787,0.5143322384522701,0.210800505425424,0.398856300069343,-0.433549131465416,-0.0121721099864546,0.249988413959737,0.0676445699913226,1.12115607772364,0.00951689964978401,0.442604050296189,0.272589329790972,0.692881329271715,-1.36526338450453,-0.0149744706010239,0.821344027116878,1.73760027610212,0.75514029379048,-0.476830502193416,0.962469718982914,-0.6219104495316,-0.794069947663725,0.363880105476989,-0.5598856084266161,0.8535949502547741,-1.22218746141468,0.850766560472802,0.458185342400083,1.87830629666628],[-0.517921908800993,0.127709931077596,-0.333156504408602,-1.15673994520763,0.0313636284346683,1.01753249881962,1.25600865870318,0.207798680776153,1.37121869387569,0.441385628528967,0.206372333941857,-0.5192665238747139,-0.5056935419536031,-0.439180628865308,-0.716243191593001,-0.591171991950036,-0.535704615378473,1.20617645779127,-0.703597875336506,-0.106030156553174,-0.525913536586449,0.409263542265938,-0.21851321049186,0.772905090732709,-0.367079657328982,0.313483230708307,-0.103115613992466,-0.167643142263517,0.5912921738275591,0.09648025194040979,1.09681882829831,-0.522613766899964,0.51724775953153,0.515312412495152,-1.96360116951731,-1.29566763837484,-0.412616858230377,-0.718021448798762,1.40156930236651,-1.96078823989003,0.111009763643328,-0.587804156704818,-1.76143830724293,-1.9516485476448,-0.564998451679621,-0.956354370368682,-1.7834758224941,-1.96730020997079,-2.27361598437866,-0.0324610272296076,-1.58039852329296,-0.287605724191642,0.942711725594652,-0.558807917454624,-1.09364109643896,-1.58241064366681,-0.7910631806162221,-0.559789054106291,-0.447134340272443,-0.8409905694583411,0.228497042303635,-0.919628989818243,-0.174794411869985,-0.711366579712711,-0.149891241648702,-0.989692915418374,0.382218584503384,1.15490967854506,-0.0139582693077806,0.148440889659861,1.32233401749309,0.710777852117518,0.09277763609621401,0.448379260888085,-0.325071830273482,0.106838243911068,0.32581344224021,0.371109856870037,-0.233628299713312,0.754281967171192,0.366668673580331,0.348898610876065,-0.185666070511653,-0.0498577785525515,0.926339206821738,0.282305917709853,0.596676143120586,2.6040820106809,0.870368554129772,0.806811621363789,-0.184257900492461,0.355289153156656,3.91346047976724,1.25322820768928,0.747253181881498,1.05867660103534,-0.00702960350680308,0.469491580148636,1.53071314254358,0.683690020939787,-0.498597343187665,-0.0432459901196309,-0.401512984224864,0.48137880301287,0.823074431937579,0.879331518368066,0.162719825111969,0.971785297690671,-0.273300109385548,-0.303585886473193,-0.152310303035173,-0.592551730576684,-0.305056526075917,0.400185394466916,-0.47719575299235,-0.61199247801143,-0.654431064383345,1.04503239856161,0.219237306948061,-0.366959417528623,-1.28928885441134,-0.454045931931756,-0.733725170854502,-0.845977651925373,-0.0340165332436995,0.215891603367904,-2.37550974869948,0.739337818606284,-0.494615641036381,-0.392464343710272,-1.07070935541317,-1.40473754553517,-1.71140919988384,-1.32535072170361,-2.47040475174977,-1.97767043574651,-1.906044094283,-1.18319652923321,-1.32046276356021,-1.90117434673403,-1.1454321766049,0.355784229615365,1.00405720418657,0.109287197056413,0.649709238268819,0.188905822705141,-0.498228660528606,0.800100658747007,2.68812760095407,0.442113660652209,1.81824577313927,0.750747141956832,-0.564928262224921,0.656545816568409,0.197199382505301,0.660072106834849,-1.50878454837075,0.00593086852888729,0.445772620005841,0.792295917162071,-0.422569235963688,0.326251421554746,-0.85067206149742,-0.348385635403631,-0.389960329205374,-0.999901968972269,-0.191831287036915,-0.0463690606416189,-1.06926871196788,0.321381019537181,-0.297627164815535,-0.155053955578854,-0.610956603373772,1.5300522348822,-0.784336701289097,0.413432934783824,-0.0463705517011016,0.459524609629296,1.8389465115443,-0.0274923168742387,-0.765740349377219,1.30076107688198,1.72382906786944,-0.356798074918266,1.76469367182458,0.937780888218107,1.2102352340475,1.15674105118486,1.41776172142944,0.397115173668769,1.5086854113775,1.45541155618599,0.191383887126542,0.708496919493018,0.523787355926961,-0.304269248865076,1.42200381153239,0.0658563077319036,2.77979154839763,0.451797872810881]],"container":"<table class=\"cell-border compact stripe hover\">\n  <thead>\n    <tr>\n      <th>id<\/th>\n      <th>sex<\/th>\n      <th>y_cont_qtl_snp<\/th>\n      <th>y_cont_qtl_mh<\/th>\n      <th>tbv_qtl_snp<\/th>\n      <th>tbv_qtl_mh<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"scrollX":true,"autoWidth":false,"dom":"frtip","columnDefs":[{"className":"dt-right","targets":[2,3,4,5]},{"name":"id","targets":0},{"name":"sex","targets":1},{"name":"y_cont_qtl_snp","targets":2},{"name":"y_cont_qtl_mh","targets":3},{"name":"tbv_qtl_snp","targets":4},{"name":"tbv_qtl_mh","targets":5}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p><a href="../demo-data/main/pheno_continuous_G1.csv" class="btn btn-sm btn-primary">Download pheno_continuous_G1.csv (large)</a> &nbsp; <a href="../demo-data/toy/pheno_continuous_G1.csv" class="btn btn-sm btn-outline-secondary">Download pheno_continuous_G1.csv (small)</a></p>
+</section><section id="binary-trait-pheno_binary_g1.csv" class="level3"><h3 class="anchored" data-anchor-id="binary-trait-pheno_binary_g1.csv">Binary trait (<code>pheno_binary_G1.csv</code>)</h3>
+<p>Same schema but with the median-thresholded <code>y_bin_*</code> columns in place of the continuous ones. Prevalence is 0.5 by construction.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-8fda700651c9f6204ac5" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-8fda700651c9f6204ac5">{"x":{"filter":"none","vertical":false,"data":[["IND001","IND002","IND003","IND004","IND005","IND006","IND007","IND008","IND009","IND010","IND011","IND012","IND013","IND014","IND015","IND016","IND017","IND018","IND019","IND020","IND021","IND022","IND023","IND024","IND025","IND026","IND027","IND028","IND029","IND030","IND031","IND032","IND033","IND034","IND035","IND036","IND037","IND038","IND039","IND040","IND041","IND042","IND043","IND044","IND045","IND046","IND047","IND048","IND049","IND050","IND051","IND052","IND053","IND054","IND055","IND056","IND057","IND058","IND059","IND060","IND061","IND062","IND063","IND064","IND065","IND066","IND067","IND068","IND069","IND070","IND071","IND072","IND073","IND074","IND075","IND076","IND077","IND078","IND079","IND080","IND081","IND082","IND083","IND084","IND085","IND086","IND087","IND088","IND089","IND090","IND091","IND092","IND093","IND094","IND095","IND096","IND097","IND098","IND099","IND100","IND101","IND102","IND103","IND104","IND105","IND106","IND107","IND108","IND109","IND110","IND111","IND112","IND113","IND114","IND115","IND116","IND117","IND118","IND119","IND120","IND121","IND122","IND123","IND124","IND125","IND126","IND127","IND128","IND129","IND130","IND131","IND132","IND133","IND134","IND135","IND136","IND137","IND138","IND139","IND140","IND141","IND142","IND143","IND144","IND145","IND146","IND147","IND148","IND149","IND150","IND151","IND152","IND153","IND154","IND155","IND156","IND157","IND158","IND159","IND160","IND161","IND162","IND163","IND164","IND165","IND166","IND167","IND168","IND169","IND170","IND171","IND172","IND173","IND174","IND175","IND176","IND177","IND178","IND179","IND180","IND181","IND182","IND183","IND184","IND185","IND186","IND187","IND188","IND189","IND190","IND191","IND192","IND193","IND194","IND195","IND196","IND197","IND198","IND199","IND200"],["M","F","M","M","M","F","F","F","F","M","F","M","F","F","M","M","F","M","M","M","M","F","M","F","F","M","F","F","M","M","F","F","F","F","M","F","F","M","M","F","M","F","M","M","M","M","F","M","F","F","F","M","M","F","F","M","M","F","F","F","M","F","M","F","M","M","M","F","F","M","M","F","M","M","M","M","F","F","F","M","F","F","M","F","M","F","F","F","F","M","F","M","M","M","M","F","M","F","M","F","M","F","M","F","M","F","M","M","F","M","M","F","M","F","M","F","F","F","F","M","F","M","M","M","M","M","M","M","F","M","M","M","M","M","M","M","F","F","F","F","M","F","M","F","F","F","M","F","F","F","F","M","F","M","F","F","F","F","F","M","F","M","F","F","F","F","M","M","M","M","M","M","F","M","M","F","M","F","F","M","M","F","M","F","F","M","M","M","F","M","F","F","M","F","F","M","F","F","F","M"],[0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,0,1,0,0,0,1,1,0,0,0,0,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,0,1,0,1,1,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,0,1,0,0,1,0,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,0,1,0,0,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,0,0,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1,1,0,0,1,0,0,0,1,0,0,1,1,0,0,1,0,0,1,1,1,0,1,1,1],[1,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,1,1,1,1,0,1,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,0,0,1,0,1,1,0,1,1,0,0,1,1,0,0,0,0,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,1,0,1,1,1,1,1,0,1,1,0,0,0,1,0,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,1,1,0,1,0,0,0,0,1,0,0,1,0,1,0,1,1,0,1,0,1,0,0,1,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,0,1,1],[-1.74074179484771,-1.88185741296409,-2.30370598121553,-0.369725804862786,-1.41703102384693,-1.50136271744914,-0.525005290855687,-0.661780081361944,0.098698807836081,-0.599346499177452,-1.19771335561084,-1.54335524155175,-1.10635650916225,0.0339358739448926,-2.29321407544872,-1.22879341157876,-1.261996195703,0.26052553432115,-0.872633558034302,-0.318915653813799,0.354252413574176,-0.511327862514488,-1.51195033777948,0.335969399161385,1.11279923207894,0.163516757209803,-0.235703568082785,0.316326153369205,-0.74404524556845,-0.480246233529367,0.569506315902515,0.859786159234309,1.04927424696877,-0.574578675770136,-0.660279591173231,-1.18669510696627,-0.519753067423683,0.117162179216464,-1.15859489238367,-0.989207560539237,-0.3141815515082,1.08230866330715,0.75596520713564,0.494521278577278,0.9645000968723439,0.506523764116484,-0.000188390818152927,0.8386447556241871,0.8113652122956539,1.29038853968126,1.03919392270554,-0.753590678871486,-1.14204113093664,0.381527639386645,-0.19002453929493,-0.523133154692053,0.222682834091414,0.778061934014027,0.938483338326804,-1.35739296768693,0.292502652783594,-0.5261820694320301,-1.8227794921026,-0.104813229012103,-0.636702117789486,-0.678585658089608,0.33354235391719,-0.566235714036312,-1.45815313926399,-0.377258712630526,-0.392344914341828,-1.11636669360742,-1.41579815615804,-0.629480238611609,-1.20837508503366,-0.0769057872897536,0.0913428242848625,0.143584949506716,-0.945529468351476,-0.171035029399088,0.123699308144704,0.548942797439668,0.959819105119759,1.66308215780593,-0.0275172373372478,1.75704206713815,1.68991337360717,0.702193419086832,0.207993763328058,1.25317695723051,0.827096056390584,1.03431441059453,1.31246766954545,0.730352369988479,1.18941007496515,-0.0968570158643917,1.06260705705589,1.57383877890733,1.52153106647285,1.18941007496515,1.83833978683181,1.2254470881788,1.46418903280264,0.611472295979075,1.15480224140665,0.769754022720376,1.09227514729184,1.04882239163089,0.183705066530248,0.9745102911450499,0.683276839860411,1.35762010376292,0.479732881016204,0.200411659007985,0.129539234712132,1.63563625752613,1.49841146055887,0.78678608881304,0.823986318143957,1.15639468805156,-0.758640653651746,-1.8783085334092,-0.09239448166498,-1.13768155777753,-0.393467700332841,-1.07947010001592,-0.973934179335158,-1.70154693385536,-0.359446598548517,-1.55182411905535,-0.155335042065181,-2.45948817686656,-2.26238564927066,-0.731483312481234,-0.769670397108223,-1.54080033132248,-2.00999525734786,-2.07371448615432,-1.13846634141742,-0.513004377908592,0.164026136606298,0.15188026811939,1.04956208006809,-0.602962594567614,-1.88579699514168,0.0382771129949872,-0.163992827183889,-0.498512757000977,1.08070766581419,0.408056006265661,0.0124490282810339,-0.49316100906992,0.4662247488978,0.8559427056947519,-0.606549799622583,-1.53788209890321,-0.584422660041394,-0.153105021892348,0.454229891183826,-0.8035099273021989,-0.512720290216321,1.67077237003768,1.34587693751546,1.09943798493672,1.84997896879792,0.260962720076368,0.932739356262329,0.918649783939684,0.56232153620006,1.09638441049818,0.247367840485575,0.825504915922787,0.5143322384522701,0.210800505425424,0.398856300069343,-0.433549131465416,-0.0121721099864546,0.249988413959737,0.0676445699913226,1.12115607772364,0.00951689964978401,0.442604050296189,0.272589329790972,0.692881329271715,-1.36526338450453,-0.0149744706010239,0.821344027116878,1.73760027610212,0.75514029379048,-0.476830502193416,0.962469718982914,-0.6219104495316,-0.794069947663725,0.363880105476989,-0.5598856084266161,0.8535949502547741,-1.22218746141468,0.850766560472802,0.458185342400083,1.87830629666628],[-0.517921908800993,0.127709931077596,-0.333156504408602,-1.15673994520763,0.0313636284346683,1.01753249881962,1.25600865870318,0.207798680776153,1.37121869387569,0.441385628528967,0.206372333941857,-0.5192665238747139,-0.5056935419536031,-0.439180628865308,-0.716243191593001,-0.591171991950036,-0.535704615378473,1.20617645779127,-0.703597875336506,-0.106030156553174,-0.525913536586449,0.409263542265938,-0.21851321049186,0.772905090732709,-0.367079657328982,0.313483230708307,-0.103115613992466,-0.167643142263517,0.5912921738275591,0.09648025194040979,1.09681882829831,-0.522613766899964,0.51724775953153,0.515312412495152,-1.96360116951731,-1.29566763837484,-0.412616858230377,-0.718021448798762,1.40156930236651,-1.96078823989003,0.111009763643328,-0.587804156704818,-1.76143830724293,-1.9516485476448,-0.564998451679621,-0.956354370368682,-1.7834758224941,-1.96730020997079,-2.27361598437866,-0.0324610272296076,-1.58039852329296,-0.287605724191642,0.942711725594652,-0.558807917454624,-1.09364109643896,-1.58241064366681,-0.7910631806162221,-0.559789054106291,-0.447134340272443,-0.8409905694583411,0.228497042303635,-0.919628989818243,-0.174794411869985,-0.711366579712711,-0.149891241648702,-0.989692915418374,0.382218584503384,1.15490967854506,-0.0139582693077806,0.148440889659861,1.32233401749309,0.710777852117518,0.09277763609621401,0.448379260888085,-0.325071830273482,0.106838243911068,0.32581344224021,0.371109856870037,-0.233628299713312,0.754281967171192,0.366668673580331,0.348898610876065,-0.185666070511653,-0.0498577785525515,0.926339206821738,0.282305917709853,0.596676143120586,2.6040820106809,0.870368554129772,0.806811621363789,-0.184257900492461,0.355289153156656,3.91346047976724,1.25322820768928,0.747253181881498,1.05867660103534,-0.00702960350680308,0.469491580148636,1.53071314254358,0.683690020939787,-0.498597343187665,-0.0432459901196309,-0.401512984224864,0.48137880301287,0.823074431937579,0.879331518368066,0.162719825111969,0.971785297690671,-0.273300109385548,-0.303585886473193,-0.152310303035173,-0.592551730576684,-0.305056526075917,0.400185394466916,-0.47719575299235,-0.61199247801143,-0.654431064383345,1.04503239856161,0.219237306948061,-0.366959417528623,-1.28928885441134,-0.454045931931756,-0.733725170854502,-0.845977651925373,-0.0340165332436995,0.215891603367904,-2.37550974869948,0.739337818606284,-0.494615641036381,-0.392464343710272,-1.07070935541317,-1.40473754553517,-1.71140919988384,-1.32535072170361,-2.47040475174977,-1.97767043574651,-1.906044094283,-1.18319652923321,-1.32046276356021,-1.90117434673403,-1.1454321766049,0.355784229615365,1.00405720418657,0.109287197056413,0.649709238268819,0.188905822705141,-0.498228660528606,0.800100658747007,2.68812760095407,0.442113660652209,1.81824577313927,0.750747141956832,-0.564928262224921,0.656545816568409,0.197199382505301,0.660072106834849,-1.50878454837075,0.00593086852888729,0.445772620005841,0.792295917162071,-0.422569235963688,0.326251421554746,-0.85067206149742,-0.348385635403631,-0.389960329205374,-0.999901968972269,-0.191831287036915,-0.0463690606416189,-1.06926871196788,0.321381019537181,-0.297627164815535,-0.155053955578854,-0.610956603373772,1.5300522348822,-0.784336701289097,0.413432934783824,-0.0463705517011016,0.459524609629296,1.8389465115443,-0.0274923168742387,-0.765740349377219,1.30076107688198,1.72382906786944,-0.356798074918266,1.76469367182458,0.937780888218107,1.2102352340475,1.15674105118486,1.41776172142944,0.397115173668769,1.5086854113775,1.45541155618599,0.191383887126542,0.708496919493018,0.523787355926961,-0.304269248865076,1.42200381153239,0.0658563077319036,2.77979154839763,0.451797872810881]],"container":"<table class=\"cell-border compact stripe hover\">\n  <thead>\n    <tr>\n      <th>id<\/th>\n      <th>sex<\/th>\n      <th>y_bin_qtl_snp<\/th>\n      <th>y_bin_qtl_mh<\/th>\n      <th>tbv_qtl_snp<\/th>\n      <th>tbv_qtl_mh<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"scrollX":true,"autoWidth":false,"dom":"frtip","columnDefs":[{"className":"dt-right","targets":[2,3,4,5]},{"name":"id","targets":0},{"name":"sex","targets":1},{"name":"y_bin_qtl_snp","targets":2},{"name":"y_bin_qtl_mh","targets":3},{"name":"tbv_qtl_snp","targets":4},{"name":"tbv_qtl_mh","targets":5}],"order":[],"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p><a href="../demo-data/main/pheno_binary_G1.csv" class="btn btn-sm btn-primary">Download pheno_binary_G1.csv (large)</a> &nbsp; <a href="../demo-data/toy/pheno_binary_G1.csv" class="btn btn-sm btn-outline-secondary">Download pheno_binary_G1.csv (small)</a></p>
+</section><section id="casecontrol-balance" class="level3"><h3 class="anchored" data-anchor-id="casecontrol-balance">Case/control balance</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-158e7f64f9c7092855b2" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-158e7f64f9c7092855b2">{"x":{"filter":"none","vertical":false,"data":[["y_bin_qtl_snp","y_bin_qtl_mh"],[100,100],[100,100],[0.5,0.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>trait<\/th>\n      <th>n_cases<\/th>\n      <th>n_controls<\/th>\n      <th>prevalence<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","paging":false,"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"name":"trait","targets":0},{"name":"n_cases","targets":1},{"name":"n_controls","targets":2},{"name":"prevalence","targets":3}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section></section><section id="qtl-ground-truth" class="level2"><h2 class="anchored" data-anchor-id="qtl-ground-truth">QTL ground truth</h2>
+<p>Ten QTL under each architecture (SNP and microhaplotype), with unit-length-normalised effects (<span class="math inline">\(\sum \beta_i^2 = 1\)</span>). <strong>Use these for QTL recovery analysis only</strong>, not as model input. Four standalone <code>.rds</code> files mirror <code>d$qtl</code> with human-readable identifiers — SNP names and microhaplotype block ids — so downstream tools can join against <code>d$map_snp</code> / <code>d$map_mh</code> directly.</p>
+<section id="causal-snps" class="level3"><h3 class="anchored" data-anchor-id="causal-snps">Causal SNPs</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-6fcddc69f3d8d0eecefb" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6fcddc69f3d8d0eecefb">{"x":{"filter":"none","vertical":false,"data":[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],["SNP029","SNP030","SNP074","SNP090","SNP158","SNP188","SNP192","SNP201","SNP242","SNP266","SNP279","SNP282","SNP296","SNP318","SNP334","SNP356","SNP444","SNP445","SNP460","SNP479"],[1,1,1,1,2,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5],[3800000,3900000,8300000,9900000,6700000,9700000,10100000,1000000,5100000,7500000,8800000,9100000,10500000,2700000,4300000,6500000,5300000,5400000,6900000,8800000],[0.3823,-0.1352,0.2929,-0.1412,-0.3044,-0.1687,-0.2235,-0.3431,0.0056,-0.2356,-0.0707,0.2832,-0.162,0.2578,0.0689,-0.2498,0.2955,0.0304,-0.1313,-0.187]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>rank<\/th>\n      <th>snp_id<\/th>\n      <th>chrom<\/th>\n      <th>position<\/th>\n      <th>effect<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","paging":false,"ordering":false,"columnDefs":[{"className":"dt-right","targets":[0,2,3,4]},{"name":"rank","targets":0},{"name":"snp_id","targets":1},{"name":"chrom","targets":2},{"name":"position","targets":3},{"name":"effect","targets":4}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section><section id="causal-microhaplotype-blocks" class="level3"><h3 class="anchored" data-anchor-id="causal-microhaplotype-blocks">Causal microhaplotype blocks</h3>
+<p><code>d$qtl$mh_idx</code> indexes columns of <span class="math inline">\(W_{ah}\)</span> rather than block columns directly, because the causal “allele” within a multi-allelic block is itself a free parameter. The derived <code>qtl_mh_blocks.rds</code> reduces each <span class="math inline">\(W_{ah}\)</span> column to its parent block id; if two QTL fall in the same block, the block id appears twice.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-bd1b3cbe03738ae37429" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-bd1b3cbe03738ae37429">{"x":{"filter":"none","vertical":false,"data":[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],["block_4","block_6","block_13","block_25","block_52","block_84","block_100","block_116","block_149","block_177","block_180","block_191","block_198","block_199","block_212","block_225","block_230","block_231","block_237","block_237"],[1,1,1,1,2,2,2,3,3,4,4,4,4,4,5,5,5,5,5,5],[1600000,2000000,3400000,5800000,1200000,7600000,10800000,4000000,10600000,6200000,6800000,9000000,10400000,10600000,3200000,5800000,6800000,7000000,8200000,8200000],[1700000,2100000,3500000,5900000,1300000,7700000,10900000,4100000,10700000,6300000,6900000,9100000,10500000,10700000,3300000,5900000,6900000,7100000,8300000,8300000],[-0.1283,-0.2721,0.3557,-0.2069,-0.118,0.257,-0.06,0.1064,0.2108,-0.434,0.1146,0.1549,-0.4533,-0.1622,0.0329,0.0543,-0.0969,0.09909999999999999,0.09719999999999999,-0.3329]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>rank<\/th>\n      <th>block_id<\/th>\n      <th>chr<\/th>\n      <th>start_pos<\/th>\n      <th>end_pos<\/th>\n      <th>effect<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","paging":false,"ordering":false,"columnDefs":[{"className":"dt-right","targets":[0,2,3,4,5]},{"name":"rank","targets":0},{"name":"block_id","targets":1},{"name":"chr","targets":2},{"name":"start_pos","targets":3},{"name":"end_pos","targets":4},{"name":"effect","targets":5}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p><a href="../demo-data/main/qtl/qtl_snp_ids.rds" class="btn btn-sm btn-outline-primary">Download qtl_snp_ids.rds</a> <a href="../demo-data/main/qtl/qtl_mh_blocks.rds" class="btn btn-sm btn-outline-primary">Download qtl_mh_blocks.rds</a> <a href="../demo-data/main/qtl/effects_snp.rds" class="btn btn-sm btn-outline-primary">Download effects_snp.rds</a> <a href="../demo-data/main/qtl/effects_mh.rds" class="btn btn-sm btn-outline-primary">Download effects_mh.rds</a></p>
+</section></section><section id="loading" class="level2"><h2 class="anchored" data-anchor-id="loading">Loading</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masreml</span><span class="op">)</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">load_data</span><span class="op">(</span><span class="st">"large"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Continuous trait, SNP architecture</span></span>
+<span><span class="va">y_cont</span> <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="va">pheno</span><span class="op">$</span><span class="va">y_cont_qtl_snp</span></span>
+<span></span>
+<span><span class="co"># Binary trait, microhaplotype architecture</span></span>
+<span><span class="va">y_bin</span>  <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="va">pheno</span><span class="op">$</span><span class="va">y_bin_qtl_mh</span></span>
+<span></span>
+<span><span class="co"># Or load the standalone CSVs directly:</span></span>
+<span><span class="va">pheno_c</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"demo-data/main/pheno_continuous_G1.csv"</span><span class="op">)</span></span>
+<span><span class="va">pheno_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"demo-data/main/pheno_binary_G1.csv"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="passing-phenotypes-to-each-package" class="level3"><h3 class="anchored" data-anchor-id="passing-phenotypes-to-each-package">Passing phenotypes to each package</h3>
+<p><code>masreml::masreml()</code> takes the response as a named numeric vector <code>y</code>, the fixed-effects design matrix <code>X</code> explicitly (build it with <code><a href="https://rdrr.io/r/stats/model.matrix.html">stats::model.matrix()</a></code>), and <code>markers</code> as a named list (<code>snp_add</code>, <code>snp_dom</code>, <code>mh_add</code>). There is no <code>formula</code> argument and no direct <code>pedigree</code> argument — for pedigree-based prediction, precompute <span class="math inline">\(\mathbf{A}\)</span> via <code>build_A_ped()</code> and pass it through the <code>G</code> slot.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masreml</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masbayes</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Continuous trait, SNP-additive GBLUP with sex as fixed effect.</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="va">pheno</span><span class="op">$</span><span class="va">y_cont_qtl_snp</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="va">pheno</span><span class="op">$</span><span class="va">id</span></span>
+<span></span>
+<span><span class="va">X_fixed</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">sex</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">pheno</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">masreml</span><span class="op">(</span></span>
+<span>  y       <span class="op">=</span> <span class="va">y</span>,</span>
+<span>  X       <span class="op">=</span> <span class="va">X_fixed</span>,</span>
+<span>  markers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>snp_add <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">snp</span><span class="op">)</span>,</span>
+<span>  trait   <span class="op">=</span> <span class="st">"continuous"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># masbayes: BayesA on the same trait. The wrapper takes the</span></span>
+<span><span class="co"># pre-standardised design matrix `w` plus colSums(w^2) as inputs;</span></span>
+<span><span class="co"># sigma2_g and sigma2_e_init are required hyperparameters.</span></span>
+<span><span class="va">W</span>   <span class="op">&lt;-</span> <span class="fu">construct_snp_matrix</span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">snp</span>, encoding <span class="op">=</span> <span class="st">"vanRaden"</span><span class="op">)</span><span class="op">$</span><span class="va">W</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">run_bayesa</span><span class="op">(</span></span>
+<span>  w             <span class="op">=</span> <span class="va">W</span>,</span>
+<span>  y             <span class="op">=</span> <span class="va">y</span>,</span>
+<span>  X             <span class="op">=</span> <span class="va">X_fixed</span>,</span>
+<span>  marker_type   <span class="op">=</span> <span class="st">"snp"</span>,</span>
+<span>  nu            <span class="op">=</span> <span class="fl">4.5</span>,</span>
+<span>  sigma2_g      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">var</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span>,</span>
+<span>  sigma2_e_init <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">var</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span>,</span>
+<span>  method        <span class="op">=</span> <span class="st">"mcmc"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Binary trait via threshold model in masreml (Laplace approximation).</span></span>
+<span><span class="va">y_bin</span> <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="va">pheno</span><span class="op">$</span><span class="va">y_bin_qtl_snp</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">y_bin</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="va">pheno</span><span class="op">$</span><span class="va">id</span></span>
+<span><span class="va">fit_bin</span> <span class="op">&lt;-</span> <span class="fu">masreml</span><span class="op">(</span></span>
+<span>  y       <span class="op">=</span> <span class="va">y_bin</span>,</span>
+<span>  X       <span class="op">=</span> <span class="va">X_fixed</span>,</span>
+<span>  markers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>snp_add <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">snp</span><span class="op">)</span>,</span>
+<span>  trait   <span class="op">=</span> <span class="st">"binary"</span>,</span>
+<span>  link    <span class="op">=</span> <span class="st">"logit"</span></span>
+<span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section></section><section id="common-pitfalls" class="level2"><h2 class="anchored" data-anchor-id="common-pitfalls">Common pitfalls</h2>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Row order must match the genotype matrix.</strong> <code>masreml::masreml()</code> aligns on <code>names(y)</code> against <code>rownames(markers$snp_add)</code> (and rownames of <code>X</code>). This is the most common source of silent bugs when ID conventions differ. Always verify before fitting:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">pheno</span><span class="op">$</span><span class="va">id</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">snp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Factor levels must be consistent across train and test.</strong> If your fixed-effect covariate is a factor (e.g.&nbsp;<code>sex</code>), make sure both train and test splits see all levels before calling <code><a href="https://rdrr.io/r/stats/model.matrix.html">stats::model.matrix()</a></code> — otherwise the design-matrix column count diverges and prediction breaks.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Binary phenotypes go through a threshold model, not regression on 0/1.</strong> Pass <code>trait = "binary"</code> (with <code>link = "logit"</code> or <code>"probit"</code>) in <code>masreml::masreml()</code> so the liability-scale variance is identified. Naive Gaussian fitting of binary data (<code>trait = "continuous"</code>) produces unbiased EBVs in some regimes but distorts heritability estimates.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong><code>tbv_*</code> columns are ground truth, not input.</strong> They are only useful for simulation: comparing <span class="math inline">\(\widehat{u}\)</span> against <code>tbv</code> is how the <a href="../tasks/genomic-prediction/masreml.html#cross-validation-cv_masreml">Cross-validation</a> tutorial computes accuracy. Never include <code>tbv_*</code> as a covariate.</p>
+</div>
+</div>
+<p>📐 <strong>Related theory:</strong> <a href="../theory/mixed-model-blup-family.qmd">Mixed Model &amp; BLUP Family</a> · <a href="../theory/continuous-and-binary-trait.qmd">Continuous and Binary Trait</a></p>
+<p>🛠 <strong>Used in:</strong> <a href="../tasks/genomic-prediction/index.html">Genomic Prediction</a> · <a href="../tasks/genomic-prediction/masreml.html#binary-trait">Binary trait — with masreml</a> · <a href="../tasks/genomic-prediction/masreml.html#cross-validation-cv_masreml">Cross-validation — with masreml</a></p>
+
+
+</section></main><!-- /main --><script>
+document.addEventListener('DOMContentLoaded', function () {
+  var brand = document.querySelectorAll('.navbar-brand-container a.navbar-brand');
+  brand.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var href = a.getAttribute('href');
+      if (!href) return;
+      e.preventDefault();
+      // Hard navigation bypasses any cached state.
+      window.location.assign(href);
+    });
+  });
+});
+</script><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/bowo1698\.github\.io\/masgenomics-docs\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../input-data/microhaplotypes.html" class="pagination-link" aria-label="Microhaplotypes">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Microhaplotypes</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../input-data/pedigree.html" class="pagination-link" aria-label="Pedigree">
+        <span class="nav-page-text">Pedigree</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Agus Wibowo · MIT License</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/input-data/phenotype.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+</div>
+  </div>
+</footer>
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>masbayes Rust modules – masgenomics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../internals/masreml-rust.html" rel="prev">
+<link href="../assets/MBGs.svg" rel="icon" type="image/svg+xml">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-f0e62160eaaacfa521cd4395bf9d9768.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": true,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="https://bowo1698.github.io/masgenomics-docs/index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo light-content">
+    <img src="../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="https://bowo1698.github.io/masgenomics-docs/index.html">
+    <span class="navbar-title">masgenomics</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../theory/index.html"> 
+<span class="menu-text">Theory</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../installation/index.html"> 
+<span class="menu-text">Installation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tasks/index.html"> 
+<span class="menu-text">Task</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../input-data/index.html"> 
+<span class="menu-text">Input Data</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-reference" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Reference</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-reference">    
+        <li>
+    <a class="dropdown-item" href="../reference/maspipeline/index.html">
+ <span class="dropdown-text">maspipeline</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/masreml/index.html">
+ <span class="dropdown-text">masreml</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/masbayes/index.html">
+ <span class="dropdown-text">masbayes</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" href="../internals/index.html" aria-current="page"> 
+<span class="menu-text">Internals</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../internals/masbayes-rust.html">masbayes Rust modules</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../internals/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Internals (Rust backend)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../internals/masreml-rust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">masreml Rust modules</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../internals/masbayes-rust.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">masbayes Rust modules</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#package-overview" id="toc-package-overview" class="nav-link active" data-scroll-target="#package-overview">Package overview</a>
+  <ul class="collapse">
+  <li><a href="#sec-masbayes-lib" id="toc-sec-masbayes-lib" class="nav-link" data-scroll-target="#sec-masbayes-lib"><code>lib.rs</code></a></li>
+  </ul></li>
+  <li><a href="#module-reference" id="toc-module-reference" class="nav-link" data-scroll-target="#module-reference">Module reference</a>
+  <ul class="collapse">
+  <li><a href="#sec-masbayes-matrix" id="toc-sec-masbayes-matrix" class="nav-link" data-scroll-target="#sec-masbayes-matrix"><code>matrix.rs</code></a></li>
+  <li><a href="#sec-masbayes-bayesa" id="toc-sec-masbayes-bayesa" class="nav-link" data-scroll-target="#sec-masbayes-bayesa"><code>bayesa.rs</code></a></li>
+  <li><a href="#sec-masbayes-bayesa_em" id="toc-sec-masbayes-bayesa_em" class="nav-link" data-scroll-target="#sec-masbayes-bayesa_em"><code>bayesa_em.rs</code></a></li>
+  <li><a href="#sec-masbayes-bayesr" id="toc-sec-masbayes-bayesr" class="nav-link" data-scroll-target="#sec-masbayes-bayesr"><code>bayesr.rs</code></a></li>
+  <li><a href="#sec-masbayes-bayesr_em" id="toc-sec-masbayes-bayesr_em" class="nav-link" data-scroll-target="#sec-masbayes-bayesr_em"><code>bayesr_em.rs</code></a></li>
+  <li><a href="#sec-masbayes-utils" id="toc-sec-masbayes-utils" class="nav-link" data-scroll-target="#sec-masbayes-utils"><code>utils.rs</code></a></li>
+  <li><a href="#sec-masbayes-types" id="toc-sec-masbayes-types" class="nav-link" data-scroll-target="#sec-masbayes-types"><code>types.rs</code></a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/internals/masbayes-rust.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">masbayes Rust modules</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The Rust kernel powering <code>masbayes</code> is split into eight focused modules. Each section below is the module-level documentation extracted directly from the corresponding <code>.rs</code> file by <a href="https://github.com/bowo1698/masgenomics-docs/blob/main/_scripts/extract-rust-docs.R"><code>_scripts/extract-rust-docs.R</code></a>, so this page stays in sync with the source.</p>
+<p>For per-function signatures and private-item details, build the full <code>cargo doc</code> HTML locally:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> masbayes/src/rust <span class="kw">&amp;&amp;</span> <span class="ex">cargo</span> doc <span class="at">--no-deps</span> <span class="at">--document-private-items</span> <span class="at">--open</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="package-overview" class="level2">
+<h2 class="anchored" data-anchor-id="package-overview">Package overview</h2>
+<section id="sec-masbayes-lib" class="level3">
+<h3 class="anchored" data-anchor-id="sec-masbayes-lib"><code>lib.rs</code></h3>
+<p><a class="rust-source-link" href="https://github.com/bowo1698/masbayes/blob/main/src/rust/src/lib.rs" target="_blank" rel="noopener">🦀 masbayes/lib.rs</a></p>
+<p>Computational backend for the <code>masbayes</code> R package: Bayesian genomic prediction models for biallelic SNP and multi-allelic microhaplotype markers. All numerically heavy work (MCMC, stochastic EM, design matrix construction) lives here; the R side is a thin extendr wrapper.</p>
+<section id="module-map" class="level4">
+<h4 class="anchored" data-anchor-id="module-map">Module map</h4>
+<ul>
+<li>[<code>matrix</code>] — design-matrix construction:
+<ul>
+<li><code>WMatrixBuilder</code> implements the Da (2015) <span class="math inline">\(W_{\alpha h}\)</span> encoding for phased multi-allelic haplotype data, followed by a per-locus frequency-weighted row shrinkage.</li>
+<li>Helper routines for biallelic SNP encoding (VanRaden) are exposed via the FFI wrappers in this file.</li>
+</ul></li>
+<li>[<code>bayesa</code>] — BayesA Gibbs sampler. Per-marker variance follows a scaled inverse chi-squared prior, leading to a t-shrunk effect distribution. Supports binary traits via Albert–Chib data augmentation.</li>
+<li>[<code>bayesr</code>] — BayesR Gibbs sampler. Marker effects follow a four-component normal mixture (one spike at zero plus three slab components scaled relative to the genetic variance); mixture proportions are updated with a Dirichlet–Multinomial step.</li>
+<li>[<code>bayesa_em</code>] / [<code>bayesr_em</code>] — Stochastic EM variants of the two samplers. Faster but discard posterior uncertainty.</li>
+<li>[<code>utils</code>] — RNG helpers (inverse-gamma, Dirichlet, normal, tabulate) and R↔︎<code>ndarray</code> conversion shims used across the kernels.</li>
+<li>[<code>types</code>] — POD result structs returned to R via the extendr wrappers.</li>
+</ul>
+</section>
+<section id="reproducibility" class="level4">
+<h4 class="anchored" data-anchor-id="reproducibility">Reproducibility</h4>
+<p>All samplers take a <code>seed: u64</code> initialising a PCG64 RNG (<code>rand_pcg</code>). Given the same data, hyperparameters, and seed, the kernels reproduce posterior samples bit-for-bit on the same platform.</p>
+</section>
+<section id="reference" class="level4">
+<h4 class="anchored" data-anchor-id="reference">Reference</h4>
+<p>Da, Y. (2015). Multi-allelic haplotype model based on genetic partition for genomic prediction and variance component estimation using SNP markers. <em>BMC Genetics</em>, 16:144.</p>
+</section>
+</section>
+</section>
+<section id="module-reference" class="level2">
+<h2 class="anchored" data-anchor-id="module-reference">Module reference</h2>
+<section id="sec-masbayes-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="sec-masbayes-matrix"><code>matrix.rs</code></h3>
+<p><a class="rust-source-link" href="https://github.com/bowo1698/masbayes/blob/main/src/rust/src/matrix.rs" target="_blank" rel="noopener">🦀 masbayes/matrix.rs</a></p>
+<p>Design-matrix construction for multi-allelic microhaplotype markers.</p>
+<section id="pipeline" class="level4">
+<h4 class="anchored" data-anchor-id="pipeline">Pipeline</h4>
+<ol type="1">
+<li><strong>Per-block encoding</strong> — for each haplotype locus (block) and each non-baseline microhaplotype <span class="math inline">\(k\)</span>, the entry <span class="math inline">\(W_{i,k}\)</span> for individual <span class="math inline">\(i\)</span> is filled with the Da (2015) three-value coding rule (Eqs. 22–24): <span class="math inline">\(-2(1-p_k)\)</span> when the individual is homozygous for <span class="math inline">\(k\)</span>, <span class="math inline">\(-(1-2p_k)\)</span> when heterozygous, <span class="math inline">\(+2p_k\)</span> when <span class="math inline">\(k\)</span> is absent.</li>
+<li><strong>Baseline drop</strong> — the most frequent microhaplotype per locus is used as the contrast reference and excluded from the columns; its effect is absorbed by the intercept <span class="math inline">\(\mu\)</span> in downstream models.</li>
+<li><strong>Frequency-weighted row shrinkage</strong> — see [<code>frequency_weighted_row_shrinkage</code>]. Applied per locus after encoding; partially reduces the alignment between each individual row and the locus’s allele-frequency vector.</li>
+</ol>
+</section>
+<section id="equivalence-with-vanraden" class="level4">
+<h4 class="anchored" data-anchor-id="equivalence-with-vanraden">Equivalence with VanRaden</h4>
+<p>Da’s three-value rule can be written in closed form as <span class="math inline">\(W_{i,k} = 2 p_k - n_{i,k}\)</span>, where <span class="math inline">\(n_{i,k} \in \{0,1,2\}\)</span> is the dosage of microhaplotype <span class="math inline">\(k\)</span> in individual <span class="math inline">\(i\)</span>. This is the per-allele VanRaden centering with the sign flipped, stacked across all non-baseline microhaplotypes within the locus.</p>
+</section>
+<section id="train-test-alignment" class="level4">
+<h4 class="anchored" data-anchor-id="train-test-alignment">Train / test alignment</h4>
+<p><code>WMatrixBuilder</code> accepts a <code>ReferenceStructure</code> for test-set encoding so that allele frequencies and the choice of baseline microhaplotype come from the training set, not the test set itself. Re-estimating <span class="math inline">\(p_k\)</span> on test data would shift the centering and bias GEBVs — never do that.</p>
+</section>
+<section id="reference-1" class="level4">
+<h4 class="anchored" data-anchor-id="reference-1">Reference</h4>
+<p>Da, Y. (2015). Multi-allelic haplotype model based on genetic partition for genomic prediction and variance component estimation using SNP markers. <em>BMC Genetics</em>, 16:144.</p>
+</section>
+</section>
+<section id="sec-masbayes-bayesa" class="level3">
+<h3 class="anchored" data-anchor-id="sec-masbayes-bayesa"><code>bayesa.rs</code></h3>
+<p><a class="rust-source-link" href="https://github.com/bowo1698/masbayes/blob/main/src/rust/src/bayesa.rs" target="_blank" rel="noopener">🦀 masbayes/bayesa.rs</a></p>
+<p>BayesA Gibbs sampler.</p>
+<section id="model" class="level4">
+<h4 class="anchored" data-anchor-id="model">Model</h4>
+<p>For a continuous trait,</p>
+<pre class="text"><code>y = 1·μ + X·α + W·β + ε,        ε ~ N(0, σ²_e · I)
+β_j | σ²_j ~ N(0, σ²_j)
+σ²_j      ~ InvChi2(ν, S²),     S² = σ²_β / L  (scaled)
+σ²_e      ~ InvGamma(a₀_e, b₀_e)</code></pre>
+<p>Marginalising the per-marker variance yields a <span class="math inline">\(t_\nu\)</span>-shrunk effect distribution, which is the defining feature of BayesA relative to ridge regression / BayesC. The prior on <code>σ²_j</code> is informative (default <code>ν = 4.5</code>) so the posterior contracts toward small effects unless data demand otherwise.</p>
+</section>
+<section id="sampling-steps-per-gibbs-iteration" class="level4">
+<h4 class="anchored" data-anchor-id="sampling-steps-per-gibbs-iteration">Sampling steps (per Gibbs iteration)</h4>
+<ol type="1">
+<li>Update marker effects <span class="math inline">\(\beta_j\)</span> one at a time from their full conditionals (Normal with mean and variance involving <code>wtw_diag[j]</code>, <code>σ²_e</code>, <code>σ²_j</code>, and the working residual <code>yadj</code>).</li>
+<li>Update per-marker variances <span class="math inline">\(\sigma²_j\)</span> from <span class="math inline">\(\mathrm{InvChi2}(\nu + 1, (\nu S² + \beta_j²) / (\nu + 1))\)</span>.</li>
+<li>Update residual variance <span class="math inline">\(\sigma²_e\)</span> from <span class="math inline">\(\mathrm{InvGamma}(a_0 + n/2,\, b_0 + \|y - \hat{y}\|^2 / 2)\)</span>.</li>
+<li>Update intercept <span class="math inline">\(\mu\)</span> from its normal full conditional given the residual mean.</li>
+<li>(Optional) Update fixed effects <span class="math inline">\(\alpha\)</span> component-wise from normal full conditionals using <code>xtx_diag</code>.</li>
+<li>(Binary trait) Albert–Chib step: sample latent liabilities <span class="math inline">\(z\)</span> from truncated normals consistent with the observed binary response.</li>
+</ol>
+</section>
+<section id="state-management" class="level4">
+<h4 class="anchored" data-anchor-id="state-management">State management</h4>
+<p><code>BayesARunner</code> keeps a single working residual vector <code>yadj = y - μ - X·α - W·β</code> (or <code>z - …</code> for binary traits) updated incrementally after every coordinate move. This avoids recomputing the full <span class="math inline">\(W\beta\)</span> product at each iteration, which is the main reason the kernel is fast.</p>
+</section>
+<section id="output" class="level4">
+<h4 class="anchored" data-anchor-id="output">Output</h4>
+<p><code>BayesARunner::run</code> returns [<code>BayesAResults</code>] containing posterior samples (after burn-in / thinning) of all parameters, plus posterior means and derived quantities (<code>sigma2_g</code>, <code>h2</code>).</p>
+</section>
+</section>
+<section id="sec-masbayes-bayesa_em" class="level3">
+<h3 class="anchored" data-anchor-id="sec-masbayes-bayesa_em"><code>bayesa_em.rs</code></h3>
+<p><a class="rust-source-link" href="https://github.com/bowo1698/masbayes/blob/main/src/rust/src/bayesa_em.rs" target="_blank" rel="noopener">🦀 masbayes/bayesa_em.rs</a></p>
+<p>BayesA — stochastic EM variant.</p>
+<p>Replaces the full Gibbs sweep of [<code>crate::bayesa</code>] with an EM-style coordinate-ascent update that uses posterior means (rather than draws) of the per-marker variances <span class="math inline">\(\sigma²_j\)</span>. Concretely, instead of sampling <span class="math inline">\(\sigma²_j\)</span> each iteration, the E-step plugs in its conditional expectation and the M-step closes the loop by updating <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\sigma²_e\)</span>.</p>
+<section id="when-to-use" class="level4">
+<h4 class="anchored" data-anchor-id="when-to-use">When to use</h4>
+<ul>
+<li>Genome-wide screens or large runs where full posterior uncertainty is not needed and only point estimates of marker effects (<span class="math inline">\(\hat\beta\)</span>) are reported.</li>
+<li>Cross-validation folds where many BayesA fits are needed and runtime is the bottleneck.</li>
+</ul>
+</section>
+<section id="when-not-to-use" class="level4">
+<h4 class="anchored" data-anchor-id="when-not-to-use">When not to use</h4>
+<ul>
+<li>Reporting credible intervals, posterior distributions of variance components, or heritability uncertainty — these require the full MCMC in [<code>crate::bayesa</code>].</li>
+<li>Datasets with strong multimodality in the marker-effect posterior; EM only finds a local mode.</li>
+</ul>
+</section>
+<section id="output-1" class="level4">
+<h4 class="anchored" data-anchor-id="output-1">Output</h4>
+<p>Reuses the [<code>BayesAResults</code>] struct so downstream R code does not need to branch on which estimator was used. Sample arrays in the result contain point estimates rather than MCMC traces.</p>
+</section>
+</section>
+<section id="sec-masbayes-bayesr" class="level3">
+<h3 class="anchored" data-anchor-id="sec-masbayes-bayesr"><code>bayesr.rs</code></h3>
+<p><a class="rust-source-link" href="https://github.com/bowo1698/masbayes/blob/main/src/rust/src/bayesr.rs" target="_blank" rel="noopener">🦀 masbayes/bayesr.rs</a></p>
+<p>BayesR Gibbs sampler.</p>
+<section id="model-1" class="level4">
+<h4 class="anchored" data-anchor-id="model-1">Model</h4>
+<p>Marker effects follow a four-component mixture of normals (a spike at zero plus three slab components scaled relative to the total genetic variance):</p>
+<pre class="text"><code>y = 1·μ + X·α + W·β + ε,             ε ~ N(0, σ²_e · I)
+β_j | γ_j = c ~ N(0, vᶜ · σ²_g),     vᶜ ∈ {0, 1e-4, 1e-3, 1e-2}
+γ_j        ~ Categorical(π),          γ_j ∈ {1, 2, 3, 4}
+π          ~ Dirichlet(α₀)
+σ²_e, σ²_g ~ InvGamma(·, ·)</code></pre>
+<p>Component 1 is the spike (<code>vᶜ = 0</code>, exactly zero effect); components 2–4 are slabs of increasing variance. Sparsity comes from the high prior mass on the spike under the Dirichlet, while large-effect markers escape into one of the slabs.</p>
+</section>
+<section id="sampling-steps-per-gibbs-iteration-1" class="level4">
+<h4 class="anchored" data-anchor-id="sampling-steps-per-gibbs-iteration-1">Sampling steps (per Gibbs iteration)</h4>
+<ol type="1">
+<li>For each marker <span class="math inline">\(j\)</span>, draw the mixture label <span class="math inline">\(\gamma_j\)</span> from its full conditional categorical (probabilities proportional to the marginal likelihood under each component × <span class="math inline">\(\pi_c\)</span>).</li>
+<li>Conditional on <span class="math inline">\(\gamma_j = c\)</span>, draw <span class="math inline">\(\beta_j\)</span> from its normal full conditional (zero when <code>vᶜ = 0</code>).</li>
+<li>Update <span class="math inline">\(\pi\)</span> via Dirichlet–Multinomial conjugacy: <span class="math inline">\(\pi \mid \gamma \sim \mathrm{Dirichlet}(\alpha_0 + n_c)\)</span> with <span class="math inline">\(n_c\)</span> tabulated by <code>tabulate(gamma, 4)</code>.</li>
+<li>Update <span class="math inline">\(\sigma²_g\)</span> and <span class="math inline">\(\sigma²_e\)</span> from their inverse-gamma full conditionals.</li>
+<li>Update the intercept <span class="math inline">\(\mu\)</span> and (optional) fixed effects <span class="math inline">\(\alpha\)</span>.</li>
+<li>(Binary trait) Albert–Chib augmentation step on latent liabilities.</li>
+</ol>
+</section>
+<section id="state-management-1" class="level4">
+<h4 class="anchored" data-anchor-id="state-management-1">State management</h4>
+<p>Identical strategy to BayesA: keep an incremental working residual <code>yadj</code> updated after every coordinate move so <span class="math inline">\(W\beta\)</span> is never recomputed from scratch within a sweep.</p>
+</section>
+<section id="output-2" class="level4">
+<h4 class="anchored" data-anchor-id="output-2">Output</h4>
+<p><code>BayesRRunner::run</code> returns [<code>BayesRResults</code>] with posterior samples of all parameters, mixture allocations <span class="math inline">\(\gamma\)</span>, mixture weights <span class="math inline">\(\pi\)</span>, and derived quantities (genetic variance, heritability).</p>
+</section>
+</section>
+<section id="sec-masbayes-bayesr_em" class="level3">
+<h3 class="anchored" data-anchor-id="sec-masbayes-bayesr_em"><code>bayesr_em.rs</code></h3>
+<p><a class="rust-source-link" href="https://github.com/bowo1698/masbayes/blob/main/src/rust/src/bayesr_em.rs" target="_blank" rel="noopener">🦀 masbayes/bayesr_em.rs</a></p>
+<p>BayesR — stochastic EM variant.</p>
+<p>Replaces the full Gibbs sweep of [<code>crate::bayesr</code>] with an EM-style update where the mixture allocations <span class="math inline">\(\gamma_j\)</span> are replaced by their posterior probabilities and the Dirichlet draws of <span class="math inline">\(\pi\)</span> are replaced by their conditional expectation under the current allocation counts. Marker effects, variance components, and intercept retain closed-form coordinate updates.</p>
+<section id="when-to-use-1" class="level4">
+<h4 class="anchored" data-anchor-id="when-to-use-1">When to use</h4>
+<ul>
+<li>Same niche as [<code>crate::bayesa_em</code>]: large screens where point estimates suffice and runtime per fit must be small.</li>
+<li>Hybrid pipelines that first run EM to warm-start MCMC, then switch to the full [<code>crate::bayesr</code>] sampler for posterior inference.</li>
+</ul>
+</section>
+<section id="when-not-to-use-1" class="level4">
+<h4 class="anchored" data-anchor-id="when-not-to-use-1">When not to use</h4>
+<ul>
+<li>Reporting mixture-membership uncertainty (which markers belong to the spike vs.&nbsp;slab) — EM collapses this to soft probabilities at the mode and loses the underlying Bernoulli/Dirichlet posterior.</li>
+<li>Variance-component inference; same caveats as the BayesA EM variant.</li>
+</ul>
+</section>
+<section id="output-3" class="level4">
+<h4 class="anchored" data-anchor-id="output-3">Output</h4>
+<p>Returns a [<code>BayesRResults</code>] populated with EM point estimates in the sample fields so the R-side API is identical to the MCMC runner.</p>
+</section>
+</section>
+<section id="sec-masbayes-utils" class="level3">
+<h3 class="anchored" data-anchor-id="sec-masbayes-utils"><code>utils.rs</code></h3>
+<p><a class="rust-source-link" href="https://github.com/bowo1698/masbayes/blob/main/src/rust/src/utils.rs" target="_blank" rel="noopener">🦀 masbayes/utils.rs</a></p>
+<p>Shared utilities for the masbayes kernels.</p>
+<p>Two unrelated groups of helpers live here:</p>
+<ol type="1">
+<li><strong>R ↔︎ <code>ndarray</code> conversion</strong> — <code>rmatrix_to_array2*</code> copy an extendr <code>RMatrix</code> into an owned <code>ndarray::Array2</code> so the MCMC loops can work with native Rust types without going through the R FFI on every cell access. Copy cost is paid once per kernel invocation.</li>
+<li><strong>Sampling primitives</strong> — <code>rnorm</code>, <code>rinvgamma</code>, <code>rdirichlet</code>, <code>tabulate</code>. These wrap <code>rand_distr</code> distributions so the call sites in <code>bayesa.rs</code> / <code>bayesr.rs</code> stay close to the manuscript notation (e.g.&nbsp;<code>sigma2 ~ InvGamma(a, b)</code> reads as <code>rinvgamma(rng, a, b)</code>).</li>
+</ol>
+<p>All sampling functions take an <code>&amp;mut R: Rng</code> so that the caller controls the seed; this is what makes the full MCMC reproducible from a single <code>Pcg64::seed_from_u64(seed)</code> at the start of each runner.</p>
+</section>
+<section id="sec-masbayes-types" class="level3">
+<h3 class="anchored" data-anchor-id="sec-masbayes-types"><code>types.rs</code></h3>
+<p><a class="rust-source-link" href="https://github.com/bowo1698/masbayes/blob/main/src/rust/src/types.rs" target="_blank" rel="noopener">🦀 masbayes/types.rs</a></p>
+<p>POD result structs returned by the BayesR and BayesA kernels.</p>
+<p>These types are written by the MCMC / EM runners in <code>bayesr.rs</code>, <code>bayesa.rs</code>, <code>bayesr_em.rs</code>, <code>bayesa_em.rs</code> and then marshalled to R lists by the extendr wrappers in <code>lib.rs</code>. Field naming matches the manuscript notation:</p>
+<ul>
+<li><code>beta_samples</code> / <code>beta_hat</code>: marker (allele) effects.</li>
+<li><code>mu_samples</code> / <code>mu_hat</code>: intercept (grand mean).</li>
+<li><code>sigma2_e_*</code>: residual variance.</li>
+<li><code>sigma2_j_*</code> (BayesA) and <code>sigma2_{small,medium,large}_*</code> (BayesR): per-marker / per-component variance components.</li>
+<li><code>gamma_samples</code> / <code>pi_samples</code> (BayesR only): mixture allocations and their Dirichlet posterior weights.</li>
+<li><code>alpha_*</code>: optional fixed-effect coefficients; <code>None</code> when no design matrix <code>X</code> was supplied.</li>
+<li><code>z_hat</code>: posterior mean of latent liabilities (Albert–Chib) for binary traits; <code>None</code> for continuous traits.</li>
+<li><code>sigma2_g</code>, <code>h2</code>: derived quantities — total additive variance and narrow-sense heritability computed from posterior means.</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var brand = document.querySelectorAll('.navbar-brand-container a.navbar-brand');
+  brand.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var href = a.getAttribute('href');
+      if (!href) return;
+      e.preventDefault();
+      // Hard navigation bypasses any cached state.
+      window.location.assign(href);
+    });
+  });
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/bowo1698\.github\.io\/masgenomics-docs\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../internals/masreml-rust.html" class="pagination-link" aria-label="masreml Rust modules">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">masreml Rust modules</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Agus Wibowo · MIT License</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/internals/masbayes-rust.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Marker-QTL Unit Congruency – masgenomics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../tasks/forward-prediction.html" rel="next">
+<link href="../tasks/gwas/masbayes.html" rel="prev">
+<link href="../assets/MBGs.svg" rel="icon" type="image/svg+xml">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-f0e62160eaaacfa521cd4395bf9d9768.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": true,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>html{ scroll-behavior: smooth; }</style>
+<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+</head>
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="https://bowo1698.github.io/masgenomics-docs/index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo light-content"><img src="../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo dark-content"></a>
+    <a class="navbar-brand" href="https://bowo1698.github.io/masgenomics-docs/index.html">
+    <span class="navbar-title">masgenomics</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../theory/index.html"> 
+<span class="menu-text">Theory</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../installation/index.html"> 
+<span class="menu-text">Installation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../tasks/index.html" aria-current="page"> 
+<span class="menu-text">Task</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../input-data/index.html"> 
+<span class="menu-text">Input Data</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-reference" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Reference</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-reference">
+<li>
+    <a class="dropdown-item" href="../reference/maspipeline/index.html">
+ <span class="dropdown-text">maspipeline</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/masreml/index.html">
+ <span class="dropdown-text">masreml</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/masbayes/index.html">
+ <span class="dropdown-text">masbayes</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../internals/index.html"> 
+<span class="menu-text">Internals</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../tasks/marker-qtl-congruency.html">Marker-QTL Unit Congruency</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Task Tutorials</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../tasks/genomic-prediction/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genomic prediction</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/genomic-prediction/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/genomic-prediction/masreml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genomic prediction with masreml</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/genomic-prediction/masbayes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genomic prediction with masbayes</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../tasks/gwas/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GWAS</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/gwas/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/gwas/masreml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GWAS with masreml</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/gwas/masbayes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GWAS with masbayes</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/marker-qtl-congruency.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Marker-QTL Unit Congruency</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tasks/forward-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forward Prediction Across Generations</span></a>
+  </div>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#objective" id="toc-objective" class="nav-link active" data-scroll-target="#objective">Objective</a></li>
+  <li><a href="#study-design" id="toc-study-design" class="nav-link" data-scroll-target="#study-design">Study design</a></li>
+  <li><a href="#metrics-and-interpretation" id="toc-metrics-and-interpretation" class="nav-link" data-scroll-target="#metrics-and-interpretation">Metrics and interpretation</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  <li><a href="#analysis" id="toc-analysis" class="nav-link" data-scroll-target="#analysis">Analysis</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/tasks/marker-qtl-congruency.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Marker-QTL Unit Congruency</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><p>📐 <strong>Theory:</strong> <a href="../theory/bayes-bayesa.qmd">BayesA</a> · <a href="../theory/bayes-bayesr.qmd">BayesR</a> · <a href="../theory/blup-gblup.qmd">GBLUP</a> · <a href="../theory/blup-gwablup.qmd">GWABLUP</a></p>
+<section id="objective" class="level2"><h2 class="anchored" data-anchor-id="objective">Objective</h2>
+<p>We developed a theory called the <strong>Marker-QTL Unit Congruence Theory</strong>, where:</p>
+<blockquote class="blockquote">
+<p><em>Genomic prediction accuracy is maximised when the marker unit is aligned with the biological QTL unit.</em></p>
+</blockquote>
+<p>In other words, if the QTL effects actually live at the haplotype-block level, microhaplotype (MH) markers are expected to outperform single-SNP markers, and vice versa. To test this, we ran a proof-of-concept simulation under both QTL scenarios and compared four genomic prediction models across two marker representations.</p>
+</section><section id="study-design" class="level2"><h2 class="anchored" data-anchor-id="study-design">Study design</h2>
+<p>A forward simulation over a fully crossed grid.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead><tr class="header">
+<th>Factor</th>
+<th>Levels</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>QTL scenario</strong></td>
+<td>
+<code>QTL@SNP</code> (true genetic effects at single-SNP level), <code>QTL@MH</code> (effects at haplotype-block level)</td>
+</tr>
+<tr class="even">
+<td><strong>Marker representation</strong></td>
+<td>
+<code>SNP</code> (z-score encoding via <code>construct_snp_matrix(encoding="zscore")</code>), <code>MH</code> (multi-allelic <span class="math inline">\(\mathbf{W}_{\alpha h}\)</span> coding, Da 2015, via <code>construct_wah_matrix</code>)</td>
+</tr>
+<tr class="odd">
+<td><strong>Model</strong></td>
+<td>
+<code>BayesR</code>, <code>BayesA</code>, <code>GBLUP</code>, <code>GWABLUP</code>
+</td>
+</tr>
+<tr class="even">
+<td><strong>Trait type</strong></td>
+<td>Continuous, binary (threshold at the training-set liability median)</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td>
+<span class="math inline">\(2 \times 2 \times 4 \times 2 = 32\)</span> model fits</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Population parameters</strong>: <span class="math inline">\(n_{\text{total}} = 300\)</span> (training 200, test 100), 50 haplotype blocks × 2 SNPs/block = 100 SNPs total, 10 QTL, target heritability <span class="math inline">\(h^2 = 0.3\)</span>. SNP MAF <span class="math inline">\(\sim\)</span> Unif(0.1, 0.5). In both scenarios the microhaplotype matrix is derived from the same SNP data via phasing and <span class="math inline">\(\mathbf{W}_{\alpha h}\)</span> encoding, so any difference in performance reflects the marker representation alone, not the underlying genotypes.</p>
+<p>We ran MCMC for 20,000 iterations with a 10,000 burn-in, thinning every 10 samples, and seed 123. Prior hyperparameters follow the <code>masbayes</code> defaults, where for BayesA (<span class="math inline">\(\nu = 4.5\)</span>) and BayesR (<span class="math inline">\(\pi = (0.90,\, 0.05,\, 0.03,\, 0.02)\)</span>, <span class="math inline">\(\text{variance\_class} = (0,\, 0.01,\, 0.1,\, 1)\)</span>).</p>
+</section><section id="metrics-and-interpretation" class="level2"><h2 class="anchored" data-anchor-id="metrics-and-interpretation">Metrics and interpretation</h2>
+<p>Let <span class="math inline">\(\hat{u}_i = \widehat{\text{GEBV}}_i\)</span> for individual <span class="math inline">\(i\)</span>, <span class="math inline">\(y_i\)</span> = observed phenotype, <span class="math inline">\(g_i\)</span> = true breeding value (TBV), <span class="math inline">\(\hat{z}_i\)</span> = posterior mean liability (binary trait), <span class="math inline">\(\Phi(\cdot)\)</span> = standard normal CDF.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead><tr class="header">
+<th>Metric</th>
+<th>Formula</th>
+<th>Range</th>
+<th>Interpretation</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(r_{\text{train}}\)</span></td>
+<td>
+<span class="math inline">\(\displaystyle r_{\text{train}} = \frac{\mathrm{Cov}(\hat{u},\, y)}{\sqrt{\mathrm{Var}(\hat{u})\,\mathrm{Var}(y)}}\)</span> on the training set. For binary traits, replace <span class="math inline">\(y\)</span> with <span class="math inline">\(\hat{z}\)</span>.</td>
+<td><span class="math inline">\([-1,\, 1]\)</span></td>
+<td>Training fit. Closer to 1 is better, but values &gt; 0.95 can signal overfitting.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(r_{\text{test},y}\)</span></td>
+<td><span class="math inline">\(\displaystyle r_{\text{test},y} = \frac{\mathrm{Cov}(\hat{u}_{\text{test}},\, y_{\text{test}})}{\sqrt{\mathrm{Var}(\hat{u}_{\text{test}})\,\mathrm{Var}(y_{\text{test}})}}\)</span></td>
+<td><span class="math inline">\([-1,\, 1]\)</span></td>
+<td>
+<strong>Predictive ability</strong> on held-out data. 1 = ideal.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(r_{\text{test},g}\)</span></td>
+<td><span class="math inline">\(\displaystyle r_{\text{test},g} = \frac{\mathrm{Cov}(\hat{u}_{\text{test}},\, g_{\text{test}})}{\sqrt{\mathrm{Var}(\hat{u}_{\text{test}})\,\mathrm{Var}(g_{\text{test}})}}\)</span></td>
+<td><span class="math inline">\([-1,\, 1]\)</span></td>
+<td>
+<strong>Accuracy against TBV</strong> — the primary metric, available only in simulation. Closer to 1 is better.</td>
+</tr>
+<tr class="even">
+<td>bias</td>
+<td>Continuous: slope <span class="math inline">\(\hat{b}\)</span> of <span class="math inline">\(y_i = a + b\,\hat{u}_i + \varepsilon_i\)</span>, <span class="math inline">\(\displaystyle \hat{b} = \frac{\mathrm{Cov}(\hat{u},\, y)}{\mathrm{Var}(\hat{u})}\)</span>. Binary: slope <span class="math inline">\(\hat{b}\)</span> of <span class="math inline">\(y_i = a + b\,\Phi(\hat{u}_i) + \varepsilon_i\)</span>.</td>
+<td>around 1</td>
+<td>
+<span class="math inline">\(\hat{b} = 1\)</span> is ideal; <span class="math inline">\(\hat{b} &lt; 1\)</span> indicates over-dispersion (predictions too extreme); <span class="math inline">\(\hat{b} &gt; 1\)</span> indicates under-dispersion (predictions too compressed).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat{h}^2_{\text{post}}\)</span></td>
+<td>
+<span class="math inline">\(\displaystyle \hat{h}^2_{\text{post}} = \frac{\hat{\sigma}^2_g}{\hat{\sigma}^2_g + \hat{\sigma}^2_e}\)</span> with variance components taken from the posterior.</td>
+<td><span class="math inline">\([0,\, 1]\)</span></td>
+<td>Posterior heritability estimate. Compare with the target <span class="math inline">\(h^2 = 0.3\)</span>.</td>
+</tr>
+<tr class="even">
+<td>AUC</td>
+<td><span class="math inline">\(\displaystyle \text{AUC} = \Pr\!\left(\hat{u}_i &gt; \hat{u}_j \,\middle|\, y_i = 1,\; y_j = 0\right)\)</span></td>
+<td><span class="math inline">\([0.5,\, 1]\)</span></td>
+<td>
+<strong>Binary only.</strong> 0.5 = random, 1.0 = perfect. &gt; 0.7 is good, &gt; 0.9 is very good. Rank-invariant.</td>
+</tr>
+</tbody>
+</table></section><section id="results" class="level2"><h2 class="anchored" data-anchor-id="results">Results</h2>
+<div class="cell">
+<details class="code-fold"><summary>Show full R script</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masbayes</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masreml</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># ── CONFIG ───────────────────────────────────────────────────────────────────</span></span>
+<span><span class="va">config</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  seed            <span class="op">=</span> <span class="fl">42</span>,</span>
+<span>  n_total         <span class="op">=</span> <span class="fl">300</span>,</span>
+<span>  n_train         <span class="op">=</span> <span class="fl">200</span>,</span>
+<span>  n_test          <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  n_blocks        <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  n_snp_per_block <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  h2_target       <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>  n_qtl           <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  mcmc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>    n_iter <span class="op">=</span> <span class="fl">20000L</span>,</span>
+<span>    n_burn <span class="op">=</span> <span class="fl">10000L</span>,</span>
+<span>    n_thin <span class="op">=</span> <span class="fl">10L</span>,</span>
+<span>    seed   <span class="op">=</span> <span class="fl">123L</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  bayesr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>    pi_vec         <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.90</span>, <span class="fl">0.05</span>, <span class="fl">0.03</span>, <span class="fl">0.02</span><span class="op">)</span>,</span>
+<span>    variance_class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    a0_e           <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    a0_g           <span class="op">=</span> <span class="fl">5</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  bayesa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>    nu   <span class="op">=</span> <span class="fl">4.5</span>,</span>
+<span>    a0_e <span class="op">=</span> <span class="fl">10</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="va">config</span><span class="op">$</span><span class="va">seed</span><span class="op">)</span></span>
+<span><span class="va">n_total</span>         <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">n_total</span></span>
+<span><span class="va">n_train</span>         <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">n_train</span></span>
+<span><span class="va">n_test</span>          <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">n_test</span></span>
+<span><span class="va">n_blocks</span>        <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">n_blocks</span></span>
+<span><span class="va">n_snp_per_block</span> <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">n_snp_per_block</span></span>
+<span><span class="va">n_snp_total</span>     <span class="op">&lt;-</span> <span class="va">n_blocks</span> <span class="op">*</span> <span class="va">n_snp_per_block</span></span>
+<span></span>
+<span><span class="co"># ── 1. Generate SNP genotype ─────────────────────────────────────────────────</span></span>
+<span><span class="va">maf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="va">n_snp_total</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="va">geno_snp_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">0L</span>, nrow <span class="op">=</span> <span class="va">n_total</span>, ncol <span class="op">=</span> <span class="va">n_snp_total</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">j</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_snp_total</span><span class="op">)</span></span>
+<span>  <span class="va">geno_snp_all</span><span class="op">[</span>, <span class="va">j</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">rbinom</a></span><span class="op">(</span><span class="va">n_total</span>, <span class="fl">2</span>, <span class="va">maf</span><span class="op">[</span><span class="va">j</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># ── 2. Phase SNP -&gt; haplotype ────────────────────────────────────────────────</span></span>
+<span><span class="va">hap_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">0L</span>, nrow <span class="op">=</span> <span class="va">n_total</span>, ncol <span class="op">=</span> <span class="va">n_snp_total</span> <span class="op">*</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">j</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_snp_total</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_total</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">g</span>  <span class="op">&lt;-</span> <span class="va">geno_snp_all</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span><span class="op">]</span></span>
+<span>    <span class="va">h1</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">g</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="fl">1L</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">g</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="fl">0L</span> <span class="kw">else</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">rbinom</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">h2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">g</span> <span class="op">-</span> <span class="va">h1</span><span class="op">)</span></span>
+<span>    <span class="va">hap_all</span><span class="op">[</span><span class="va">i</span>, <span class="fl">2</span><span class="op">*</span><span class="va">j</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">h1</span> <span class="op">+</span> <span class="fl">1L</span></span>
+<span>    <span class="va">hap_all</span><span class="op">[</span><span class="va">i</span>, <span class="fl">2</span><span class="op">*</span><span class="va">j</span>  <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">h2</span> <span class="op">+</span> <span class="fl">1L</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mode.html">storage.mode</a></span><span class="op">(</span><span class="va">hap_all</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integer"</span></span>
+<span></span>
+<span><span class="co"># ── 3. Reorder hap columns by block ─────────────────────────────────────────</span></span>
+<span><span class="va">hap_cols_per_block</span> <span class="op">&lt;-</span> <span class="va">n_snp_per_block</span> <span class="op">*</span> <span class="fl">2</span></span>
+<span><span class="va">hap_reordered</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">0L</span>, nrow <span class="op">=</span> <span class="va">n_total</span>, ncol <span class="op">=</span> <span class="va">n_snp_total</span> <span class="op">*</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">col_out</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_blocks</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">j</span> <span class="kw">in</span> <span class="op">(</span><span class="op">(</span><span class="va">b</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">*</span><span class="va">n_snp_per_block</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">:</span><span class="op">(</span><span class="va">b</span><span class="op">*</span><span class="va">n_snp_per_block</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">hap_reordered</span><span class="op">[</span>, <span class="va">col_out</span><span class="op">]</span>   <span class="op">&lt;-</span> <span class="va">hap_all</span><span class="op">[</span>, <span class="fl">2</span><span class="op">*</span><span class="va">j</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span>    <span class="va">hap_reordered</span><span class="op">[</span>, <span class="va">col_out</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">hap_all</span><span class="op">[</span>, <span class="fl">2</span><span class="op">*</span><span class="va">j</span>  <span class="op">]</span></span>
+<span>    <span class="va">col_out</span> <span class="op">&lt;-</span> <span class="va">col_out</span> <span class="op">+</span> <span class="fl">2</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mode.html">storage.mode</a></span><span class="op">(</span><span class="va">hap_reordered</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integer"</span></span>
+<span></span>
+<span><span class="co"># ── 4. Encode MH per block ───────────────────────────────────────────────────</span></span>
+<span><span class="va">idx_train</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_train</span></span>
+<span><span class="va">idx_test</span>  <span class="op">&lt;-</span> <span class="op">(</span><span class="va">n_train</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op">:</span><span class="va">n_total</span></span>
+<span></span>
+<span><span class="va">encode_hap</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mat</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">mat</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">x</span> <span class="op">*</span> <span class="fl">3</span><span class="op">^</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">hap_block_all</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">0L</span>, nrow <span class="op">=</span> <span class="va">n_total</span>, ncol <span class="op">=</span> <span class="va">n_blocks</span> <span class="op">*</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">allele_freq_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>haplotype<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">)</span>, allele<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">)</span>, freq<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n_blocks</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">cols</span>    <span class="op">&lt;-</span> <span class="op">(</span><span class="op">(</span><span class="va">b</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">*</span><span class="va">hap_cols_per_block</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">:</span><span class="op">(</span><span class="va">b</span><span class="op">*</span><span class="va">hap_cols_per_block</span><span class="op">)</span></span>
+<span>  <span class="va">hap_sub</span> <span class="op">&lt;-</span> <span class="va">hap_reordered</span><span class="op">[</span>, <span class="va">cols</span><span class="op">]</span></span>
+<span>  <span class="va">h1_id</span>   <span class="op">&lt;-</span> <span class="fu">encode_hap</span><span class="op">(</span><span class="va">hap_sub</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">hap_cols_per_block</span>, <span class="fl">2</span><span class="op">)</span>, drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">h2_id</span>   <span class="op">&lt;-</span> <span class="fu">encode_hap</span><span class="op">(</span><span class="va">hap_sub</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="va">hap_cols_per_block</span>, <span class="fl">2</span><span class="op">)</span>, drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">hap_block_all</span><span class="op">[</span>, <span class="fl">2</span><span class="op">*</span><span class="va">b</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">h1_id</span></span>
+<span>  <span class="va">hap_block_all</span><span class="op">[</span>, <span class="fl">2</span><span class="op">*</span><span class="va">b</span>  <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">h2_id</span></span>
+<span>  <span class="va">tbl</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">h1_id</span><span class="op">[</span><span class="va">idx_train</span><span class="op">]</span>, <span class="va">h2_id</span><span class="op">[</span><span class="va">idx_train</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">freqs</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span></span>
+<span>  <span class="va">alleles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">allele_freq_list</span><span class="op">$</span><span class="va">haplotype</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">allele_freq_list</span><span class="op">$</span><span class="va">haplotype</span>,</span>
+<span>                                   <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"block_"</span>, <span class="va">b</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">alleles</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">allele_freq_list</span><span class="op">$</span><span class="va">allele</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">allele_freq_list</span><span class="op">$</span><span class="va">allele</span>, <span class="va">alleles</span><span class="op">)</span></span>
+<span>  <span class="va">allele_freq_list</span><span class="op">$</span><span class="va">freq</span>      <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">allele_freq_list</span><span class="op">$</span><span class="va">freq</span>, <span class="va">freqs</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mode.html">storage.mode</a></span><span class="op">(</span><span class="va">hap_block_all</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"integer"</span></span>
+<span><span class="va">colnames_block</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"block_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_blocks</span>, each <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># ── 5. Construct W matrices ──────────────────────────────────────────────────</span></span>
+<span><span class="va">wah_train</span>  <span class="op">&lt;-</span> <span class="fu">construct_wah_matrix</span><span class="op">(</span></span>
+<span>  <span class="va">hap_block_all</span><span class="op">[</span><span class="va">idx_train</span>,<span class="op">]</span>, <span class="va">colnames_block</span>, <span class="va">allele_freq_list</span>, <span class="cn">NULL</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">W_mh_train</span> <span class="op">&lt;-</span> <span class="va">wah_train</span><span class="op">$</span><span class="va">W_ah</span></span>
+<span><span class="va">ref_struct</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>allele_info<span class="op">=</span><span class="va">wah_train</span><span class="op">$</span><span class="va">allele_info</span>,</span>
+<span>                    dropped_alleles<span class="op">=</span><span class="va">wah_train</span><span class="op">$</span><span class="va">dropped_alleles</span><span class="op">)</span></span>
+<span><span class="va">W_mh_test</span>  <span class="op">&lt;-</span> <span class="fu">construct_wah_matrix</span><span class="op">(</span></span>
+<span>  <span class="va">hap_block_all</span><span class="op">[</span><span class="va">idx_test</span>,<span class="op">]</span>, <span class="va">colnames_block</span>, <span class="cn">NULL</span>, <span class="va">ref_struct</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">W_ah</span></span>
+<span></span>
+<span><span class="va">snp_train_obj</span> <span class="op">&lt;-</span> <span class="fu">construct_snp_matrix</span><span class="op">(</span><span class="va">geno_snp_all</span><span class="op">[</span><span class="va">idx_train</span>, <span class="op">]</span>,</span>
+<span>                                      encoding <span class="op">=</span> <span class="st">"zscore"</span><span class="op">)</span></span>
+<span><span class="va">W_snp_train</span>   <span class="op">&lt;-</span> <span class="va">snp_train_obj</span><span class="op">$</span><span class="va">W</span></span>
+<span><span class="va">p_snp_tr</span>      <span class="op">&lt;-</span> <span class="va">snp_train_obj</span><span class="op">$</span><span class="va">freq</span></span>
+<span><span class="va">sd_snp_tr</span>     <span class="op">&lt;-</span> <span class="va">snp_train_obj</span><span class="op">$</span><span class="va">sd</span></span>
+<span></span>
+<span><span class="va">W_snp_test</span>    <span class="op">&lt;-</span> <span class="fu">construct_snp_matrix</span><span class="op">(</span><span class="va">geno_snp_all</span><span class="op">[</span><span class="va">idx_test</span>, <span class="op">]</span>,</span>
+<span>                                      encoding <span class="op">=</span> <span class="st">"zscore"</span>,</span>
+<span>                                      ref_freq <span class="op">=</span> <span class="va">p_snp_tr</span>,</span>
+<span>                                      ref_sd   <span class="op">=</span> <span class="va">sd_snp_tr</span><span class="op">)</span><span class="op">$</span><span class="va">W</span></span>
+<span><span class="va">W_snp_all</span>     <span class="op">&lt;-</span> <span class="fu">construct_snp_matrix</span><span class="op">(</span><span class="va">geno_snp_all</span>,</span>
+<span>                                      encoding <span class="op">=</span> <span class="st">"zscore"</span>,</span>
+<span>                                      ref_freq <span class="op">=</span> <span class="va">p_snp_tr</span>,</span>
+<span>                                      ref_sd   <span class="op">=</span> <span class="va">sd_snp_tr</span><span class="op">)</span><span class="op">$</span><span class="va">W</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mode.html">storage.mode</a></span><span class="op">(</span><span class="va">W_snp_train</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"double"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mode.html">storage.mode</a></span><span class="op">(</span><span class="va">W_snp_test</span><span class="op">)</span>  <span class="op">&lt;-</span> <span class="st">"double"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mode.html">storage.mode</a></span><span class="op">(</span><span class="va">W_snp_all</span><span class="op">)</span>   <span class="op">&lt;-</span> <span class="st">"double"</span></span>
+<span></span>
+<span><span class="va">wah_all</span>    <span class="op">&lt;-</span> <span class="fu">construct_wah_matrix</span><span class="op">(</span></span>
+<span>  <span class="va">hap_block_all</span>, <span class="va">colnames_block</span>, <span class="va">allele_freq_list</span>, <span class="cn">NULL</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">W_mh_all</span>   <span class="op">&lt;-</span> <span class="va">wah_all</span><span class="op">$</span><span class="va">W_ah</span></span>
+<span></span>
+<span><span class="co"># ── 6. Simulate y (continuous and binary) ───────────────────────────────────</span></span>
+<span><span class="va">simulate_y</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">W_source</span>, <span class="va">idx_tr</span>, <span class="va">label</span>, <span class="va">h2_target</span> <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>                       <span class="va">n_qtl</span> <span class="op">=</span> <span class="fl">10</span>, <span class="va">type</span> <span class="op">=</span> <span class="st">"snp"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">n_col</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">W_source</span><span class="op">)</span></span>
+<span>  <span class="va">beta_true</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n_col</span><span class="op">)</span></span>
+<span>  <span class="va">qtl_idx</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">n_col</span>, <span class="va">n_qtl</span><span class="op">)</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">type</span> <span class="op">==</span> <span class="st">"snp"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html">rgamma</a></span><span class="op">(</span><span class="va">n_qtl</span>, shape<span class="op">=</span><span class="fl">0.4</span>, scale<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>, <span class="va">n_qtl</span>, replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span>    <span class="va">beta_true</span><span class="op">[</span><span class="va">qtl_idx</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">raw</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">raw</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>    <span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">n_qtl</span><span class="op">)</span></span>
+<span>    <span class="va">beta_true</span><span class="op">[</span><span class="va">qtl_idx</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">raw</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">raw</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">tbv_all</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html">as.vector</a></span><span class="op">(</span><span class="va">W_source</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">beta_true</span><span class="op">)</span></span>
+<span>  <span class="va">tbv_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">tbv_all</span><span class="op">[</span><span class="va">idx_tr</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">tbv_sd</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">tbv_all</span><span class="op">[</span><span class="va">idx_tr</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">tbv_std</span>  <span class="op">&lt;-</span> <span class="op">(</span><span class="va">tbv_all</span> <span class="op">-</span> <span class="va">tbv_mean</span><span class="op">)</span> <span class="op">/</span> <span class="va">tbv_sd</span></span>
+<span>  <span class="va">sg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">var</a></span><span class="op">(</span><span class="va">tbv_std</span><span class="op">[</span><span class="va">idx_tr</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">se</span> <span class="op">&lt;-</span> <span class="va">sg</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">h2_target</span><span class="op">)</span> <span class="op">/</span> <span class="va">h2_target</span></span>
+<span>  <span class="va">y_cont</span> <span class="op">&lt;-</span> <span class="va">tbv_std</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">tbv_std</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">threshold</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">y_cont</span><span class="op">[</span><span class="va">idx_tr</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">y_bin</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">y_cont</span> <span class="op">&gt;</span> <span class="va">threshold</span><span class="op">)</span></span>
+<span>  <span class="va">h2_obs</span> <span class="op">&lt;-</span> <span class="va">sg</span> <span class="op">/</span> <span class="op">(</span><span class="va">sg</span> <span class="op">+</span> <span class="va">se</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>y_cont<span class="op">=</span><span class="va">y_cont</span>, y_bin<span class="op">=</span><span class="va">y_bin</span>, g<span class="op">=</span><span class="va">tbv_std</span>, sigma2_g<span class="op">=</span><span class="va">sg</span>, sigma2_e<span class="op">=</span><span class="va">se</span>, h2<span class="op">=</span><span class="va">h2_obs</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="va">config</span><span class="op">$</span><span class="va">seed</span><span class="op">)</span></span>
+<span><span class="va">sc_snp</span> <span class="op">&lt;-</span> <span class="fu">simulate_y</span><span class="op">(</span><span class="va">W_snp_all</span>, <span class="va">idx_train</span>, <span class="st">"QTL@SNP"</span>,</span>
+<span>                     h2_target <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">h2_target</span>,</span>
+<span>                     n_qtl     <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">n_qtl</span>,</span>
+<span>                     type      <span class="op">=</span> <span class="st">"snp"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="va">config</span><span class="op">$</span><span class="va">seed</span><span class="op">)</span></span>
+<span><span class="va">sc_mh</span>  <span class="op">&lt;-</span> <span class="fu">simulate_y</span><span class="op">(</span><span class="va">W_mh_all</span>,  <span class="va">idx_train</span>, <span class="st">"QTL@MH"</span>,</span>
+<span>                     h2_target <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">h2_target</span>,</span>
+<span>                     n_qtl     <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">n_qtl</span>,</span>
+<span>                     type      <span class="op">=</span> <span class="st">"mh"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># ── 7. Bayesian model fitting ────────────────────────────────────────────────</span></span>
+<span><span class="va">mcmc_p</span> <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">mcmc</span></span>
+<span></span>
+<span><span class="va">run_scenario</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">sc</span>, <span class="va">W_tr</span>, <span class="va">W_te</span>, <span class="va">y_tr</span>, <span class="va">y_te</span>, <span class="va">g_te</span>,</span>
+<span>                         <span class="va">marker_label</span>, <span class="va">trait_type</span> <span class="op">=</span> <span class="st">"continuous"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">y_train</span> <span class="op">&lt;-</span> <span class="va">y_tr</span></span>
+<span>  <span class="va">y_test</span>  <span class="op">&lt;-</span> <span class="va">y_te</span></span>
+<span>  <span class="va">resp</span>    <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait_type</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="st">"binary"</span> <span class="kw">else</span> <span class="st">"gaussian"</span></span>
+<span>  <span class="va">mtype</span>   <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span><span class="op">(</span><span class="va">marker_label</span>, <span class="st">"SNP"</span><span class="op">)</span><span class="op">)</span> <span class="st">"snp"</span> <span class="kw">else</span> <span class="st">"multiallelic"</span></span>
+<span>  <span class="va">rows</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">se_init</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait_type</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="fl">1.0</span> <span class="kw">else</span> <span class="va">sc</span><span class="op">$</span><span class="va">sigma2_e</span></span>
+<span>  <span class="va">sg_init</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait_type</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="fl">1.0</span> <span class="kw">else</span> <span class="va">sc</span><span class="op">$</span><span class="va">sigma2_g</span></span>
+<span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">model</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"BayesR"</span>, <span class="st">"BayesA"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">result</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="va">model</span> <span class="op">==</span> <span class="st">"BayesR"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">run_bayesr</span><span class="op">(</span></span>
+<span>          w<span class="op">=</span><span class="va">W_tr</span>, y<span class="op">=</span><span class="va">y_train</span>, </span>
+<span>          marker_type   <span class="op">=</span> <span class="va">mtype</span>,</span>
+<span>          pi_vec        <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">bayesr</span><span class="op">$</span><span class="va">pi_vec</span>,</span>
+<span>          sigma2_e_init <span class="op">=</span> <span class="va">se_init</span>,</span>
+<span>          sigma2_ah     <span class="op">=</span> <span class="va">sg_init</span>,</span>
+<span>          prior_params  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>            a0_e           <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">bayesr</span><span class="op">$</span><span class="va">a0_e</span>,</span>
+<span>            a0_g           <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">bayesr</span><span class="op">$</span><span class="va">a0_g</span>,</span>
+<span>            variance_class <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">bayesr</span><span class="op">$</span><span class="va">variance_class</span></span>
+<span>          <span class="op">)</span>,</span>
+<span>          mcmc_params   <span class="op">=</span> <span class="va">mcmc_p</span>,</span>
+<span>          method        <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
+<span>          response_type <span class="op">=</span> <span class="va">resp</span>,</span>
+<span>          fold_id       <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span></span>
+<span>      <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>        <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">run_bayesa</span><span class="op">(</span></span>
+<span>          w<span class="op">=</span><span class="va">W_tr</span>, y<span class="op">=</span><span class="va">y_train</span>, </span>
+<span>          marker_type   <span class="op">=</span> <span class="va">mtype</span>,</span>
+<span>          nu            <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">bayesa</span><span class="op">$</span><span class="va">nu</span>,</span>
+<span>          sigma2_g      <span class="op">=</span> <span class="va">sg_init</span>,</span>
+<span>          sigma2_e_init <span class="op">=</span> <span class="va">se_init</span>,</span>
+<span>          prior_params  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a0_e <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">bayesa</span><span class="op">$</span><span class="va">a0_e</span><span class="op">)</span>,</span>
+<span>          mcmc_params   <span class="op">=</span> <span class="va">mcmc_p</span>,</span>
+<span>          method        <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
+<span>          response_type <span class="op">=</span> <span class="va">resp</span>,</span>
+<span>          fold_id       <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span></span>
+<span>      <span class="op">}</span></span>
+<span></span>
+<span>      <span class="va">gebv_tr</span>  <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">GEBV</span></span>
+<span>      <span class="va">pred_te</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">W_te</span>, <span class="va">y_test</span><span class="op">)</span></span>
+<span>      <span class="va">gebv_te</span>  <span class="op">&lt;-</span> <span class="va">pred_te</span><span class="op">$</span><span class="va">GEBV</span></span>
+<span>      <span class="va">r_test_y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">gebv_te</span>, <span class="va">y_test</span><span class="op">)</span></span>
+<span>      <span class="va">r_test_g</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">gebv_te</span>, <span class="va">g_te</span><span class="op">)</span></span>
+<span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="va">trait_type</span> <span class="op">==</span> <span class="st">"binary"</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">z_hat</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">is.numeric</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">z_hat</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">r_train</span>       <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">gebv_tr</span>, <span class="va">res</span><span class="op">$</span><span class="va">z_hat</span><span class="op">)</span></span>
+<span>        <span class="va">bias_test</span>     <span class="op">&lt;-</span> <span class="va">pred_te</span><span class="op">$</span><span class="va">metrics</span><span class="op">$</span><span class="va">bias</span></span>
+<span>        <span class="va">sigma2_g_post</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">var</a></span><span class="op">(</span><span class="va">gebv_tr</span><span class="op">)</span></span>
+<span>        <span class="va">h2_post</span>       <span class="op">&lt;-</span> <span class="va">sigma2_g_post</span> <span class="op">/</span> <span class="op">(</span><span class="va">sigma2_g_post</span> <span class="op">+</span> <span class="fl">1.0</span><span class="op">)</span></span>
+<span>      <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>        <span class="va">r_train</span>       <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">gebv_tr</span>, <span class="va">y_train</span><span class="op">)</span></span>
+<span>        <span class="va">bias_test</span>     <span class="op">&lt;-</span> <span class="va">pred_te</span><span class="op">$</span><span class="va">metrics</span><span class="op">$</span><span class="va">bias</span></span>
+<span>        <span class="va">sigma2_g_post</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">var</a></span><span class="op">(</span><span class="va">gebv_tr</span><span class="op">)</span></span>
+<span>        <span class="va">sigma2_e_post</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">sigma2_e_samples</span><span class="op">)</span></span>
+<span>        <span class="va">h2_post</span>       <span class="op">&lt;-</span> <span class="va">sigma2_g_post</span> <span class="op">/</span> <span class="op">(</span><span class="va">sigma2_g_post</span> <span class="op">+</span> <span class="va">sigma2_e_post</span><span class="op">)</span></span>
+<span>      <span class="op">}</span></span>
+<span></span>
+<span>      <span class="va">auc</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait_type</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">pred_te</span><span class="op">$</span><span class="va">metrics</span><span class="op">$</span><span class="va">AUC</span> <span class="kw">else</span> <span class="cn">NA</span></span>
+<span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>status<span class="op">=</span><span class="st">"OK"</span>, r_train<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">r_train</span>,<span class="fl">3</span><span class="op">)</span>,</span>
+<span>           r_test_y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">r_test_y</span>,<span class="fl">3</span><span class="op">)</span>, r_test_g<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">r_test_g</span>,<span class="fl">3</span><span class="op">)</span>,</span>
+<span>           bias<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">bias_test</span>,<span class="fl">3</span><span class="op">)</span>, h2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">h2_post</span>,<span class="fl">3</span><span class="op">)</span>,</span>
+<span>           auc<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">auc</span>,<span class="fl">3</span><span class="op">)</span>, p<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">W_tr</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>, error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>status<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"ERROR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>           r_train<span class="op">=</span><span class="cn">NA</span>, r_test_y<span class="op">=</span><span class="cn">NA</span>, r_test_g<span class="op">=</span><span class="cn">NA</span>,</span>
+<span>           bias<span class="op">=</span><span class="cn">NA</span>, h2<span class="op">=</span><span class="cn">NA</span>, auc<span class="op">=</span><span class="cn">NA</span>, p<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">W_tr</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="va">rows</span><span class="op">[[</span><span class="va">model</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>      Trait<span class="op">=</span><span class="va">trait_type</span>, Marker<span class="op">=</span><span class="va">marker_label</span>, Model<span class="op">=</span><span class="va">model</span>,</span>
+<span>      Status<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">status</span>, r_train<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">r_train</span>,</span>
+<span>      r_test_y<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">r_test_y</span>, r_test_g<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">r_test_g</span>,</span>
+<span>      bias<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">bias</span>, h2_post<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">h2</span>, AUC<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">auc</span>,</span>
+<span>      p<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">p</span>, stringsAsFactors<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">rows</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># ── 7b. GBLUP via masreml ────────────────────────────────────────────────────</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">geno_snp_all</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_total</span><span class="op">)</span></span>
+<span><span class="va">G_snp_full</span> <span class="op">&lt;-</span> <span class="fu">build_G_snp</span><span class="op">(</span><span class="va">geno_snp_all</span>, ref_W <span class="op">=</span> <span class="va">geno_snp_all</span><span class="op">[</span><span class="va">idx_train</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">hap_block_all</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_total</span><span class="op">)</span></span>
+<span><span class="va">G_mh_full</span> <span class="op">&lt;-</span> <span class="fu">build_G_mh</span><span class="op">(</span></span>
+<span>  mh_list <span class="op">=</span> <span class="va">hap_block_all</span>,</span>
+<span>  ref_mh  <span class="op">=</span> <span class="va">hap_block_all</span><span class="op">[</span><span class="va">idx_train</span>, <span class="op">]</span>,</span>
+<span>  ids     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_total</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">train_ids_ch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">idx_train</span><span class="op">)</span></span>
+<span><span class="va">test_ids_ch</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">idx_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">run_gblup_scenario</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">sc</span>, <span class="va">marker_label</span>, <span class="va">G_full</span>, <span class="va">y_tr</span>, <span class="va">y_te</span>, <span class="va">g_te</span>,</span>
+<span>                                <span class="va">trait_type</span> <span class="op">=</span> <span class="st">"continuous"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">G_tr</span> <span class="op">&lt;-</span> <span class="va">G_full</span><span class="op">[</span><span class="va">train_ids_ch</span>, <span class="va">train_ids_ch</span><span class="op">]</span></span>
+<span>  <span class="va">y_named</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">y_tr</span>, <span class="va">train_ids_ch</span><span class="op">)</span></span>
+<span>  <span class="va">fit</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html">tryCatch</a></span><span class="op">(</span></span>
+<span>    <span class="fu">masreml</span><span class="op">(</span>y <span class="op">=</span> <span class="va">y_named</span>, G <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>g <span class="op">=</span> <span class="va">G_tr</span><span class="op">)</span>,</span>
+<span>            trait <span class="op">=</span> <span class="va">trait_type</span>, method <span class="op">=</span> <span class="st">"auto"</span><span class="op">)</span>,</span>
+<span>    error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="cn">NULL</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Trait<span class="op">=</span><span class="va">trait_type</span>, Marker<span class="op">=</span><span class="va">marker_label</span>, Model<span class="op">=</span><span class="st">"GBLUP"</span>,</span>
+<span>                      Status<span class="op">=</span><span class="st">"ERROR"</span>, r_train<span class="op">=</span><span class="cn">NA</span>, r_test_y<span class="op">=</span><span class="cn">NA</span>, r_test_g<span class="op">=</span><span class="cn">NA</span>,</span>
+<span>                      bias<span class="op">=</span><span class="cn">NA</span>, h2_post<span class="op">=</span><span class="cn">NA</span>, AUC<span class="op">=</span><span class="cn">NA</span>, p<span class="op">=</span><span class="cn">NA</span>, stringsAsFactors<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit</span>, G_full <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>g <span class="op">=</span> <span class="va">G_full</span><span class="op">)</span>,</span>
+<span>                  train_ids <span class="op">=</span> <span class="va">train_ids_ch</span>, test_ids <span class="op">=</span> <span class="va">test_ids_ch</span><span class="op">)</span></span>
+<span>  <span class="va">gebv_tr</span>  <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">total_gebv</span> <span class="op">+</span> <span class="va">fit</span><span class="op">$</span><span class="va">fixed_effects</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span>  <span class="va">gebv_te</span>  <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="va">GEBV</span>      <span class="op">+</span> <span class="va">fit</span><span class="op">$</span><span class="va">fixed_effects</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span>  <span class="va">h2_post</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">varcomp</span><span class="op">$</span><span class="va">h2</span><span class="op">[</span><span class="st">"g"</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">ev</span> <span class="op">&lt;-</span> <span class="fu">evaluate_prediction</span><span class="op">(</span></span>
+<span>          gebv        <span class="op">=</span> <span class="va">gebv_te</span>,</span>
+<span>          y           <span class="op">=</span> <span class="va">y_te</span>,</span>
+<span>          h2          <span class="op">=</span> <span class="va">h2_post</span>,</span>
+<span>          tbv         <span class="op">=</span> <span class="va">g_te</span>,</span>
+<span>          fitted_prob <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait_type</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">pred</span><span class="op">$</span><span class="va">prob</span> <span class="kw">else</span> <span class="cn">NULL</span></span>
+<span>        <span class="op">)</span></span>
+<span>  <span class="va">r_train</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">gebv_tr</span>, <span class="va">y_tr</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Trait<span class="op">=</span><span class="va">trait_type</span>, Marker<span class="op">=</span><span class="va">marker_label</span>, Model<span class="op">=</span><span class="st">"GBLUP"</span>,</span>
+<span>             Status<span class="op">=</span><span class="st">"OK"</span>,</span>
+<span>             r_train<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">r_train</span>,<span class="fl">3</span><span class="op">)</span>, r_test_y<span class="op">=</span><span class="va">ev</span><span class="op">$</span><span class="va">r_test_y</span>,</span>
+<span>             r_test_g<span class="op">=</span><span class="va">ev</span><span class="op">$</span><span class="va">r_test_g</span>, bias<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">ev</span><span class="op">$</span><span class="va">bias</span>,<span class="fl">3</span><span class="op">)</span>,</span>
+<span>             h2_post<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">h2_post</span>,<span class="fl">3</span><span class="op">)</span>, AUC<span class="op">=</span><span class="va">ev</span><span class="op">$</span><span class="va">AUC</span>,</span>
+<span>             p<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">G_tr</span><span class="op">)</span>, stringsAsFactors<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">gblup_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">sc_name</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"QTL@SNP"</span>, <span class="st">"QTL@MH"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">sc</span>   <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">sc_name</span> <span class="op">==</span> <span class="st">"QTL@SNP"</span><span class="op">)</span> <span class="va">sc_snp</span> <span class="kw">else</span> <span class="va">sc_mh</span></span>
+<span>  <span class="va">g_te</span> <span class="op">&lt;-</span> <span class="va">sc</span><span class="op">$</span><span class="va">g</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">trait</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"continuous"</span>, <span class="st">"binary"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">y_tr</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_bin</span><span class="op">[</span><span class="va">idx_train</span><span class="op">]</span> <span class="kw">else</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_cont</span><span class="op">[</span><span class="va">idx_train</span><span class="op">]</span></span>
+<span>    <span class="va">y_te</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_bin</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span>  <span class="kw">else</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_cont</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span></span>
+<span>    <span class="va">r_snp</span> <span class="op">&lt;-</span> <span class="fu">run_gblup_scenario</span><span class="op">(</span><span class="va">sc</span>, <span class="st">"SNP"</span>, <span class="va">G_snp_full</span>, <span class="va">y_tr</span>, <span class="va">y_te</span>, <span class="va">g_te</span>, <span class="va">trait</span><span class="op">)</span></span>
+<span>    <span class="va">r_mh</span>  <span class="op">&lt;-</span> <span class="fu">run_gblup_scenario</span><span class="op">(</span><span class="va">sc</span>, <span class="st">"MH"</span>,  <span class="va">G_mh_full</span>,  <span class="va">y_tr</span>, <span class="va">y_te</span>, <span class="va">g_te</span>, <span class="va">trait</span><span class="op">)</span></span>
+<span>    <span class="va">r_snp</span><span class="op">$</span><span class="va">Scenario</span> <span class="op">&lt;-</span> <span class="va">r_mh</span><span class="op">$</span><span class="va">Scenario</span> <span class="op">&lt;-</span> <span class="va">sc_name</span></span>
+<span>    <span class="va">gblup_results</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">sc_name</span>, <span class="va">trait</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">r_snp</span>, <span class="va">r_mh</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">gblup_final</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">gblup_results</span><span class="op">)</span></span>
+<span><span class="va">gblup_final</span> <span class="op">&lt;-</span> <span class="va">gblup_final</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Scenario"</span>,<span class="st">"Trait"</span>,<span class="st">"Marker"</span>,<span class="st">"Model"</span>,</span>
+<span>                                <span class="st">"r_train"</span>,<span class="st">"r_test_y"</span>,<span class="st">"r_test_g"</span>,</span>
+<span>                                <span class="st">"bias"</span>,<span class="st">"h2_post"</span>,<span class="st">"AUC"</span>,<span class="st">"p"</span>,<span class="st">"Status"</span><span class="op">)</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># ── 7c. GWABLUP via masreml ──────────────────────────────────────────────────</span></span>
+<span><span class="va">run_gwablup_scenario</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">sc</span>, <span class="va">marker_type</span>, <span class="va">y_tr</span>, <span class="va">y_te</span>, <span class="va">g_te</span>,</span>
+<span>                                  <span class="va">G_full</span>, <span class="va">geno_train</span>, <span class="va">geno_all</span>,</span>
+<span>                                  <span class="va">trait_type</span> <span class="op">=</span> <span class="st">"continuous"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">train_ids</span> <span class="op">&lt;-</span> <span class="va">train_ids_ch</span></span>
+<span>  <span class="va">test_ids</span>  <span class="op">&lt;-</span> <span class="va">test_ids_ch</span></span>
+<span>  <span class="va">y_named</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">y_tr</span>, <span class="va">train_ids</span><span class="op">)</span></span>
+<span>  <span class="va">G_tr</span>      <span class="op">&lt;-</span> <span class="va">G_full</span><span class="op">[</span><span class="va">train_ids</span>, <span class="va">train_ids</span><span class="op">]</span></span>
+<span>  <span class="va">comp_name</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">marker_type</span> <span class="op">==</span> <span class="st">"SNP"</span><span class="op">)</span> <span class="st">"snp_add"</span> <span class="kw">else</span> <span class="st">"mh_add"</span></span>
+<span></span>
+<span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">fit_tr</span> <span class="op">&lt;-</span> <span class="fu">masreml</span><span class="op">(</span>y <span class="op">=</span> <span class="va">y_named</span>, G <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>g <span class="op">=</span> <span class="va">G_tr</span><span class="op">)</span>,</span>
+<span>                      trait <span class="op">=</span> <span class="va">trait_type</span>, method <span class="op">=</span> <span class="st">"auto"</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">marker_type</span> <span class="op">==</span> <span class="st">"SNP"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">markers_tr</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>snp_add <span class="op">=</span> <span class="va">geno_train</span><span class="op">)</span></span>
+<span>      <span class="va">ref_markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>snp_add <span class="op">=</span> <span class="va">geno_train</span><span class="op">)</span></span>
+<span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>      <span class="va">hap_tr</span>      <span class="op">&lt;-</span> <span class="va">hap_block_all</span><span class="op">[</span><span class="va">idx_train</span>, <span class="op">]</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">hap_tr</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">train_ids</span></span>
+<span>      <span class="va">markers_tr</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mh_add <span class="op">=</span> <span class="va">hap_tr</span><span class="op">)</span></span>
+<span>      <span class="va">ref_markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mh_add <span class="op">=</span> <span class="va">hap_tr</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="va">gwas_tr</span> <span class="op">&lt;-</span> <span class="fu">run_gwas</span><span class="op">(</span></span>
+<span>      markers     <span class="op">=</span> <span class="va">markers_tr</span>,</span>
+<span>      y           <span class="op">=</span> <span class="va">y_named</span>,</span>
+<span>      masreml_fit <span class="op">=</span> <span class="va">fit_tr</span>,</span>
+<span>      ref_markers <span class="op">=</span> <span class="va">ref_markers</span></span>
+<span>    <span class="op">)</span></span>
+<span>    <span class="va">fit_wa</span> <span class="op">&lt;-</span> <span class="fu">gwablup</span><span class="op">(</span></span>
+<span>      y           <span class="op">=</span> <span class="va">y_named</span>,</span>
+<span>      markers     <span class="op">=</span> <span class="va">markers_tr</span>,</span>
+<span>      gwas_result <span class="op">=</span> <span class="va">gwas_tr</span>,</span>
+<span>      trait       <span class="op">=</span> <span class="va">trait_type</span>,</span>
+<span>      ref_markers <span class="op">=</span> <span class="va">ref_markers</span></span>
+<span>    <span class="op">)</span></span>
+<span>    <span class="va">g_full_named</span>        <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">G_full</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">g_full_named</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">comp_name</span></span>
+<span>    <span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">fit_wa</span>,</span>
+<span>                    G_full    <span class="op">=</span> <span class="va">g_full_named</span>,</span>
+<span>                    train_ids <span class="op">=</span> <span class="va">train_ids</span>,</span>
+<span>                    test_ids  <span class="op">=</span> <span class="va">test_ids</span><span class="op">)</span></span>
+<span>    <span class="va">gebv_tr</span> <span class="op">&lt;-</span> <span class="va">fit_wa</span><span class="op">$</span><span class="va">total_gebv</span> <span class="op">+</span> <span class="va">fit_wa</span><span class="op">$</span><span class="va">fixed_effects</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span>    <span class="va">gebv_te</span> <span class="op">&lt;-</span> <span class="va">pred</span><span class="op">$</span><span class="va">GEBV</span>         <span class="op">+</span> <span class="va">fit_wa</span><span class="op">$</span><span class="va">fixed_effects</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span>    <span class="va">h2_post</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">fit_wa</span><span class="op">$</span><span class="va">varcomp</span><span class="op">$</span><span class="va">h2</span><span class="op">[</span><span class="va">comp_name</span><span class="op">]</span><span class="op">)</span></span>
+<span>    <span class="va">ev</span> <span class="op">&lt;-</span> <span class="fu">evaluate_prediction</span><span class="op">(</span></span>
+<span>            gebv        <span class="op">=</span> <span class="va">gebv_te</span>,</span>
+<span>            y           <span class="op">=</span> <span class="va">y_te</span>,</span>
+<span>            h2          <span class="op">=</span> <span class="va">h2_post</span>,</span>
+<span>            tbv         <span class="op">=</span> <span class="va">g_te</span>,</span>
+<span>            fitted_prob <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait_type</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">pred</span><span class="op">$</span><span class="va">prob</span> <span class="kw">else</span> <span class="cn">NULL</span></span>
+<span>          <span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>status<span class="op">=</span><span class="st">"OK"</span>,</span>
+<span>         r_train  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">gebv_tr</span>, <span class="va">y_tr</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>         r_test_y <span class="op">=</span> <span class="va">ev</span><span class="op">$</span><span class="va">r_test_y</span>,</span>
+<span>         r_test_g <span class="op">=</span> <span class="va">ev</span><span class="op">$</span><span class="va">r_test_g</span>,</span>
+<span>         bias     <span class="op">=</span> <span class="va">ev</span><span class="op">$</span><span class="va">bias</span>,</span>
+<span>         h2_post  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">h2_post</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>         auc      <span class="op">=</span> <span class="va">ev</span><span class="op">$</span><span class="va">AUC</span>,</span>
+<span>         p        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">fit_wa</span><span class="op">$</span><span class="va">total_gebv</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>status<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"ERROR:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>         r_train<span class="op">=</span><span class="cn">NA</span>, r_test_y<span class="op">=</span><span class="cn">NA</span>, r_test_g<span class="op">=</span><span class="cn">NA</span>,</span>
+<span>         bias<span class="op">=</span><span class="cn">NA</span>, h2_post<span class="op">=</span><span class="cn">NA</span>, auc<span class="op">=</span><span class="cn">NA</span>, p<span class="op">=</span><span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Trait<span class="op">=</span><span class="va">trait_type</span>, Marker<span class="op">=</span><span class="va">marker_type</span>, Model<span class="op">=</span><span class="st">"GWABLUP"</span>,</span>
+<span>             Status<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">status</span>,</span>
+<span>             r_train<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">r_train</span>, r_test_y<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">r_test_y</span>,</span>
+<span>             r_test_g<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">r_test_g</span>, bias<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">bias</span>,</span>
+<span>             h2_post<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">h2_post</span>, AUC<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">auc</span>,</span>
+<span>             p<span class="op">=</span><span class="va">result</span><span class="op">$</span><span class="va">p</span>, stringsAsFactors<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">geno_train</span> <span class="op">&lt;-</span> <span class="va">geno_snp_all</span><span class="op">[</span><span class="va">idx_train</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">geno_train</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">train_ids_ch</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mode.html">storage.mode</a></span><span class="op">(</span><span class="va">geno_train</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"double"</span></span>
+<span></span>
+<span><span class="va">gwablup_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">sc_name</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"QTL@SNP"</span>, <span class="st">"QTL@MH"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">sc</span>   <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">sc_name</span> <span class="op">==</span> <span class="st">"QTL@SNP"</span><span class="op">)</span> <span class="va">sc_snp</span> <span class="kw">else</span> <span class="va">sc_mh</span></span>
+<span>  <span class="va">g_te</span> <span class="op">&lt;-</span> <span class="va">sc</span><span class="op">$</span><span class="va">g</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">trait</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"continuous"</span>, <span class="st">"binary"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">y_tr</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_bin</span><span class="op">[</span><span class="va">idx_train</span><span class="op">]</span> <span class="kw">else</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_cont</span><span class="op">[</span><span class="va">idx_train</span><span class="op">]</span></span>
+<span>    <span class="va">y_te</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_bin</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span>  <span class="kw">else</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_cont</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span></span>
+<span>    <span class="va">r_snp</span> <span class="op">&lt;-</span> <span class="fu">run_gwablup_scenario</span><span class="op">(</span><span class="va">sc</span>, <span class="st">"SNP"</span>, <span class="va">y_tr</span>, <span class="va">y_te</span>, <span class="va">g_te</span>,</span>
+<span>                                   <span class="va">G_snp_full</span>, <span class="va">geno_train</span>, <span class="va">geno_snp_all</span>, <span class="va">trait</span><span class="op">)</span></span>
+<span>    <span class="va">r_mh</span>  <span class="op">&lt;-</span> <span class="fu">run_gwablup_scenario</span><span class="op">(</span><span class="va">sc</span>, <span class="st">"MH"</span>,  <span class="va">y_tr</span>, <span class="va">y_te</span>, <span class="va">g_te</span>,</span>
+<span>                                   <span class="va">G_mh_full</span>,  <span class="va">geno_train</span>, <span class="va">geno_snp_all</span>, <span class="va">trait</span><span class="op">)</span></span>
+<span>    <span class="va">r_snp</span><span class="op">$</span><span class="va">Scenario</span> <span class="op">&lt;-</span> <span class="va">r_mh</span><span class="op">$</span><span class="va">Scenario</span> <span class="op">&lt;-</span> <span class="va">sc_name</span></span>
+<span>    <span class="va">gwablup_results</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">sc_name</span>, <span class="va">trait</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">r_snp</span>, <span class="va">r_mh</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">gwablup_final</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">gwablup_results</span><span class="op">)</span></span>
+<span><span class="va">gwablup_final</span> <span class="op">&lt;-</span> <span class="va">gwablup_final</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Scenario"</span>,<span class="st">"Trait"</span>,<span class="st">"Marker"</span>,<span class="st">"Model"</span>,</span>
+<span>                                    <span class="st">"r_train"</span>,<span class="st">"r_test_y"</span>,<span class="st">"r_test_g"</span>,</span>
+<span>                                    <span class="st">"bias"</span>,<span class="st">"h2_post"</span>,<span class="st">"AUC"</span>,<span class="st">"p"</span>,<span class="st">"Status"</span><span class="op">)</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># ── 8. Run all Bayesian combinations ─────────────────────────────────────────</span></span>
+<span><span class="va">all_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">sc_name</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"QTL@SNP"</span>, <span class="st">"QTL@MH"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">sc</span>   <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">sc_name</span> <span class="op">==</span> <span class="st">"QTL@SNP"</span><span class="op">)</span> <span class="va">sc_snp</span> <span class="kw">else</span> <span class="va">sc_mh</span></span>
+<span>  <span class="va">g_te</span> <span class="op">&lt;-</span> <span class="va">sc</span><span class="op">$</span><span class="va">g</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">trait</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"continuous"</span>, <span class="st">"binary"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">y_tr_use</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_bin</span><span class="op">[</span><span class="va">idx_train</span><span class="op">]</span> <span class="kw">else</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_cont</span><span class="op">[</span><span class="va">idx_train</span><span class="op">]</span></span>
+<span>    <span class="va">y_te_use</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">trait</span> <span class="op">==</span> <span class="st">"binary"</span><span class="op">)</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_bin</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span>  <span class="kw">else</span> <span class="va">sc</span><span class="op">$</span><span class="va">y_cont</span><span class="op">[</span><span class="va">idx_test</span><span class="op">]</span></span>
+<span>    <span class="va">r_mh</span>  <span class="op">&lt;-</span> <span class="fu">run_scenario</span><span class="op">(</span><span class="va">sc</span>, <span class="va">W_mh_train</span>, <span class="va">W_mh_test</span>,</span>
+<span>                          <span class="va">y_tr_use</span>, <span class="va">y_te_use</span>,</span>
+<span>                          <span class="va">g_te</span>, <span class="st">"MH"</span>, <span class="va">trait</span><span class="op">)</span></span>
+<span>    <span class="va">r_snp</span> <span class="op">&lt;-</span> <span class="fu">run_scenario</span><span class="op">(</span><span class="va">sc</span>, <span class="va">W_snp_train</span>, <span class="va">W_snp_test</span>,</span>
+<span>                          <span class="va">y_tr_use</span>, <span class="va">y_te_use</span>,</span>
+<span>                          <span class="va">g_te</span>, <span class="st">"SNP"</span>, <span class="va">trait</span><span class="op">)</span></span>
+<span>    <span class="va">res</span>        <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">r_mh</span>, <span class="va">r_snp</span><span class="op">)</span></span>
+<span>    <span class="va">res</span><span class="op">$</span><span class="va">Scenario</span> <span class="op">&lt;-</span> <span class="va">sc_name</span></span>
+<span>    <span class="va">all_results</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">sc_name</span>, <span class="va">trait</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">res</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># ── 9. Combined results ──────────────────────────────────────────────────────</span></span>
+<span><span class="va">final</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">all_results</span><span class="op">)</span>, <span class="va">gblup_final</span>, <span class="va">gwablup_final</span><span class="op">)</span></span>
+<span><span class="va">final</span> <span class="op">&lt;-</span> <span class="va">final</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Scenario"</span>,<span class="st">"Trait"</span>,<span class="st">"Marker"</span>,<span class="st">"Model"</span>,</span>
+<span>                   <span class="st">"r_train"</span>,<span class="st">"r_test_y"</span>,<span class="st">"r_test_g"</span>,</span>
+<span>                   <span class="st">"bias"</span>,<span class="st">"h2_post"</span>,<span class="st">"AUC"</span>,<span class="st">"p"</span>,<span class="st">"Status"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">final</span> <span class="op">&lt;-</span> <span class="va">final</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">final</span><span class="op">$</span><span class="va">Scenario</span>, <span class="va">final</span><span class="op">$</span><span class="va">Trait</span>, <span class="va">final</span><span class="op">$</span><span class="va">Marker</span>, <span class="va">final</span><span class="op">$</span><span class="va">Model</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Combined results: 2 QTL scenarios × 2 traits × 2 markers × 4 models = 32 model fits. Train n = 200, test n = 100, h² target = 0.3, n_QTL = 10.</caption>
+<colgroup>
+<col style="width: 9%">
+<col style="width: 11%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 6%">
+<col style="width: 8%">
+<col style="width: 6%">
+<col style="width: 4%">
+<col style="width: 7%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Scenario</th>
+<th style="text-align: left;">Trait</th>
+<th style="text-align: left;">Marker</th>
+<th style="text-align: left;">Model</th>
+<th style="text-align: right;">r_train</th>
+<th style="text-align: right;">r_test_y</th>
+<th style="text-align: right;">r_test_g</th>
+<th style="text-align: right;">bias</th>
+<th style="text-align: right;">h2_post</th>
+<th style="text-align: right;">AUC</th>
+<th style="text-align: right;">p</th>
+<th style="text-align: left;">Status</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">BayesA</td>
+<td style="text-align: right;">0.899</td>
+<td style="text-align: right;">0.295</td>
+<td style="text-align: right;">0.726</td>
+<td style="text-align: right;">0.595</td>
+<td style="text-align: right;">0.366</td>
+<td style="text-align: right;">0.671</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">BayesR</td>
+<td style="text-align: right;">0.923</td>
+<td style="text-align: right;">0.310</td>
+<td style="text-align: right;">0.754</td>
+<td style="text-align: right;">0.501</td>
+<td style="text-align: right;">0.521</td>
+<td style="text-align: right;">0.675</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">GBLUP</td>
+<td style="text-align: right;">0.744</td>
+<td style="text-align: right;">0.128</td>
+<td style="text-align: right;">0.573</td>
+<td style="text-align: right;">1.466</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.568</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">GWABLUP</td>
+<td style="text-align: right;">0.744</td>
+<td style="text-align: right;">0.128</td>
+<td style="text-align: right;">0.572</td>
+<td style="text-align: right;">1.460</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.571</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">BayesA</td>
+<td style="text-align: right;">0.841</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: right;">0.521</td>
+<td style="text-align: right;">0.435</td>
+<td style="text-align: right;">0.277</td>
+<td style="text-align: right;">0.592</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">BayesR</td>
+<td style="text-align: right;">0.786</td>
+<td style="text-align: right;">0.204</td>
+<td style="text-align: right;">0.550</td>
+<td style="text-align: right;">0.645</td>
+<td style="text-align: right;">0.177</td>
+<td style="text-align: right;">0.611</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">GBLUP</td>
+<td style="text-align: right;">0.686</td>
+<td style="text-align: right;">0.164</td>
+<td style="text-align: right;">0.497</td>
+<td style="text-align: right;">1.943</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.600</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">GWABLUP</td>
+<td style="text-align: right;">0.687</td>
+<td style="text-align: right;">0.165</td>
+<td style="text-align: right;">0.498</td>
+<td style="text-align: right;">1.946</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.599</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">BayesA</td>
+<td style="text-align: right;">0.784</td>
+<td style="text-align: right;">0.444</td>
+<td style="text-align: right;">0.801</td>
+<td style="text-align: right;">1.071</td>
+<td style="text-align: right;">0.202</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">BayesR</td>
+<td style="text-align: right;">0.786</td>
+<td style="text-align: right;">0.461</td>
+<td style="text-align: right;">0.833</td>
+<td style="text-align: right;">0.865</td>
+<td style="text-align: right;">0.289</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">GBLUP</td>
+<td style="text-align: right;">0.817</td>
+<td style="text-align: right;">0.290</td>
+<td style="text-align: right;">0.696</td>
+<td style="text-align: right;">1.337</td>
+<td style="text-align: right;">0.365</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">GWABLUP</td>
+<td style="text-align: right;">0.754</td>
+<td style="text-align: right;">0.270</td>
+<td style="text-align: right;">0.682</td>
+<td style="text-align: right;">1.524</td>
+<td style="text-align: right;">0.290</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">BayesA</td>
+<td style="text-align: right;">0.751</td>
+<td style="text-align: right;">0.261</td>
+<td style="text-align: right;">0.530</td>
+<td style="text-align: right;">0.737</td>
+<td style="text-align: right;">0.186</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">BayesR</td>
+<td style="text-align: right;">0.732</td>
+<td style="text-align: right;">0.267</td>
+<td style="text-align: right;">0.557</td>
+<td style="text-align: right;">0.651</td>
+<td style="text-align: right;">0.223</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">GBLUP</td>
+<td style="text-align: right;">0.769</td>
+<td style="text-align: right;">0.233</td>
+<td style="text-align: right;">0.525</td>
+<td style="text-align: right;">1.186</td>
+<td style="text-align: right;">0.326</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@MH</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">GWABLUP</td>
+<td style="text-align: right;">0.776</td>
+<td style="text-align: right;">0.232</td>
+<td style="text-align: right;">0.524</td>
+<td style="text-align: right;">1.084</td>
+<td style="text-align: right;">0.345</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">BayesA</td>
+<td style="text-align: right;">0.875</td>
+<td style="text-align: right;">0.338</td>
+<td style="text-align: right;">0.561</td>
+<td style="text-align: right;">0.688</td>
+<td style="text-align: right;">0.347</td>
+<td style="text-align: right;">0.678</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">BayesR</td>
+<td style="text-align: right;">0.844</td>
+<td style="text-align: right;">0.339</td>
+<td style="text-align: right;">0.627</td>
+<td style="text-align: right;">0.724</td>
+<td style="text-align: right;">0.308</td>
+<td style="text-align: right;">0.680</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">GBLUP</td>
+<td style="text-align: right;">0.725</td>
+<td style="text-align: right;">0.290</td>
+<td style="text-align: right;">0.444</td>
+<td style="text-align: right;">3.244</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.657</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">GWABLUP</td>
+<td style="text-align: right;">0.724</td>
+<td style="text-align: right;">0.289</td>
+<td style="text-align: right;">0.447</td>
+<td style="text-align: right;">3.204</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.657</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">BayesA</td>
+<td style="text-align: right;">0.866</td>
+<td style="text-align: right;">0.439</td>
+<td style="text-align: right;">0.797</td>
+<td style="text-align: right;">0.892</td>
+<td style="text-align: right;">0.383</td>
+<td style="text-align: right;">0.752</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">BayesR</td>
+<td style="text-align: right;">0.818</td>
+<td style="text-align: right;">0.454</td>
+<td style="text-align: right;">0.894</td>
+<td style="text-align: right;">0.921</td>
+<td style="text-align: right;">0.332</td>
+<td style="text-align: right;">0.763</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">GBLUP</td>
+<td style="text-align: right;">0.708</td>
+<td style="text-align: right;">0.360</td>
+<td style="text-align: right;">0.622</td>
+<td style="text-align: right;">4.038</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.726</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">GWABLUP</td>
+<td style="text-align: right;">0.709</td>
+<td style="text-align: right;">0.362</td>
+<td style="text-align: right;">0.626</td>
+<td style="text-align: right;">4.027</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.726</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">BayesA</td>
+<td style="text-align: right;">0.774</td>
+<td style="text-align: right;">0.480</td>
+<td style="text-align: right;">0.831</td>
+<td style="text-align: right;">1.146</td>
+<td style="text-align: right;">0.232</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">BayesR</td>
+<td style="text-align: right;">0.713</td>
+<td style="text-align: right;">0.531</td>
+<td style="text-align: right;">0.939</td>
+<td style="text-align: right;">0.937</td>
+<td style="text-align: right;">0.303</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">GBLUP</td>
+<td style="text-align: right;">0.762</td>
+<td style="text-align: right;">0.392</td>
+<td style="text-align: right;">0.601</td>
+<td style="text-align: right;">2.696</td>
+<td style="text-align: right;">0.265</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">MH</td>
+<td style="text-align: left;">GWABLUP</td>
+<td style="text-align: right;">0.708</td>
+<td style="text-align: right;">0.314</td>
+<td style="text-align: right;">0.518</td>
+<td style="text-align: right;">2.882</td>
+<td style="text-align: right;">0.214</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">BayesA</td>
+<td style="text-align: right;">0.756</td>
+<td style="text-align: right;">0.562</td>
+<td style="text-align: right;">0.931</td>
+<td style="text-align: right;">1.008</td>
+<td style="text-align: right;">0.336</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">BayesR</td>
+<td style="text-align: right;">0.692</td>
+<td style="text-align: right;">0.562</td>
+<td style="text-align: right;">0.967</td>
+<td style="text-align: right;">0.994</td>
+<td style="text-align: right;">0.319</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">GBLUP</td>
+<td style="text-align: right;">0.770</td>
+<td style="text-align: right;">0.499</td>
+<td style="text-align: right;">0.766</td>
+<td style="text-align: right;">2.303</td>
+<td style="text-align: right;">0.336</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">QTL@SNP</td>
+<td style="text-align: left;">continuous</td>
+<td style="text-align: left;">SNP</td>
+<td style="text-align: left;">GWABLUP</td>
+<td style="text-align: right;">0.769</td>
+<td style="text-align: right;">0.531</td>
+<td style="text-align: right;">0.817</td>
+<td style="text-align: right;">2.182</td>
+<td style="text-align: right;">0.337</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: left;">OK</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section><section id="analysis" class="level2"><h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
+<p>Simulation results support the theory of marker-QTL unit congruence. When the QTL is a combined effect of microhaplotype blocks, the accuracy of microhaplotype-based BayesR prediction reaches 0.832 for continuous traits and 0.758 for binary traits, which is 20-30% higher than that of SNPs. This phenomenon shows that when the QTL is a combined effect of multiple microhaplotype blocks, SNPs cannot capture the QTL signal, as it disperses across all blocks.</p>
+<p>When the QTL is only a single independent SNP variant, the prediction accuracy of SNP-based BayesR reaches 0.973 for continuous traits and 0.897 for binary traits. Interestingly, although SNPs appear superior in this scenario, microhaplotypes remain quite competitive, with a smaller accuracy gap for continuous traits. This phenomenon shows that microhaplotypes can still capture the QTL signal, even though the QTL is composed of independent SNPs.</p>
+<p>In both scenarios, the Bayesian models (BayesR and BayesA) outperform GBLUP and GWABLUP in bias calibration. GBLUP exhibits severe bias inflation, with values ​​exceeding 2.0 to 4.0 under QTL@SNP, as variance is spread uniformly across all markers rather than concentrated at the true QTL. BayesR has more calibrated predictions (bias approaching 1.0) than BayesA, due to its mixture priors that more aggressively downscale non-QTL markers toward zero. GWABLUP offers only marginal improvement over GBLUP, with the GWAS weighting step insufficient to recover the rare QTL signal captured by the full mixture prior.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It should be noted, however, that the genotype data used in this analysis were generated through simulation and may not fully reflect the properties of empirical genotype data. In practice, the number of microhaplotype blocks that can be constructed depends on the density of SNPs within short physical windows (i.e., 150 bp), and regions containing only a single SNP within the defined window length cannot form a valid microhaplotype block. The effective marker density and genomic coverage of a microhaplotype panel may therefore differ considerably across species, sequencing platforms, and target enrichment designs, which could influence the magnitude of the advantages reported here.</p>
+</div>
+</div>
+
+
+</section></main><!-- /main --><script>
+document.addEventListener('DOMContentLoaded', function () {
+  var brand = document.querySelectorAll('.navbar-brand-container a.navbar-brand');
+  brand.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var href = a.getAttribute('href');
+      if (!href) return;
+      e.preventDefault();
+      // Hard navigation bypasses any cached state.
+      window.location.assign(href);
+    });
+  });
+});
+</script><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/bowo1698\.github\.io\/masgenomics-docs\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../tasks/gwas/masbayes.html" class="pagination-link" aria-label="GWAS with masbayes">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">GWAS with masbayes</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../tasks/forward-prediction.html" class="pagination-link" aria-label="Forward Prediction Across Generations">
+        <span class="nav-page-text">Forward Prediction Across Generations</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Agus Wibowo · MIT License</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/tasks/marker-qtl-congruency.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+</div>
+  </div>
+</footer>
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
