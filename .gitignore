@@ -25,10 +25,12 @@ Thumbs.db
 /.quarto/
 **/*.quarto_ipynb
 
-# Internal planning 
+# Internal planning
 docs/
 
 # Local backups (created before edits to source files; never commit)
 *.bak
 *.bak.*
 _quarto.yml.bak
+
+/.luarc.json

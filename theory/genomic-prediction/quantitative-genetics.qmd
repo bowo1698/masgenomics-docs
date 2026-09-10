@@ -1,0 +1,222 @@
+---
+title: "Quantitative genetics: from phenotype to breeding value"
+editor:
+  markdown:
+    wrap: 72
+---
+
+Two breeding candidates can have the same measured phenotype yet differ in
+the genetic merit they are expected to pass to offspring. One may have grown
+well because it received favourable alleles. The other may have reached the
+same size because it received better nutrition. Selection needs a way to
+separate these sources of resemblance and variation at the population level.
+
+The [gene-action
+section](../biological-fundamentals/genetic-fundamentals.qmd#gene-action)
+describes how alleles can act additively, through dominance within a locus,
+or through interactions among loci. Its [environmental-effects
+section](../biological-fundamentals/genetic-fundamentals.qmd#environmental-effects)
+explains why phenotype is not determined by genotype alone. **[Quantitative
+genetics](https://doi.org/10.1038/nrg2612)** translates those biological
+mechanisms into statistical quantities that describe variation among
+individuals in a defined population.
+
+## A phenotype is a measured outcome
+
+For individual $i$, a useful teaching decomposition is
+
+$$
+P_i = \mu + A_i + D_i + I_i + E_i.
+$$
+
+Here $P_i$ is the measured phenotypic value and $\mu$ is the population mean
+under the stated measurement conditions. The remaining terms are deviations
+from that mean:
+
+- $A_i$ is the additive genetic value formed from population-specific average
+  effects of the alleles carried by the individual.
+- $D_i$ is a dominance deviation caused by the combination of two alleles at
+  the same locus.
+- $I_i$ represents epistatic deviations caused by interactions among loci.
+- $E_i$ represents environmental and other non-genetic deviations included in
+  this simplified model.
+
+The complete **[genotypic value](https://doi.org/10.1038/nrg2612)** in this
+decomposition is $G_i=A_i+D_i+I_i$. Dominance and epistasis can be
+biologically important, but their genotype combinations are not transmitted
+intact in the same predictable way as average allele effects. Meiosis
+transmits alleles, while segregation and recombination can change the
+within-locus and between-locus combinations in the offspring.
+
+This equation is a model, not a claim that the five quantities can be read
+directly from one animal. Their definitions depend on the population, allele
+frequencies, environments, and measurement scale. A different decomposition
+might include management groups, maternal effects, genotype-by-environment
+interaction, or measurement error explicitly rather than placing them in
+$E_i$.
+
+## Breeding value targets transmissible average effects
+
+An individual's **[breeding
+value](https://pubmed.ncbi.nlm.nih.gov/18319743/)** is its additive genetic
+value $A_i$ relative to a specified population mean. It summarises the
+average effects of alleles that the individual can transmit, rather than the
+full phenotype or complete genotypic value. This is why two individuals with
+the same phenotype can have different breeding values.
+
+The word *additive* describes the statistical contribution of average allele
+effects. It does not mean that dominance or epistasis is absent from the
+biology. Average effects depend partly on allele frequencies and genetic
+background, so a breeding value is population-specific. It can change when
+the reference population changes, even though the individual's DNA does not.
+
+A true breeding value is normally latent. Breeders predict it from phenotype,
+pedigree, genomic markers, or a combination of these records. In the project
+dataset, `tbv_qtl_snp` is available because the data were simulated and the
+data-generating effects are known. Empirical breeding data do not ordinarily
+reveal true breeding values.
+
+## Variance describes differences among individuals
+
+The **[phenotypic variance](https://doi.org/10.1038/nrg2322)**, written
+$\sigma_P^2$, describes how measured phenotypes vary among individuals in the
+defined population and environment. The **[additive genetic
+variance](https://doi.org/10.1038/nrg2322)**, $\sigma_A^2$, describes
+variation among their breeding values. Dominance and epistatic deviations can
+similarly contribute $\sigma_D^2$ and $\sigma_I^2$.
+
+If all model components are uncorrelated, a simplified variance decomposition
+is
+
+$$
+\sigma_P^2
+= \sigma_A^2 + \sigma_D^2 + \sigma_I^2 + \sigma_E^2.
+$$
+
+That sum is not automatic. Covariance terms are required when genetic and
+environmental components are associated or when the statistical design does
+not separate them. For example, superior genotypes receiving systematically
+better management can create genotype-environment covariance.
+
+The **[narrow-sense
+heritability](https://doi.org/10.1038/nrg2322)** of the trait is
+
+$$
+h^2 = \frac{\sigma_A^2}{\sigma_P^2}.
+$$
+
+It is a dimensionless population parameter for a stated trait, population,
+environment, and time. It is not the genetic fraction of one individual's
+phenotype. A value of $h^2=0.5$ does not mean that half of an animal's body
+weight was caused by genes. It means that, under the model used, additive
+genetic differences account for half of the phenotypic variance among
+individuals in that population.
+
+Heritability can change when allele frequencies, environmental variation,
+management, or the sampled population changes. A high heritability also does
+not imply that environmental improvement is ineffective. Heritability
+describes variation among individuals, not whether a trait can respond to a
+change applied to the whole population.
+
+## The project data contain a target and a realised sample
+
+The simulator standardised the SNP-based true breeding values to sample
+variance 1 and generated environmental deviations using a target
+heritability of 0.5. It also added a fixed sex effect to the phenotype. The
+following calculation deliberately compares the sample variance of the true
+breeding values with the sample variance of the raw phenotype.
+
+```{r}
+#| label: quantitative-genetics-variance
+d <- readRDS("../../demo-data/main/demo_data.rds")
+sigma_a2 <- var(d$pheno$tbv_qtl_snp)
+sigma_p2 <- var(d$pheno$y_cont_qtl_snp)
+realised_ratio <- sigma_a2 / sigma_p2
+selection_differential <- 5
+response_from_target <- d$meta$h2_target * selection_differential
+c(
+  sigma_a2 = sigma_a2,
+  sigma_p2 = sigma_p2,
+  realised_ratio = realised_ratio,
+  target_h2 = d$meta$h2_target,
+  response_from_target = response_from_target
+)
+```
+
+The additive sample variance is 1, the raw phenotypic sample variance is
+approximately 1.774, and their ratio is approximately 0.564. That ratio is
+not a fitted heritability estimate. The target value 0.5 determined the
+environmental variance used by the generator before one finite sample was
+drawn. The realised raw phenotype also contains the fixed sex effect, and
+sample covariances among genetic, environmental, and sex contributions need
+not equal zero. Those features prevent the raw sample ratio from reproducing
+the generator's target exactly.
+
+In empirical data, $\sigma_A^2$ is not obtained by taking the variance of a
+known true breeding value column. A statistical model must estimate variance
+components using pedigree or genomic relationships and an explicit design
+for fixed and random effects. Later pages develop that model-based route.
+
+## Selection differential and expected response
+
+Suppose the population mean for a trait is 50 units and the selected parents
+have mean 55. The **[selection
+differential](https://pmc.ncbi.nlm.nih.gov/articles/PMC3354028/)** is
+
+$$
+S = 55-50 = 5.
+$$
+
+The **[breeder's equation](https://pmc.ncbi.nlm.nih.gov/articles/PMC3354028/)**
+uses narrow-sense heritability to predict the change in the offspring
+generation mean:
+
+$$
+R=h^2S.
+$$
+
+With the simulator's target $h^2=0.5$, the expected response is
+$R=0.5(5)=2.5$ units. The predicted offspring mean would therefore be 52.5
+under the assumptions of this calculation. The R chunk above reproduces the
+2.5-unit response as `response_from_target`.
+
+The equation is a one-generation expectation, not a guarantee for every
+offspring. Its simple form assumes that the parent-offspring relationship is
+adequately represented by additive inheritance, the heritability applies to
+the selection population and environment, and selection does not immediately
+change the relevant parameters enough to invalidate the approximation.
+Assortative mating, inbreeding, genotype-by-environment interaction, maternal
+effects, or strong changes in allele frequencies can require a richer model.
+
+## Check your understanding
+
+::: {.callout-note collapse="true" title="Exercise 1: Separate phenotype components"}
+For a hypothetical individual, let $\mu=10$, $A_i=1.2$, $D_i=-0.3$,
+$I_i=0.1$, and $E_i=0.5$. Calculate its genotypic and phenotypic values.
+
+The genotypic value is $G_i=1.2-0.3+0.1=1.0$ relative to the mean. The
+phenotypic value is $P_i=10+1.0+0.5=11.5$. Only $A_i=1.2$ is the breeding
+value in this decomposition.
+:::
+
+::: {.callout-note collapse="true" title="Exercise 2: Interpret heritability"}
+A population has $\sigma_A^2=4$ and $\sigma_P^2=10$. Calculate $h^2$ and
+state one conclusion that the result does not support.
+
+The narrow-sense heritability is $h^2=4/10=0.4$. It does not mean that 40% of
+one individual's phenotype is genetic. The ratio describes variance among
+individuals in the specified population and environment.
+:::
+
+::: {.callout-note collapse="true" title="Exercise 3: Predict response to selection"}
+If $h^2=0.25$ and selected parents exceed the population mean by 3 units,
+what response does the breeder's equation predict?
+
+The selection differential is $S=3$, so $R=h^2S=0.25(3)=0.75$ units. This is
+an expected change in the population mean under the equation's assumptions,
+not a prediction for each offspring.
+:::
+
+Breeding value defines the quantity that selection seeks to improve. The next
+page explains how genome-wide markers and phenotypes from a training
+population can be used to predict that quantity for selection candidates.

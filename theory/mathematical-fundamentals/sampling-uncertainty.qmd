@@ -1,0 +1,256 @@
+---
+title: "Sampling and statistical uncertainty"
+---
+
+A genomic prediction model learns from a finite training sample, but breeders
+usually want its conclusions to apply to other individuals. A sample mean,
+marker effect, or prediction accuracy would change if a different set of
+individuals were measured. Statistical uncertainty describes this
+sample-to-sample variation. More records often improve precision, but a large
+sample from the wrong families, environments, or generations can still answer
+the wrong breeding question.
+
+## Population depends on the question
+
+A biological population might mean all members of a herd, strain, or species.
+A **[statistical population](https://en.wikipedia.org/wiki/Statistical_population)**
+is the collection or probability process about which an analysis seeks a
+conclusion. The target population must be stated more precisely than either
+label. It might consist of selection candidates from the same breeding
+programme next year, including the environments and management conditions in
+which they will be evaluated.
+
+A **[sample](https://en.wikipedia.org/wiki/Sampling_(statistics))** is the set
+of individuals actually observed. In genomic prediction, the training sample
+contains the phenotypes and genotypes used to estimate a model. A sample is
+representative when its selection mechanism and biological structure retain
+the features relevant to the target population. Sample size alone cannot
+guarantee this. Two thousand close relatives from one environment may provide
+less information about an unrelated population than a smaller, deliberately
+diverse sample.
+
+The examples below use the 200 simulated project individuals as an empirical
+population. Resampling from those records is a teaching device. It does not
+recreate the pedigree, meiosis, recombination, or environmental process that
+generated the original dataset.
+
+## A statistic varies across possible samples
+
+A **[parameter](https://en.wikipedia.org/wiki/Statistical_parameter)** such as
+a target-population mean is fixed but unknown under the frequentist framework
+used here. A **[statistic](https://en.wikipedia.org/wiki/Statistic)** is
+calculated from a sample and therefore changes with the selected observations.
+The **[sampling
+distribution](https://en.wikipedia.org/wiki/Sampling_distribution)** of a
+statistic describes its values over repeated samples drawn by the same
+procedure.
+
+This differs from the phenotype distribution. One distribution contains
+individual phenotype values. The sampling distribution of the mean contains
+one mean from each possible sample. If independent observations come from a
+population with mean $\mu$, variance $\sigma^2$, and sample size $n$, then
+
+$$
+E(\bar Y)=\mu,
+\qquad
+\operatorname{Var}(\bar Y)=\frac{\sigma^2}{n}.
+$$
+
+The standard deviation of a sampling distribution is called a **[standard
+error](https://en.wikipedia.org/wiki/Standard_error)**. For the sample mean,
+
+$$
+\operatorname{SE}(\bar Y)=\frac{\sigma}{\sqrt n}.
+$$
+
+Because the population standard deviation $\sigma$ is usually unknown, it is
+often replaced by the sample standard deviation $s$. The square-root relation
+has an important consequence: doubling sample size does not halve the
+standard error. Under the same independent-sampling assumptions, four times
+as many observations are needed to halve it.
+
+## Manual example
+
+The first five rounded project phenotypes from the descriptive-statistics
+page have mean $\bar y=-1.4$ and sample standard deviation $s=1.517$. Treating
+them temporarily as independent observations from a normal population gives
+
+$$
+\widehat{\operatorname{SE}}(\bar y)
+=\frac{1.517}{\sqrt5}=0.678.
+$$
+
+If the population variance is estimated from these same five observations, a
+two-sided 95% Student-t interval for the population mean is
+
+$$
+\bar y \mathbin{\pm} t_{0.975,4}\frac{s}{\sqrt n}
+=-1.4 \mathbin{\pm} 2.776(0.678)
+=(-3.283,\ 0.483).
+$$
+
+This interval is wide because five observations provide little information.
+It is only an arithmetic illustration. The first five rows were not obtained
+through a documented random-sampling design, and related individuals would
+violate the independence assumption. Those limitations prevent the interval
+from supporting a population claim here.
+
+```{r}
+#| label: small-sample-interval
+d <- readRDS("../../demo-data/main/demo_data.rds")
+y <- round(d$pheno$y_cont_qtl_snp[1:5])
+standard_error <- sd(y) / sqrt(length(y))
+critical_value <- qt(0.975, df = length(y) - 1)
+confidence_interval <- mean(y) + c(-1, 1) * critical_value * standard_error
+
+c(
+  mean = mean(y),
+  standard_error = standard_error,
+  lower = confidence_interval[1],
+  upper = confidence_interval[2]
+)
+```
+
+## Resampling the project phenotypes
+
+The following simulation repeatedly samples with replacement from the 200
+raw continuous phenotypes. Each repeat produces one sample mean. The random
+seed makes the teaching result reproducible.
+
+```{r}
+#| label: bootstrap-means
+set.seed(20260910)
+project_population <- d$pheno$y_cont_qtl_snp
+sample_means_10 <- replicate(
+  2000,
+  mean(sample(project_population, 10, replace = TRUE))
+)
+sample_means_100 <- replicate(
+  2000,
+  mean(sample(project_population, 100, replace = TRUE))
+)
+
+c(
+  phenotype_sd = sd(project_population),
+  mean_sd_n10 = sd(sample_means_10),
+  mean_sd_n100 = sd(sample_means_100)
+)
+```
+
+The 200 source phenotypes have standard deviation approximately 1.332. Across
+the resamples, means based on 10 records have standard deviation approximately
+0.417, while means based on 100 records have standard deviation approximately
+0.135. Increasing sample size narrows the sampling distribution of the mean;
+it does not change the spread of the 200 source phenotypes.
+
+```{r}
+#| label: fig-sampling-distributions
+#| fig-cap: "Sampling distributions from 2,000 resamples of the simulated project phenotypes. Both panels use the same horizontal scale. Means based on 100 observations cluster more tightly around the source-data mean than means based on 10 observations."
+#| fig-alt: "Two stacked histograms share a horizontal scale. The histogram for samples of 100 is much narrower around the vertical source-mean line than the histogram for samples of 10."
+#| fig-width: 7
+#| fig-height: 7
+plot_limits <- range(sample_means_10, sample_means_100)
+old_par <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 1))
+hist(
+  sample_means_10, breaks = 30, xlim = plot_limits,
+  main = "Sample size 10", xlab = "Sample mean"
+)
+abline(v = mean(project_population), lwd = 2, lty = 2)
+hist(
+  sample_means_100, breaks = 30, xlim = plot_limits,
+  main = "Sample size 100", xlab = "Sample mean"
+)
+abline(v = mean(project_population), lwd = 2, lty = 2)
+par(old_par)
+```
+
+The observed ratio of the two simulation standard deviations is approximately
+3.10, close to the theoretical ratio
+$\sqrt{100/10}=\sqrt{10}\approx3.16$. Small differences are expected because
+the simulation uses a finite number of resamples.
+
+## Confidence intervals describe a procedure
+
+A **[confidence interval](https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm)**
+combines an estimate with its sampling uncertainty. A 95% confidence procedure
+is designed so that, under its assumptions, about 95% of intervals calculated
+from repeated samples cover the fixed population parameter. Once one interval
+has been calculated, it either covers that parameter or it does not. The
+frequentist statement is not that there is a 95% probability that this one
+fixed interval contains the fixed parameter.
+
+For an independent normal sample with unknown variance, the interval for a
+mean uses a Student-t critical value:
+
+$$
+\bar y \mathbin{\pm} t_{1-\alpha/2,n-1}\frac{s}{\sqrt n},
+$$
+
+where $1-\alpha$ is the confidence level. Dependence among relatives,
+selective sampling, strong skew in a small sample, or unmodelled population
+structure can make this simple interval inappropriate. A genomic analysis
+must align its uncertainty calculation with its actual sampling and model
+structure.
+
+## Bias and precision are different
+
+A **[statistical estimator](https://en.wikipedia.org/wiki/Estimator)**
+$\hat\theta$ targets a parameter $\theta$. Its **[statistical
+bias](https://en.wikipedia.org/wiki/Bias_of_an_estimator)** is
+
+$$
+\operatorname{Bias}(\hat\theta)=E(\hat\theta)-\theta.
+$$
+
+An unbiased estimator is correct on average over repeated samples, but one
+realised estimate can still be far from the target.
+**[Precision](https://en.wikipedia.org/wiki/Accuracy_and_precision)**
+describes the spread of the estimator's sampling distribution. Larger samples
+often improve precision, but they do not repair bias caused by systematically
+missing a subpopulation or measuring the trait differently in training and
+deployment groups.
+
+This distinction matters in breeding. A precisely estimated mean for one
+family may still be a biased estimate of the mean for all candidate families.
+Likewise, random cross-validation within a training population can estimate
+one prediction task precisely while giving an optimistic answer for future or
+unrelated candidates.
+
+## Exercises
+
+1. Independent observations have standard deviation 10. Compare the standard
+   error of the mean for sample sizes 25 and 100.
+
+::: {.callout-note collapse="true" title="Solution"}
+For $n=25$, the standard error is $10/\sqrt{25}=2$. For $n=100$, it is
+$10/\sqrt{100}=1$. Quadrupling the sample size halves the standard error under
+the independence assumption.
+:::
+
+2. A 95% confidence interval calculated from one sample is $(12,18)`. Is it
+   correct to say that the fixed population mean has probability 0.95 of lying
+   in this realised interval?
+
+::: {.callout-note collapse="true" title="Solution"}
+No, not under the frequentist interpretation used here. The interval is the
+random object before sampling; the parameter is fixed. The 95% refers to the
+long-run coverage of the method over repeated samples generated under its
+assumptions.
+:::
+
+3. A training sample contains many records but only from one family. Explain
+   why increasing the number of records may narrow a standard error without
+   making the sample representative of unrelated families.
+
+::: {.callout-note collapse="true" title="Solution"}
+Additional records can reduce sample-to-sample variation for the family that
+was sampled. They do not add the allele frequencies, linkage patterns, or
+environments present in unobserved families. The estimate may therefore be
+precise for the sampled family but systematically unrepresentative of the
+broader target population.
+:::
+
+Sampling uncertainty concerns the behaviour of one statistic across possible
+samples. The next mathematical topic examines how two variables vary
+together. Covariance and correlation provide the first tools for describing
+connections among phenotypes, breeding values, and later predictions.

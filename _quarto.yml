@@ -58,8 +58,21 @@ website:
       collapse-level: 1
       contents:
         - theory/index.qmd
-        - theory/genomic-selection.qmd
-        - theory/multiallelic-markers.qmd
+        - section: "1. Biological fundamentals"
+          contents:
+            - theory/biological-fundamentals/genetic-fundamentals.qmd
+            - theory/biological-fundamentals/genetic-variation-markers.qmd
+            - theory/biological-fundamentals/population-genetic-variation.qmd
+        - section: "2. Mathematical fundamentals"
+          contents:
+            - theory/mathematical-fundamentals/descriptive-statistics.qmd
+            - theory/mathematical-fundamentals/probability-random-variables.qmd
+            - theory/mathematical-fundamentals/probability-distributions.qmd
+            - theory/mathematical-fundamentals/sampling-uncertainty.qmd
+        - section: "3. Genomic prediction"
+          contents:
+            - theory/genomic-prediction/quantitative-genetics.qmd
+            - theory/genomic-prediction/markers-to-prediction.qmd
     - title: "Input Data"
       collapse-level: 1
       contents:

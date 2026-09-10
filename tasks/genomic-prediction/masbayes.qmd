@@ -2,11 +2,7 @@
 title: "Genomic prediction with masbayes"
 ---
 
-📐 **Theory:** [Bayesian Alphabet](../../theory/bayesian-alphabet.qmd) ·
-[BayesA](../../theory/bayes-bayesa.qmd) ·
-[BayesR](../../theory/bayes-bayesr.qmd) ·
-[MCMC & EM](../../theory/bayes-mcmc-em.qmd) ·
-[Continuous and Binary Trait](../../theory/continuous-and-binary-trait.qmd)
+📐 **Theory:** [Theory overview](../../theory/index.qmd)
 
 This tutorial fits Bayesian genomic prediction with `masbayes`:
 BayesA (Student-$t$ prior, continuous shrinkage) and BayesR (4-class
@@ -404,7 +400,6 @@ test-set GEBV and (for binary) `prob`.
   [`run_bayesr()`](../../reference/masbayes/run_bayesr.qmd) ·
   [`construct_snp_matrix()`](../../reference/masbayes/construct_snp_matrix.qmd) ·
   [`construct_wah_matrix()`](../../reference/masbayes/construct_wah_matrix.qmd)
-- [Theory → BayesA](../../theory/bayes-bayesa.qmd) and
-  [BayesR](../../theory/bayes-bayesr.qmd)
+- [Theory overview](../../theory/index.qmd) for the BayesA and BayesR models
 - [Genomic prediction with masreml](masreml.qmd) — frequentist counterpart
 - [GWAS with masbayes](../gwas/masbayes.qmd) — extract PIPs from a BayesR fit

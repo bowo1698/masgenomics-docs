@@ -2,9 +2,7 @@
 title: "Forward Prediction Across Generations"
 ---
 
-📐 **Theory:** [BayesA](../theory/bayes-bayesa.qmd) ·
-[BayesR](../theory/bayes-bayesr.qmd) ·
-[GBLUP](../theory/blup-gblup.qmd)
+📐 **Theory:** [Theory overview](../theory/index.qmd)
 
 ## Objective
 

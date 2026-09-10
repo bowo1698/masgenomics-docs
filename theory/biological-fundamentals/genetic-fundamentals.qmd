@@ -1,0 +1,443 @@
+---
+title: "Genetic Fundamentals"
+editor:
+  markdown:
+    wrap: 72
+---
+
+## DNA: The storage of biological information
+
+Every living organism has cells, which are the smallest units of the
+organism and act differently in the body. For example, **[somatic cells](https://www.genome.gov/genetics-glossary/Somatic-Cells)** are
+responsible for growth, formation of body structure, and repair of
+damaged tissue, while **[gamete cells](https://www.genome.gov/genetics-glossary/Gamete)** (sex cells) are responsible for the
+reproductive process to pass on genetic material to offspring. Inside
+the cells, there are two divisions: the nucleus and the cytoplasm. The
+cytoplasm contains several particles called organelles, such as
+mitochondria, Golgi apparatus, ribosomes, lysosomes and so on. However,
+here we are not going into details about these organelles; we are going
+to focus on the nucleus instead.
+
+![An animal cell, showing the nucleus and surrounding organelles.
+The chromatin label identifies the DNA-containing material inside the
+nucleus. OpenStax, [source](https://commons.wikimedia.org/wiki/File:0312_Animal_Cell_and_Components.jpg),
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); unchanged.
+[View full-size image](../../assets/genetic-fundamentals/animal-cell.jpg).](../../assets/genetic-fundamentals/animal-cell.jpg){#fig-animal-cell
+fig-align="center" width="720" .scientific-illustration
+fig-alt="Labelled animal cell with a nucleus containing chromatin, surrounded by cytoplasm, mitochondria, ribosomes, and other organelles."}
+
+The nucleus is the core of cells, containing all of the genetic
+information for development, metabolism, and behaviour of the organism.
+Within the nuclear membrane, there are threadlike bodies called
+**[chromosomes](https://www.genome.gov/genetics-glossary/Chromosome)** that organise nucleic acids, such as **[deoxyribonucleic acid (DNA)](https://www.genome.gov/genetics-glossary/Deoxyribonucleic-Acid-DNA)** and **[ribonucleic acid (RNA)](https://www.genome.gov/genetics-glossary/Ribonucleic-Acid-RNA)**. Chromosomes appear in pairs, in which
+one chromosome inherited from the male parent and one from the female
+parent. In addition, the number of chromosomes varies among species, and
+in fact, chromosome number can be used to characterise species. For
+example, humans typically have 23 chromosome pairs or 46 in total, while
+orangutans have 24 chromosome pairs.
+
+Since we are focusing on biological substances that carry genetic
+information, we are going to focus only on DNA or RNA. The main
+differences between DNA and RNA lie in their helix structure, the type
+of constituent sugar, nitrogenous base, and their functions within the
+cell, as summarised in the table below.
+
+| Characteristics | DNA | RNA |
+|------------------------|------------------------|------------------------|
+| Main function | Stores and transmits permanent genetic information for a long time | Carries genetic messages from DNA to construct proteins |
+| Structure | Double helix | Single helix |
+| Pentose sugar | Deoxyribose (losing one oxygen atom in the 2nd chain) | Ribose |
+| Nitrogenous base | Adenine (A), Guanine (G), Cytosine (C), Thymine (T) | Adenine (A), Guanine (G), Cytosine (C), Uracil (U) |
+| Location | Nucleus | Cytoplasm, ribosomes |
+
+![Comparison of RNA and DNA strands and their nitrogenous bases. Both
+contain A, C, and G; RNA contains U where DNA contains T. Sponk, with
+contributions by MesserWoland and Roland1952,
+[source](https://commons.wikimedia.org/wiki/File:Difference_DNA_RNA-EN.svg),
+[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); unchanged.
+[View full-size image](../../assets/genetic-fundamentals/dna-rna.svg).](../../assets/genetic-fundamentals/dna-rna.svg){#fig-dna-rna
+fig-align="center" width="720" .scientific-illustration
+fig-alt="Single-stranded RNA beside double-stranded DNA. Letter labels identify C, G, A, and U in RNA, and C, G, A, and T in DNA."}
+
+Between nitrogenous bases are hydrogen bonds that always pair C with G
+and A with T. So there are always four combinations: A-T, T-A, G-C, C-G.
+
+So, the question is, how do cells transmit their genetic information to
+build a new cell, for example?
+
+To answer that question, I am going to introduce a critical concept
+called the **[central
+dogma](https://en.wikipedia.org/wiki/Central_dogma_of_molecular_biology)**.
+
+In simple terms, the central dogma describes how proteins, the building
+blocks of cells, are made from DNA. Not every stretch of DNA codes for a
+protein; only specific segments, called **[genes](https://www.genome.gov/genetics-glossary/Gene)**, are used for this
+purpose.
+
+Consider what happens when the body needs a new muscle cell. A gene
+called MyoD1 switches on muscle-cell formation, prompting uncommitted
+stem cells to commit to becoming muscle cells. The MyoD1 gene is first
+transcribed into **[messenger RNA (mRNA)](https://www.genome.gov/genetics-glossary/Messenger-RNA-mRNA)**, which is then translated into
+proteins that assemble the muscle tissue. This sounds like a
+straightforward chain of events, but in reality it unfolds through a
+complex web of interactions with many other genes.
+
+In organisms that reproduce sexually, chromosomes from both parents mix
+through a process called **[crossing over](https://www.genome.gov/genetics-glossary/Crossing-Over)**, which is why every
+individual ends up with a genetic combination all their own. A child of
+a brown-eyed mother and a blue-eyed father, for example, may end up with
+an eye colour that blends or leans toward one parent's trait. These
+observable, physical characteristics are called **[phenotypes](https://www.genome.gov/genetics-glossary/Phenotype)**.
+
+Even though children inherit the same set of genes as their parents, the
+exact version of each gene, and the DNA sequence behind it, can differ.
+These gene variants are called **[alleles](https://www.genome.gov/genetics-glossary/Allele)**, while the specific
+combination of DNA sequences an individual carries is called their
+**[genotype](https://en.wikipedia.org/wiki/Genotype)**.
+
+## Cell division
+
+An organism grows when its cells divide, and it replaces many damaged or
+worn-out cells in the same way. Each division must distribute DNA to the
+new daughter cells. This raises two related questions: how can a growing
+body maintain its chromosome number, and how can offspring inherit
+chromosomes from two parents without doubling that number in every
+generation? Mitosis and meiosis solve these different problems.
+
+For the examples below, consider an organism with two chromosome sets,
+one inherited from each parent. Such a cell is **[diploid](https://www.genome.gov/genetics-glossary/Diploid)**, written as
+$2n$, whereas a **[haploid](https://en.wikipedia.org/wiki/Ploidy#Haploidy)** cell has one set, written as $n$. The
+members of a **[homologous chromosome](https://en.wikipedia.org/wiki/Homologous_chromosome)** pair carry corresponding genes at the
+same positions, or **[loci](https://www.genome.gov/genetics-glossary/Locus)**, but may carry different alleles. Before either
+mitosis or meiosis, **[DNA replication](https://www.genome.gov/genetics-glossary/DNA-Replication)** produces two copies of each
+chromosome, called **[sister chromatids](https://en.wikipedia.org/wiki/Sister_chromatids)**, joined at the **[centromere](https://www.genome.gov/genetics-glossary/Centromere)**. This
+doubles the amount of DNA without changing the number of chromosome
+sets: a replicated diploid cell is still diploid.
+
+### Mitosis
+
+**[Mitosis](https://www.genome.gov/genetics-glossary/Mitosis)** divides the nucleus so that each daughter nucleus receives one
+copy of every chromosome. In a dividing skin cell, for example, it
+preserves the chromosome complement needed by the replacement cells. DNA
+replication occurs beforehand, during the **[S phase](https://en.wikipedia.org/wiki/S_phase)** of **[interphase](https://en.wikipedia.org/wiki/Interphase)**.
+Provided replication and chromosome separation proceed without errors,
+the daughter cells inherit the same nuclear genetic information as the
+parent cell. **[Mutations](https://www.genome.gov/genetics-glossary/Mutation)** can introduce differences, so genetic identity is
+the expected outcome rather than an absolute guarantee. The [NHGRI
+description of
+mitosis](https://www.genome.gov/genetics-glossary/Mitosis) summarises
+this role in growth and cell replacement.
+
+During **[prophase](https://en.wikipedia.org/wiki/Prophase)**, chromosomes condense and the **[mitotic spindle](https://en.wikipedia.org/wiki/Spindle_apparatus)** begins to
+form. As the nuclear envelope breaks down in **[prometaphase](https://en.wikipedia.org/wiki/Prometaphase)**, spindle
+microtubules attach to structures called **[kinetochores](https://en.wikipedia.org/wiki/Kinetochore)** on the
+chromosomes. At **[metaphase](https://en.wikipedia.org/wiki/Metaphase)**, the replicated chromosomes align near the
+centre of the cell, with sister chromatids attached towards opposite
+poles. This arrangement allows **[anaphase](https://en.wikipedia.org/wiki/Anaphase)** to separate the sisters so that
+each pole receives a complete chromosome set. During **[telophase](https://en.wikipedia.org/wiki/Telophase)**, nuclear
+envelopes form around the separated sets and the chromosomes begin to
+decondense.
+
+Division of the cytoplasm, called **[cytokinesis](https://en.wikipedia.org/wiki/Cytokinesis)**, usually overlaps with the
+end of mitosis and completes the formation of two cells. It is a
+separate process from nuclear division. For a diploid parent cell, the
+usual outcome is two diploid daughter cells: each retains both members
+of every homologous pair. Mitosis therefore maintains the chromosome
+number across successive divisions during growth.
+
+In @fig-mitosis, follow the arrows from interphase through chromosome
+alignment and separation. The two daughter cells return to interphase
+after nuclear division and cytokinesis.
+
+![Stages of mitosis, with interphase shown for context. Sister chromatids
+separate at anaphase, and daughter nuclei form at telophase. Jpablo cad
+and Juliana Osorio; translation by Matt; derivative by M3.dahl,
+[source](https://commons.wikimedia.org/wiki/File:Mitosis_schematic_diagram-en.svg),
+[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); unchanged.
+[View full-size diagram](../../assets/genetic-fundamentals/mitosis.svg).](../../assets/genetic-fundamentals/mitosis.svg){#fig-mitosis
+fig-align="center" width="760" .scientific-illustration
+fig-alt="Arrows connect interphase, prophase, prometaphase, metaphase, anaphase, and telophase. Chromosomes align centrally, sister chromatids move to opposite poles, and two daughter cells form."}
+
+### Meiosis
+
+In animals, **[meiosis](https://www.genome.gov/genetics-glossary/Meiosis)** produces the haploid cells that develop into
+gametes. It involves one round of DNA replication followed by two
+divisions. During meiosis I, homologous chromosomes pair and then
+separate, reducing the number of chromosome sets from two to one. During
+meiosis II, sister chromatids separate, without another round of DNA
+replication between the divisions. The distinction is in what separates:
+homologues first, then sister chromatids.
+
+The usual description gives four haploid products from one diploid cell,
+but these do not always become four functional gametes. In mammalian egg
+formation, unequal cytoplasmic divisions produce one large egg and small
+**[polar bodies](https://en.wikipedia.org/wiki/Polar_body)**. In plants, meiosis produces **[spores](https://en.wikipedia.org/wiki/Spore)**; gametes form later in
+the haploid phase of the life cycle. These differences in development
+share the same chromosome-reduction process described in the [NHGRI
+overview of meiosis](https://www.genome.gov/genetics-glossary/Meiosis).
+
+Meiosis also changes which alleles travel together. During prophase I,
+crossing over exchanges corresponding DNA segments between
+non-sister chromatids of homologous chromosomes. A chromosome passed to
+an offspring can therefore contain segments derived from both of that
+parent's parents. This **[recombination](https://en.wikipedia.org/wiki/Genetic_recombination)** rearranges existing alleles into
+new combinations; mutation is the source of new alleles. The [NHGRI
+explanation of crossing
+over](https://www.genome.gov/genetics-glossary/Crossing-Over) describes
+how this exchange contributes to variation among gametes.
+
+At metaphase I, each homologous pair can orient towards either pole
+independently of the other pairs. This **[independent assortment](https://en.wikipedia.org/wiki/Mendelian_inheritance#Law_of_Independent_Assortment)** mixes
+chromosomes of maternal and paternal origin. In a simple example with
+two chromosome pairs, assortment alone permits four combinations of
+whole chromosomes in gametes across many meioses. Crossing over adds
+further possibilities within each chromosome.
+
+**[Fertilisation](https://en.wikipedia.org/wiki/Fertilisation)** occurs after meiosis, when two haploid gametes unite to
+form a diploid **[zygote](https://en.wikipedia.org/wiki/Zygote)**. Which gametes combine contributes additional
+variation among offspring. Thus, meiosis reduces the chromosome number
+and reshuffles inherited DNA, while fertilisation restores the diploid
+number. Together these processes explain why siblings can inherit
+different combinations of alleles from the same parents.
+
+The numbered steps in @fig-meiosis separate replication (1), pairing of
+homologues (2), crossing over (3), meiosis I (4), and meiosis II (5).
+The two chromosome lengths represent two different homologous pairs.
+Notice that the first division separates homologues while the second
+separates sister chromatids.
+
+![Chromosome behaviour before and during meiosis. One replication is
+followed by two divisions, producing four haploid cells in this schematic.
+Peter coxhead, [source](https://commons.wikimedia.org/wiki/File:Meiosis_main_steps.svg),
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/); unchanged.
+[View full-size diagram](../../assets/genetic-fundamentals/meiosis.svg).](../../assets/genetic-fundamentals/meiosis.svg){#fig-meiosis
+fig-align="center" width="800" .scientific-illustration
+fig-alt="Five numbered steps show chromosome duplication, homologous pairing, crossing over, separation of homologues into two cells, and separation of sister chromatids into four haploid cells. Long and short chromosomes distinguish the two pairs."}
+
+## Mendelian inheritance
+
+Gregor Mendel's experiments with pea plants showed that inheritance
+follows predictable patterns when particular traits are tracked across
+generations. We can now connect those patterns to the behaviour of
+chromosomes during meiosis. At an **[autosomal](https://www.genome.gov/genetics-glossary/Autosome)** locus in a diploid organism,
+an individual usually carries two alleles, one from each parent. An
+individual with matching alleles is **[homozygous](https://en.wikipedia.org/wiki/Zygosity#Homozygous)** at that locus; one
+with different alleles is **[heterozygous](https://en.wikipedia.org/wiki/Zygosity#Heterozygous)**. These terms describe a
+specific locus, so an individual can be homozygous at one locus and
+heterozygous at another.
+
+The **[law of segregation](https://en.wikipedia.org/wiki/Mendelian_inheritance#Law_of_Segregation)** states that the two alleles separate during
+gamete formation. For a heterozygote $Pp$, ordinary Mendelian
+segregation gives a probability of one-half for a gamete to receive $P$
+and one-half to receive $p$. Fertilisation pairs one allele from each
+parent again. This transmission of discrete alleles explains how a trait
+absent from the parents' appearance can reappear in their offspring.
+
+The law of independent assortment concerns different loci. For example,
+an individual $AaBb$ produces $AB$, $Ab$, $aB$, and $ab$ gametes in
+equal expected proportions when the loci assort independently. Loci on
+different chromosomes usually satisfy this condition. Nearby loci on the
+same chromosome are **[linked](https://www.genome.gov/genetics-glossary/Linkage)** and tend to pass together, although crossing
+over can separate them. Consequently, segregation at a single locus does
+not imply independence between all loci.
+
+Dominance describes how the two alleles in a heterozygote affect the
+phenotype. It does not change their probabilities of transmission.
+Mendel's familiar dominant and recessive traits illustrate one pattern
+of gene action, but many traits have more complex genetic causes, as
+outlined in the [NHGRI account of Mendel's
+work](https://www.genome.gov/genetics-glossary/Gregor-Johann-Mendel).
+
+### Example: Monohybrid cross
+
+Suppose a single locus determines whether flowers are purple or white,
+and the purple allele ($P$) is completely dominant over the white allele
+($p$). Crossing two heterozygous plants can be written as:
+
+$Pp \times Pp$
+
+Each parent produces $P$ and $p$ gametes in equal expected proportions.
+In the **[Punnett square](https://en.wikipedia.org/wiki/Punnett_square)** below, the row and column identify the alleles
+contributed by the two parents. Each intersection has probability
+$1/2 \times 1/2 = 1/4$ under random union of these gametes.
+
+| Gamete from parent 1 | $P$ from parent 2 | $p$ from parent 2 |
+|----------------------|-------------------|-------------------|
+| $P$                  | $PP$              | $Pp$              |
+| $p$                  | $Pp$              | $pp$              |
+
+The expected genotypic ratio is $1\,PP : 2\,Pp : 1\,pp$. Two different
+gamete combinations produce $Pp$, which explains its probability of
+one-half. Because $PP$ and $Pp$ both produce purple flowers, the
+expected phenotypic ratio is $3\text{ purple} : 1\text{ white}$.
+
+These ratios are probabilities across offspring, not a requirement that
+every four offspring contain exactly three purple plants and one white
+plant. Small families can depart substantially from the expected ratio
+by chance. The prediction also assumes equal allele transmission,
+fertilisation success, and survival of the genotypes, with flower colour
+following the stated dominance pattern.
+
+## Gene action
+
+Segregation tells us which alleles an offspring can inherit. Gene action
+describes how those alleles contribute to its phenotype. A gene may
+encode an enzyme involved in pigment production, for example, so a
+change in enzyme activity can alter flower colour. The visible outcome
+depends on the other allele at that locus, other genes in the pathway,
+and the conditions in which the organism develops.
+
+### Complete dominance
+
+In **[complete dominance](https://en.wikipedia.org/wiki/Dominance_(genetics)#Complete_dominance)**, the heterozygote has the same phenotype as one of
+the homozygotes for the trait being considered. In the example above,
+$PP$ and $Pp$ are both purple. One possible biochemical explanation is
+that a single functional copy produces enough enzyme for the purple
+phenotype. This is an illustrative mechanism; dominance can arise in
+other ways and depends on what phenotype is measured.
+
+The recessive allele remains present in a heterozygote and can pass to
+its offspring. A dominant allele is not necessarily more common in the
+population or more beneficial to the organism. Dominance describes the
+heterozygous phenotype, whereas allele frequency and effects on survival
+or reproduction are separate properties.
+
+### Incomplete dominance
+
+In **[incomplete dominance](https://en.wikipedia.org/wiki/Dominance_(genetics)#Incomplete_dominance)**, the heterozygous phenotype lies between the two
+homozygous phenotypes. Consider a hypothetical flower-colour locus with
+alleles $C^R$ and $C^W$: $C^R C^R$ plants have red flowers, $C^W C^W$
+plants have white flowers, and $C^R C^W$ plants have pink flowers. A
+possible explanation is that the heterozygote produces less pigment than
+the red homozygote, enough to give an intermediate colour.
+
+Crossing two pink plants still gives a genotypic ratio of $1:2:1$, but
+the phenotypic ratio is now also $1\text{ red} : 2\text{ pink} :
+1\text{ white}$. The alleles remain distinct and segregate normally;
+they have not permanently blended. Red and white flowers can therefore
+reappear among the offspring of pink parents.
+
+The cross in @fig-incomplete-dominance shows the preceding generation:
+a red homozygote crossed with a white homozygote produces only pink
+heterozygotes. The diagram uses $R$ and $r$ for the alleles called $C^R$
+and $C^W$ above; the capital letter does not imply complete dominance
+in this example.
+
+![A red-by-white homozygote cross produces pink heterozygotes in all four
+cells of the Punnett square. Crossing those heterozygotes with one
+another would give the 1:2:1 ratio described above. Spencerbaron,
+[source](https://commons.wikimedia.org/wiki/File:Incomplete_dominance.svg),
+[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); unchanged.
+[View full-size diagram](../../assets/genetic-fundamentals/incomplete-dominance.svg).](../../assets/genetic-fundamentals/incomplete-dominance.svg){#fig-incomplete-dominance
+fig-align="center" width="560" .scientific-illustration
+fig-alt="Punnett square for a red RR flower crossed with a white rr flower. Both column gametes carry R and both row gametes carry r; all four offspring cells are labelled Rr and show pink flowers."}
+
+### Codominance
+
+In **[codominance](https://en.wikipedia.org/wiki/Dominance_(genetics)#Codominance)**, the heterozygote shows distinguishable contributions
+from both alleles. In the standard model of human ABO blood groups,
+$I^A$ and $I^B$ encode enzymes that produce different carbohydrate
+antigens on red blood cells. An individual with genotype $I^A I^B$
+expresses both A and B antigens and has blood type AB. These are two
+detectable products, rather than an intermediate antigen. The [NCBI
+record for the ABO gene](https://www.ncbi.nlm.nih.gov/gene/28) describes
+the enzymes responsible for these antigen differences.
+
+The distinction from incomplete dominance concerns the phenotype used to
+classify the heterozygote. With incomplete dominance, we observe an
+intermediate value such as pigment intensity. With codominance, we can
+identify both allelic contributions separately. Both patterns are
+compatible with Mendelian segregation.
+
+### Multiple alleles
+
+A locus can have many alleles across a population. At an ordinary
+autosomal locus, a diploid individual still carries only two allele
+copies, which may be identical or different. Thus, the number of alleles
+in the population and the number carried by one individual answer
+different questions.
+
+The standard ABO example uses three main allele categories: $I^A$,
+$I^B$, and $i$. Both $I^A$ and $I^B$ are dominant over $i$ for blood
+group, and they are codominant with each other. This gives six unordered
+genotypes and four usual blood groups: $I^A I^A$ or $I^A i$ gives A,
+$I^B I^B$ or $I^B i$ gives B, $I^A I^B$ gives AB, and $ii$ gives O.
+These categories simplify a locus that contains additional sequence
+variants, as described in the [NCBI chapter on the ABO blood
+group](https://www.ncbi.nlm.nih.gov/books/NBK2267/).
+
+### Epistasis
+
+**[Epistasis](https://www.genome.gov/genetics-glossary/Epistasis)** occurs when the phenotypic effect of a genotype at one locus
+depends on the genotype at another locus. This can happen when the
+products of different genes participate in the same pathway. Blocking an
+early step may prevent a later step from affecting the phenotype, even
+when the gene for that later step functions normally. The [NHGRI
+definition of
+epistasis](https://www.genome.gov/genetics-glossary/Epistasis) describes
+this modification of one gene's effect by other genes.
+
+Consider a hypothetical pigment pathway in which at least one $A$ allele
+is required to make a precursor. At a second locus, $B$ allows
+conversion of that precursor to a dark pigment, while $bb$ leaves it
+pale. An $aa$ individual cannot make the precursor, so it is unpigmented
+regardless of its $B$ genotype. Here the $aa$ genotype masks the
+distinction between dark and pale. Each locus can still segregate in
+Mendelian proportions, but combining genotypes into visible categories
+changes the phenotypic ratios. Dominance concerns alleles at one locus;
+this example of epistasis concerns two loci.
+
+### Pleiotropy
+
+**[Pleiotropy](https://en.wikipedia.org/wiki/Pleiotropy)** means that variation in one gene influences more than one
+trait. A gene product may function in several tissues or regulate a
+process with several downstream consequences. For an illustrative
+example, a change in a growth regulator could affect both body size and
+the timing of maturity. These effects need not be equally large or
+beneficial for every trait.
+
+In breeding, a pleiotropic allele can help explain why selecting for one
+trait also changes another. However, correlated traits alone do not
+prove pleiotropy: separate genes that are closely linked can also be
+inherited together. Pleiotropy also differs from **[polygenic inheritance](https://www.genome.gov/genetics-glossary/Polygenic-Trait)**,
+in which many genes contribute to one trait. A trait can be polygenic
+while some of its contributing genes also have pleiotropic effects.
+
+### Environmental effects
+
+The same genotype can produce different phenotypes under different
+conditions. Nutrition can limit growth, for example, even when an
+organism carries alleles associated with larger body size. Temperature,
+light, and other exposures can alter development or gene expression
+without changing the inherited DNA sequence. A difference in phenotype
+therefore does not, by itself, establish a genetic difference.
+
+An environmental effect becomes a **[genotype-by-environment interaction](https://www.genome.gov/genetics-glossary/Gene-Environment-Interaction)** when genotypes respond differently to the environmental
+change. Consider a hypothetical comparison of two plant genotypes: one
+grows more than the other under ample water, but loses that advantage
+during drought. Their response to water availability differs. If drought
+reduced both by the same amount on the measurement scale, that would be
+an environmental effect without an interaction. The [NHGRI explanation
+of gene-environment
+interaction](https://www.genome.gov/genetics-glossary/Gene-Environment-Interaction)
+describes this dependence of genetic effects on environmental exposure.
+
+For a measured quantitative trait, one way to express these
+contributions is the statistical model
+
+$$y = \mu + G + E + G\!\times\!E + \varepsilon.$$
+
+Here, $y$ is the observed trait value, $\mu$ is the overall mean, $G$ is
+the genotypic effect, $E$ is the environmental effect, and
+$G\!\times\!E$ denotes their interaction. The residual $\varepsilon$
+captures variation not represented by those terms, including measurement
+error. This is a model for a specified population, set of environments,
+and measurement scale. The interaction symbol names a model component;
+it does not mean that a DNA sequence is literally multiplied by an
+environment.
+
+These distinctions matter when comparing animals, plants, or breeding
+lines. A higher observed value may reflect inherited differences, better
+growing conditions, or both. Replication across relevant environments
+helps separate those contributions and assess whether a genetic
+advantage persists under the conditions where selection will be used.

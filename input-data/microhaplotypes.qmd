@@ -250,9 +250,7 @@ compact layout is 4× smaller in memory and exposes the same biology
 for pipeline-level interop.
 :::
 
-📐 **Related theory:** [Biallelic & Multi-allelic](../theory/biallelic-and-multiallelic.qmd) ·
-[Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd) ·
-[Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
+📐 **Related theory:** [Theory overview](../theory/index.qmd)
 
 🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd) ·
 [GWAS → GWABLUP](../tasks/gwas/masreml.qmd#step-6-gwas-assisted-prediction-gwablup)

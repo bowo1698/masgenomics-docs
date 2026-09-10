@@ -2,8 +2,7 @@
 title: "GWAS with masbayes"
 ---
 
-📐 **Theory:** [BayesR](../../theory/bayes-bayesr.qmd) ·
-[MCMC & EM](../../theory/bayes-mcmc-em.qmd)
+📐 **Theory:** [Theory overview](../../theory/index.qmd)
 
 This tutorial extracts GWAS-style output from a BayesR MCMC fit:
 **per-marker posterior inclusion probabilities (PIPs)** and
@@ -333,7 +332,7 @@ fit_snp$beta_samples   # full posterior trace, n_kept x ncol(W) (MCMC only)
 
 - [`run_bayesr()`](../../reference/masbayes/run_bayesr.qmd) — full
   signature including the `map`, `windsize`, `windnum` arguments
-- [Theory → BayesR](../../theory/bayes-bayesr.qmd) — mixture prior,
+- [Theory overview](../../theory/index.qmd) — mixture prior,
   PIP diagnostics, $\hat\pi_0$ interpretation
 - [GWAS with masreml](masreml.qmd) — frequentist EMMAX-style alternative
 - [Genomic prediction with masbayes](../genomic-prediction/masbayes.qmd) —

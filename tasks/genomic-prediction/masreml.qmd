@@ -2,10 +2,7 @@
 title: "Genomic prediction with masreml"
 ---
 
-📐 **Theory:** [Mixed Model & BLUP Family](../../theory/mixed-model-blup-family.qmd) ·
-[REML Algorithms](../../theory/blup-reml.qmd) ·
-[GBLUP](../../theory/blup-gblup.qmd) ·
-[Continuous and Binary Trait](../../theory/continuous-and-binary-trait.qmd)
+📐 **Theory:** [Theory overview](../../theory/index.qmd)
 
 This tutorial fits genomic prediction models with `masreml` end-to-end:
 GBLUP on SNP, Microhaplotype-GBLUP on phased microhaplotypes,
@@ -276,5 +273,5 @@ for the full argument lists.
 - [`masreml()`](../../reference/masreml/masreml.qmd) — main fitting function
 - [`cv_masreml()`](../../reference/masreml/cv_masreml.qmd) — cross-validation
 - [`predict.masreml`](../../reference/masreml/predict.masreml.qmd) — prediction on new individuals
-- [Theory → REML Algorithms](../../theory/blup-reml.qmd) — variance-component estimation engines
+- [Theory overview](../../theory/index.qmd) for the variance-component estimation engines
 - [Genomic prediction with masbayes](masbayes.qmd) — Bayesian alternative

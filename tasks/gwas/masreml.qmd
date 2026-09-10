@@ -2,8 +2,7 @@
 title: "GWAS with masreml"
 ---
 
-📐 **Theory:** [Mixed Model & BLUP Family](../../theory/mixed-model-blup-family.qmd) ·
-[GWABLUP](../../theory/blup-gwablup.qmd)
+📐 **Theory:** [Theory overview](../../theory/index.qmd)
 
 This tutorial runs an EMMAX-style mixed-model GWAS with `masreml`,
 inspects the results, validates them against the bundled ground-truth
@@ -380,6 +379,6 @@ Bayesian posterior threshold.
 
 - [`run_gwas()`](../../reference/masreml/run_gwas.qmd) ·
   [`gwablup()`](../../reference/masreml/gwablup.qmd)
-- [Theory → GWABLUP](../../theory/blup-gwablup.qmd) — Meuwissen 2024 framework
+- [Theory overview](../../theory/index.qmd) — Meuwissen 2024 framework
 - [GWAS with masbayes](masbayes.qmd) — BayesR PIP-based alternative
 - [`masreml/examples/04_gwas.R`](https://github.com/bowo1698/masreml/blob/main/examples/04_gwas.R) — full source for this tutorial

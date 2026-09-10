@@ -180,6 +180,12 @@ kbd {
 }
 .hero-logo img { display: block; width: 100%; height: auto; }
 
+// Keep dark labels in imported scientific diagrams legible in dark themes.
+.scientific-illustration img {
+  background-color: #fff;
+  padding: 0.5rem;
+}
+
 .hero-logo:hover {
   transform: translateY(-3px);
   border-color: $primary;

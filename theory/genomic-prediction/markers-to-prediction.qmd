@@ -1,0 +1,203 @@
+---
+title: "From markers to genomic prediction"
+editor:
+  markdown:
+    wrap: 72
+---
+
+A young selection candidate may have no phenotype for a late, sex-limited,
+or destructive trait. It can still be genotyped. The breeding problem is to
+use marker information, together with records from other individuals, to
+predict the candidate's breeding value before its own phenotype becomes
+available.
+
+The preceding page defined breeding value as a population-specific additive
+genetic value. Markers do not measure that value directly. They become useful
+when a statistical model learns how marker patterns in a **[training
+population](https://doi.org/10.3168/jds.2008-1646)** relate to phenotypes and
+then applies the fitted relationship to selection candidates.
+
+## Markers carry information about genetic differences
+
+A **[quantitative trait locus
+(QTL)](https://doi.org/10.1038/nrg2612)** is a genomic region whose variation
+contributes to variation in a quantitative trait. The causal variant within a
+QTL is not automatically observed on a marker panel. A nearby marker can
+still carry information because alleles at the marker and causal locus may be
+associated in the population.
+
+This population association is called **[linkage
+disequilibrium](https://doi.org/10.1038/nrg2361)**. Recombination tends to
+break associations over generations, while physical linkage, population
+history, selection, and drift shape the LD that remains. A marker can
+therefore predict a causal chromosome segment without causing the trait. The
+marker-QTL relationship is population-dependent and may weaken in a different
+breed, generation, or genetic background.
+
+Genome-wide prediction does not require every fitted marker to be a known
+QTL. Dense markers can collectively track chromosome segments carrying
+causal variants. Some models express this information through estimated
+marker effects. Others use genomic similarity among individuals. Both routes
+learn a relationship between the observed genotypes and the prediction
+target.
+
+## Training and candidate populations have different roles
+
+The training population contains individuals with both phenotypes and
+genotypes. Their phenotypes provide information about the trait, while their
+genotypes connect that information to inherited chromosome segments. Fixed
+effects such as sex, management group, or contemporary group must be handled
+by the model when they affect the phenotype but are not part of breeding
+value.
+
+The **[candidate population](https://doi.org/10.3168/jds.2008-1646)** contains
+the individuals to be ranked for selection. Candidate genotypes are supplied
+to the fitted model. Their trait phenotypes may be absent, unavailable at
+selection time, or deliberately withheld during validation. A close genetic
+and environmental relationship between the training and candidate
+populations usually gives the model more relevant information than a poorly
+matched training set.
+
+The project data provide 160 training records and 40 held-out records, with
+both groups represented within each of ten full-sib families. Because the
+dataset is simulated, phenotypes and true breeding values remain stored for
+the held-out individuals so prediction can later be evaluated. A real
+deployment candidate would not need a known phenotype or true breeding value
+at the time its prediction is made.
+
+## Follow the information through the prediction process
+
+The complete flow is
+
+```text
+phenotypes + genotypes
+          |
+          v
+      fit model
+          |
+          v
+ estimated parameters
+          |
+          v
+ candidate genotypes
+          |
+          v
+         GEBV
+          |
+          v
+        ranking
+```
+
+Each transition has a distinct meaning.
+
+1. **Phenotypes and genotypes enter the fitted model.** The training
+   phenotypes contain genetic and non-genetic variation. The model relates
+   their adjusted genetic signal to genome-wide marker patterns while
+   representing relevant fixed effects and residual variation.
+
+2. **Model fitting produces estimated parameters.** Depending on the method,
+   these may include marker effects, variance components, genomic
+   relationships, shrinkage parameters, or posterior distributions. An
+   estimate is uncertain because it is learned from a finite training sample.
+
+3. **Candidate genotypes receive the training-derived representation.** The
+   same allele coding, marker order, centring values, and other preprocessing
+   must be used. Re-estimating preprocessing from candidates can change the
+   meaning of the fitted parameters and can leak information during model
+   evaluation.
+
+4. **The model produces a genomic estimated breeding value.** A **[genomic
+   estimated breeding value
+   (GEBV)](https://doi.org/10.1093/genetics/157.4.1819)** predicts the
+   candidate's additive genetic merit relative to the model's reference
+   population. It is neither an observed phenotype nor a directly measured
+   genetic quantity.
+
+5. **Breeders use GEBVs in a selection decision.** Ranking candidates by GEBV
+   can support selection for one trait. Practical breeding objectives may
+   combine several traits, uncertainty, inbreeding, diversity, economic
+   weights, and mating constraints. A high GEBV alone does not specify a
+   complete breeding programme.
+
+## Marker effect does not mean causal effect
+
+An estimated marker effect describes a statistical contribution under a
+particular coding, model, and training population. It may reflect LD with one
+or more causal variants, correlations with other markers, and shrinkage from
+the fitted model. Its sign can reverse if the counted allele is reversed. Its
+magnitude can change when markers are centred or scaled.
+
+These properties separate prediction from biological mechanism. A marker can
+improve prediction without being causal, while a causal variant can receive a
+poorly estimated effect when it is unobserved, rare, or weakly tagged by the
+available markers. Establishing causality requires evidence beyond a fitted
+prediction coefficient or association statistic.
+
+## Three genomic analyses answer different questions
+
+Marker-assisted selection, genomic selection, and genome-wide association
+studies all use markers, but their objectives and outputs differ.
+
+| Approach | Main question | Typical marker scope | Primary output | How it informs breeding |
+|---|---|---|---|---|
+| **[Marker-assisted selection](https://doi.org/10.1098/rstb.2007.2170)** | Does a candidate carry one or more targeted alleles or regions with established relevance? | A limited set of markers linked to known genes or QTLs | Marker status or targeted genetic score | Selects or introgresses specific regions, often for comparatively simple or major-effect targets |
+| **[Genomic selection](https://doi.org/10.1093/genetics/157.4.1819)** | What is the candidate's breeding value when genome-wide marker information is considered jointly? | Dense markers distributed across the genome | GEBV | Ranks candidates using predicted additive genetic merit, including for polygenic traits |
+| **[Genome-wide association study (GWAS)](https://doi.org/10.1038/s43586-021-00056-9)** | Which loci show statistical evidence of association with the trait? | Genome-wide markers tested for association | Locus-level effect estimates, uncertainty, and significance evidence | Identifies regions for investigation; association alone does not establish causality or provide a validated selection index |
+
+The boundaries can overlap. A robust association discovered by GWAS may
+later supply a marker for targeted selection. A genomic prediction model may
+also use external association evidence to weight markers. The distinction
+rests on the immediate goal: tracking specified loci, predicting total
+breeding value, or finding associations.
+
+## Prediction must match its deployment population
+
+A fitted model learns from the allele frequencies, LD patterns,
+relationships, environments, and phenotype definitions represented in its
+training records. Applying it to distant candidates changes the information
+available to connect markers with causal variants. Prediction accuracy can
+therefore decline across breeds, generations, or management systems.
+
+Model evaluation must imitate the intended use. Holding out close relatives
+within the same generation asks a different question from predicting a later
+generation or another population. The project split is useful for teaching
+within-family prediction, but its result should not be described as evidence
+of performance in unrelated populations.
+
+## Check your understanding
+
+::: {.callout-note collapse="true" title="Exercise 1: Identify the analysis goal"}
+A breeder wants to rank 500 unphenotyped juveniles for a polygenic growth
+trait using dense genome-wide markers. Is the immediate task MAS, genomic
+selection, or GWAS?
+
+The immediate task is genomic selection because the desired output is a
+genome-wide prediction of breeding value for each candidate. A GWAS would
+instead seek locus-level associations, while MAS would target a limited set
+of previously established loci.
+:::
+
+::: {.callout-note collapse="true" title="Exercise 2: Locate the missing information"}
+A model has been fitted with phenotypes only, and candidate genotypes are
+available. Which part of the prediction flow is missing?
+
+Training genotypes are missing. Without them, the fitted model cannot learn
+how training phenotypes relate to marker patterns that can also be observed
+in candidates.
+:::
+
+::: {.callout-note collapse="true" title="Exercise 3: Interpret a high GEBV"}
+A candidate has the highest GEBV for growth. What does this establish, and
+what does it leave unresolved?
+
+It establishes that the fitted model predicts the highest additive genetic
+merit for growth among the candidates being compared. It does not reveal the
+candidate's true breeding value, guarantee its offspring mean, establish that
+any marker is causal, or account automatically for other traits and
+inbreeding constraints.
+:::
+
+The flow depends on representing candidate and training genotypes in exactly
+the same numerical form. The next page develops marker dosage, allele
+frequency, centring, scaling, and multiallelic encoding before those
+representations enter genomic relationship and prediction models.

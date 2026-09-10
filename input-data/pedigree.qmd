@@ -161,8 +161,7 @@ satisfies this — sires/dams come first, then offspring. If your real
 pedigree has cycles or is unordered, sort topologically before passing
 to `build_A_ped()`:
 
-```{r}
-#| eval: false
+```r
 # Toy topological sort assuming no cycles
 sort_pedigree <- function(ped) {
   done <- character()
@@ -188,6 +187,6 @@ matters when you have un-genotyped individuals (then `A` covers them)
 or when you want to compare $A$ vs $G$ partitioning.
 :::
 
-📐 **Related theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd)
+📐 **Related theory:** [Theory overview](../theory/index.qmd)
 
 🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd)

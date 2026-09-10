@@ -1,0 +1,213 @@
+---
+title: "Probability and random variables"
+---
+
+A breeder can describe the phenotypes already recorded, but selection
+decisions concern offspring and candidates whose outcomes are not yet known.
+Probability supplies a model for that uncertainty. It does not guarantee the
+genotype of one offspring. Instead, it describes the pattern expected when
+the same inheritance process is repeated under stated assumptions.
+
+## Outcomes and events in a Mendelian cross
+
+Consider one autosomal locus with alleles $A$ and $a$. Two heterozygous
+parents are crossed:
+
+$$
+Aa \times Aa.
+$$
+
+Under ordinary Mendelian segregation, each parent contributes $A$ with
+probability $1/2$ and $a$ with probability $1/2$. Assume that
+transmission from one parent is independent of transmission from the other,
+and that the four gamete combinations have equal fertilisation and survival.
+These assumptions define the probability model. Segregation distortion,
+differential survival, or genotyping error would require a different model.
+
+An **[outcome](https://en.wikipedia.org/wiki/Outcome_(probability))** records
+one possible result. The **[sample space](https://en.wikipedia.org/wiki/Sample_space)**
+$\Omega$ is the set of all outcomes considered by the model:
+
+$$
+\Omega=\{(A,A),(A,a),(a,A),(a,a)\}.
+$$
+
+The first entry is the sire's contribution and the second is the dam's. Each
+ordered pair has probability $1/4$. Keeping the pairs ordered matters:
+$(A,a)$ and $(a,A)$ are different transmission outcomes even though both
+produce genotype $Aa$.
+
+An **[event](https://en.wikipedia.org/wiki/Event_(probability_theory))** is a
+set of outcomes. If $H$ denotes the event that an offspring is
+heterozygous, then
+
+$$
+H=\{(A,a),(a,A)\}, \qquad P(H)=\frac{2}{4}=\frac{1}{2}.
+$$
+
+The genotype probabilities are therefore $P(AA)=1/4$, $P(Aa)=1/2$, and
+$P(aa)=1/4$. These values describe proportions over repeated crosses. A
+family of four offspring need not contain exactly one $AA$, two $Aa$, and
+one $aa$.
+
+## Conditional probability and independence
+
+**[Conditional probability](https://en.wikipedia.org/wiki/Conditional_probability)**
+asks how the probability of one event changes after another event is known.
+For events $B$ and $C$, with $P(C)>0$,
+
+$$
+P(B\mid C)=\frac{P(B\cap C)}{P(C)}.
+$$
+
+Let $B$ be the event that the offspring is $AA$, and let $C$ be the
+event that it carries at least one $A$ allele. Three of the four outcomes
+belong to $C$, and one of those three belongs to $B$. Consequently,
+$P(B\mid C)=1/3$, not $1/4$. Learning that the offspring carries $A$
+has changed the relevant set of possible outcomes.
+
+Two events are **[independent](https://en.wikipedia.org/wiki/Independence_(probability_theory))**
+when knowing that one occurred does not change the probability of the other.
+Let $S$ mean that the sire contributes $A$, and $D$ mean that the dam
+contributes $A$. In this model,
+
+$$
+P(S\cap D)=\frac{1}{4}=P(S)P(D)
+=\frac{1}{2}\times\frac{1}{2}.
+$$
+
+This equality expresses the independence assumption for the two parental
+transmissions. Independence is not a general claim about all genetic events.
+Nearby loci can be inherited together because of linkage, and relatives can
+have correlated genetic values.
+
+## A random variable turns outcomes into numbers
+
+A **[random variable](https://en.wikipedia.org/wiki/Random_variable)** maps
+each outcome to a numerical value. Define $G$ as the number of $A$ alleles
+carried by an offspring. This is the usual 0, 1, 2 allele-dosage coding:
+
+| Transmission outcome | Genotype | $G$ | Probability |
+|---|---|---:|---:|
+| $(a,a)$ | $aa$ | 0 | $1/4$ |
+| $(A,a)$ or $(a,A)$ | $Aa$ | 1 | $1/2$ |
+| $(A,A)$ | $AA$ | 2 | $1/4$ |
+
+The outcome is a pair of transmitted alleles, while $G$ is a function of
+that outcome. Several outcomes can map to the same value. This distinction
+lets a statistical model work with numerical marker dosage without claiming
+that the number itself contains the complete biological history of the
+alleles.
+
+The **[expected value](https://en.wikipedia.org/wiki/Expected_value)** of a
+discrete random variable is its probability-weighted centre:
+
+$$
+E(G)=\sum_g gP(G=g)
+=0\left(\frac14\right)+1\left(\frac12\right)
++2\left(\frac14\right)=1.
+$$
+
+An expectation is a long-run average under the model. Here it happens to be
+a possible dosage, but an expectation need not be a value that any individual
+can take. For example, the expected genotype count in a family need not be an
+integer.
+
+The variance of $G$ measures probability-weighted squared distance from
+its expectation:
+
+$$
+\operatorname{Var}(G)
+=\sum_g \{g-E(G)\}^2P(G=g)
+=1\left(\frac14\right)+0\left(\frac12\right)
++1\left(\frac14\right)=0.5.
+$$
+
+This is a variance of a random variable under a probability model. It differs
+from the sample variance calculated from realised observations on the
+previous page, although a sufficiently informative random sample can be used
+to estimate a population variance.
+
+## Verify the cross in R
+
+The following code constructs the four equally likely ordered transmissions.
+Logical values are added as 0 and 1, which gives the $A$-allele dosage.
+
+```{r}
+#| label: mendelian-probability
+cross <- expand.grid(sire = c("A", "a"), dam = c("A", "a"))
+cross$dosage <- (cross$sire == "A") + (cross$dam == "A")
+probability <- prop.table(table(cross$dosage))
+expectation <- sum(as.numeric(names(probability)) * probability)
+variance <- sum(
+  (as.numeric(names(probability)) - expectation)^2 * probability
+)
+
+cross
+probability
+c(expectation = expectation, variance = variance)
+```
+
+The result gives dosage probabilities 0.25, 0.50, and 0.25, expectation 1,
+and variance 0.5. The calculation verifies the stated model; it is not an
+empirical test of segregation in the project dataset.
+
+## Probability notation used later
+
+The expression $P(A)$ denotes the probability of event $A$. The union
+$A\cup B$ means that at least one of two events occurs, while the
+intersection $A\cap B$ means that both occur. For mutually exclusive
+events, $P(A\cup B)=P(A)+P(B)$. For general events, the shared intersection
+must be subtracted once:
+
+$$
+P(A\cup B)=P(A)+P(B)-P(A\cap B).
+$$
+
+The complement $A^c$ contains outcomes outside $A$, so
+$P(A^c)=1-P(A)$. These rules will reappear when genotype classes, binary
+phenotypes, and Bayesian mixture classes are assigned probabilities.
+
+## Exercises
+
+1. In a hypothetical transmission model, the sire contributes $A$ with
+   probability 0.6 and the dam contributes $A$ with probability 0.3.
+   Assuming independent parental transmissions, what is the probability that
+   an offspring carries exactly one $A$ allele? What is the probability that
+   it carries at least one $A$ allele?
+
+::: {.callout-note collapse="true" title="Solution"}
+Exactly one $A$ can arise when the sire contributes $A$ and the dam
+contributes $a$, or when the sire contributes $a$ and the dam contributes
+$A$. Its probability is
+$0.6(1-0.3)+(1-0.6)0.3=0.42+0.12=0.54$. The probability of at least one $A$
+is one minus the probability that both contribute $a$:
+$1-(1-0.6)(1-0.3)=1-0.28=0.72$.
+:::
+
+2. Suppose an $Aa$ parent is crossed with an $aa$ parent. Construct the
+   ordered sample space and calculate the expectation and variance of the
+   offspring's $A$-allele dosage.
+
+::: {.callout-note collapse="true" title="Solution"}
+Writing the heterozygous parent's contribution first, the ordered sample
+space is $\{(A,a),(a,a)\}$. The $aa$ parent always contributes $a$, while the
+$Aa$ parent contributes $A$ or $a$ with equal probability. The two outcomes
+give dosage 1 with probability $1/2$ and dosage 0 with probability $1/2$. Thus
+$E(G)=0.5$, and
+$\operatorname{Var}(G)=(0-0.5)^2(0.5)+(1-0.5)^2(0.5)=0.25$.
+:::
+
+3. For the original $Aa\times Aa$ cross, calculate
+   $P(AA\mid\text{offspring is homozygous})$.
+
+::: {.callout-note collapse="true" title="Solution"}
+The homozygous outcomes are $(A,A)$ and $(a,a)$, each with probability
+$1/4$. Conditional on this two-outcome set, one outcome is $AA$, so the
+conditional probability is $(1/4)/(1/2)=1/2$.
+:::
+
+A random variable is fully described only after probabilities have been
+assigned to its possible values. The next page develops probability
+distributions, which provide reusable models for genotype counts, binary
+traits, residuals, and marker effects.

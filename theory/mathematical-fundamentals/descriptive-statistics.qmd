@@ -1,0 +1,266 @@
+---
+title: "Descriptive statistics"
+---
+
+A breeding programme may record body weight, disease score, or harvest yield
+for hundreds of individuals. Before fitting a genomic prediction model, the
+breeder needs to know what values are typical, how much individuals differ,
+and whether a few unusual records deserve investigation. **[Descriptive
+statistics](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3.htm)**
+answer these questions by reducing a collection of observations to numerical
+and graphical summaries. They describe the recorded sample; by themselves,
+they do not explain why the observations differ or predict an unobserved
+individual.
+
+## Centre and spread answer different questions
+
+Consider two hypothetical groups of five selection candidates. Both groups
+have a mean weight of 10 kg, but their values differ in spread.
+
+| Candidate | Group A (kg) | Group B (kg) |
+|---:|---:|---:|
+| 1 | 8 | 4 |
+| 2 | 9 | 7 |
+| 3 | 10 | 10 |
+| 4 | 11 | 13 |
+| 5 | 12 | 16 |
+
+The equal means do not make the groups equivalent. Group A lies close to 10
+kg, whereas Group B includes much lighter and heavier candidates. A measure
+of centre identifies a typical value. A measure of spread describes how far
+observations tend to lie from that centre. Genomic prediction needs both:
+marker effects cannot help distinguish candidates if the target trait has no
+variation, and a centre alone hides the amount of variation available to the
+model.
+
+## Measures of centre
+
+The **[arithmetic mean](https://www.itl.nist.gov/div898/handbook/eda/section3/eda351.htm)**
+of observations $y_1,\ldots,y_n$ is
+
+$$
+\bar y = \frac{1}{n}\sum_{i=1}^{n} y_i,
+$$
+
+where $n$ is the number of observations and $\bar y$ is their sample
+mean. Every observation contributes its magnitude, so one extreme value can
+move the mean substantially. This sensitivity is useful when the magnitude
+of every measurement matters, but it also means that data errors can distort
+the summary.
+
+The **[median](https://www.itl.nist.gov/div898/handbook/eda/section3/eda351.htm)**
+is the middle value after sorting the observations. For an even number of
+observations, it is conventionally the mean of the two middle values. Because
+the median depends on order rather than the distance of every observation
+from the centre, it changes less than the mean when one observation is
+extreme.
+
+The **[mode](https://www.itl.nist.gov/div898/handbook/eda/section3/eda351.htm)**
+is the most frequent observed value or category. A sample can have no repeated
+value, one mode, or several equally frequent modes. For continuously measured
+traits, exact repetitions may be rare and the mode can depend on measurement
+precision or histogram bins. It is often more informative for genotype or
+phenotype categories than for precise continuous measurements.
+
+## Measures of position and spread
+
+A **[quantile](https://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm)**
+divides ordered observations by cumulative proportion. The first quartile
+$Q_1$ marks the 25th percentile, the median marks the 50th, and the third
+quartile $Q_3$ marks the 75th. Software packages use several interpolation
+conventions for sample quantiles, so a small sample can yield slightly
+different values under different conventions.
+
+The **[range](https://www.itl.nist.gov/div898/handbook/eda/section3/eda356.htm)**
+is the maximum minus the minimum. It is easy to interpret but uses only two
+observations. The **[interquartile range](https://www.itl.nist.gov/div898/handbook/eda/section3/eda356.htm)**,
+
+$$
+\operatorname{IQR}=Q_3-Q_1,
+$$
+
+describes the width of the middle half of the data. It is less sensitive than
+the range to observations in the tails.
+
+Variance begins with a **[deviation](https://en.wikipedia.org/wiki/Deviation_(statistics))**,
+$y_i-\bar y$, the signed distance between one observation and the mean.
+Deviations sum to zero, so simply averaging them would report no spread.
+Squaring prevents positive and negative deviations from cancelling. The
+**[sample variance](https://www.itl.nist.gov/div898/handbook/eda/section3/eda356.htm)**
+is
+
+$$
+s^2=\frac{1}{n-1}\sum_{i=1}^{n}(y_i-\bar y)^2.
+$$
+
+Variance has squared units. If weight is recorded in kilograms, its variance
+is measured in square kilograms. The **[sample standard deviation](https://www.itl.nist.gov/div898/handbook/eda/section3/eda356.htm)**
+is $s=\sqrt{s^2}$, which restores the original measurement unit.
+
+::: {.callout-note collapse="true" title="Why divide sample variance by n - 1?"}
+Assume $Y_1,\ldots,Y_n$ are independent and identically distributed with
+finite mean $\mu$ and variance $\sigma^2$. Estimating the mean from the same
+observations forces the deviations from $\bar Y$ to sum to zero. This is one
+linear constraint, leaving $n-1$ degrees of freedom; it does not mean that
+the individual deviations are independent.
+
+The identity
+
+$$
+\sum_{i=1}^{n}(Y_i-\bar Y)^2
+=\sum_{i=1}^{n}(Y_i-\mu)^2-n(\bar Y-\mu)^2
+$$
+
+makes the correction explicit. Taking expectations gives
+
+$$
+E\left[\sum_{i=1}^{n}(Y_i-\bar Y)^2\right]
+=n\sigma^2-n\operatorname{Var}(\bar Y)
+=n\sigma^2-n\left(\frac{\sigma^2}{n}\right)
+=(n-1)\sigma^2.
+$$
+
+Dividing by $n-1$ therefore makes $s^2$ unbiased for $\sigma^2$ under these
+assumptions. If the observations are the entire population of interest rather
+than a random sample from it, division by $n$ answers a different descriptive
+question.
+:::
+
+## Manual calculation with the project data
+
+The recurring dataset in this curriculum is simulated. It contains 200
+individuals, their marker genotypes, phenotypes, pedigrees, and true breeding
+values. For a calculation that can be checked by hand, take the first five
+continuous phenotypes and round them to whole units. Rounding is used only for
+this teaching calculation; applied summaries retain the raw values.
+
+```{r}
+#| label: descriptive-data
+d <- readRDS("../../demo-data/main/demo_data.rds")
+y <- round(d$pheno$y_cont_qtl_snp[1:5])
+y
+```
+
+The values are $(-1,-3,-2,1,-2)$. Their sum is $-7$, so the mean is
+$-7/5=-1.4$. Sorting gives $(-3,-2,-2,-1,1)$; the middle value and
+median is $-2$. The value $-2$ occurs twice, more often than any other
+value, so it is the mode.
+
+Subtracting the mean gives the deviations
+$(0.4,-1.6,-0.6,2.4,-0.6)$. Their squares sum to
+
+$$
+0.4^2+(-1.6)^2+(-0.6)^2+2.4^2+(-0.6)^2=9.2.
+$$
+
+The sample variance is therefore $9.2/(5-1)=2.3$, and the sample standard
+deviation is $\sqrt{2.3}=1.517$ units. Under R's default quantile
+convention, $Q_1=-2$ and $Q_3=-1$, giving an IQR of 1. The range is
+$1-(-3)=4$.
+
+```{r}
+#| label: descriptive-manual-check
+mode_value <- as.numeric(names(which.max(table(y))))
+c(
+  mean = mean(y),
+  median = median(y),
+  mode = mode_value,
+  variance = var(y),
+  sd = sd(y),
+  range = diff(range(y)),
+  iqr = IQR(y)
+)
+```
+
+These summaries describe five rounded observations, not the full simulated
+population. The negative centre is also relative to the arbitrary scale used
+by the simulation; it does not mean that an individual has a biologically
+negative trait. On all 200 raw records, the centre and spread differ because
+rounding has been removed and many more individuals contribute.
+
+```{r}
+#| label: descriptive-full-data
+summary(d$pheno$y_cont_qtl_snp)
+c(
+  variance = var(d$pheno$y_cont_qtl_snp),
+  sd = sd(d$pheno$y_cont_qtl_snp)
+)
+```
+
+For these 200 simulated records, the raw mean is approximately 0.411 and the
+standard deviation is approximately 1.332. These are realised summaries of
+one simulated dataset. They are not universal values for a species, trait, or
+breeding programme.
+
+## Outliers require investigation, not automatic deletion
+
+An **[outlier](https://www.itl.nist.gov/div898/handbook/prc/section1/prc16.htm)**
+is an observation that appears unusually distant from most of the data under
+a stated comparison rule. The common boxplot rule flags values below
+$Q_1-1.5\operatorname{IQR}$ or above
+$Q_3+1.5\operatorname{IQR}$. It is a screening convention, not proof that
+an observation is false.
+
+An unusual phenotype could result from a transcription error, a different
+measurement protocol, disease, environment, or genuine biology. Removing it
+without checking can discard valuable genetic variation and make later
+predictions appear more precise than they are. A breeder should examine the
+record, metadata, and biological context before deciding whether correction,
+exclusion, or retention is justified.
+
+## Exercises
+
+1. Round rows 6 to 10 of `y_cont_qtl_snp`. Calculate their mean, median,
+   mode, sample variance, and sample standard deviation. Compare their centre
+   and spread with rows 1 to 5.
+
+::: {.callout-note collapse="true" title="Solution"}
+The rounded values are $(-2,0,-1,-1,-2)$. Their mean is $-1.2$, the median
+is $-1$, and the two modes are $-2$ and $-1$. The sample variance is 0.7,
+and the sample standard deviation is approximately 0.837. Compared with rows
+1 to 5, this group has a higher mean and a smaller standard deviation. The
+comparison is descriptive and does not establish a genetic cause for the
+difference.
+
+```{r}
+exercise_y <- round(d$pheno$y_cont_qtl_snp[6:10])
+exercise_counts <- table(exercise_y)
+exercise_modes <- as.numeric(
+  names(exercise_counts[exercise_counts == max(exercise_counts)])
+)
+c(
+  mean = mean(exercise_y),
+  median = median(exercise_y),
+  variance = var(exercise_y),
+  sd = sd(exercise_y)
+)
+exercise_modes
+```
+:::
+
+2. A hypothetical trait has values $(5,5,6,7,27)$. Compare the mean and
+   median. Which measure better represents the four observations clustered
+   between 5 and 7?
+
+::: {.callout-note collapse="true" title="Solution"}
+The mean is $(5+5+6+7+27)/5=10$, while the median is 6. The value 27 pulls
+the mean above four of the five observations. The median better represents
+the centre of that cluster, but the value 27 should be investigated rather
+than deleted automatically.
+:::
+
+3. Two hypothetical groups both have mean 4. Group C is $(3,4,5)$, and
+   Group D is $(0,4,8)$. Calculate their sample variances and explain what
+   the comparison adds beyond their equal means.
+
+::: {.callout-note collapse="true" title="Solution"}
+For Group C, the squared deviations sum to 2, so the sample variance is
+$2/(3-1)=1$. For Group D, they sum to 32, so the sample variance is
+$32/(3-1)=16$. The equal means identify the same centre, while the
+variances show that Group D is much more dispersed.
+:::
+
+Descriptive statistics treat the recorded values as fixed observations. The
+next step is to describe uncertain outcomes before they are observed.
+Probability and random variables provide that language and connect Mendelian
+segregation to the statistical models used in genomic prediction.

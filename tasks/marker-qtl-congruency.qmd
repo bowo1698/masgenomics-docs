@@ -2,10 +2,7 @@
 title: "Marker-QTL Unit Congruency"
 ---
 
-📐 **Theory:** [BayesA](../theory/bayes-bayesa.qmd) ·
-[BayesR](../theory/bayes-bayesr.qmd) ·
-[GBLUP](../theory/blup-gblup.qmd) ·
-[GWABLUP](../theory/blup-gwablup.qmd)
+📐 **Theory:** [Theory overview](../theory/index.qmd)
 
 ## Objective
 
@@ -511,6 +508,7 @@ final <- final[, c("Scenario","Trait","Marker","Model",
                    "bias","h2_post","AUC","p","Status")]
 final <- final[order(final$Scenario, final$Trait, final$Marker, final$Model), ]
 ```
+
 
 ```{r}
 #| label: combined-table

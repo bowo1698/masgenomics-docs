@@ -150,8 +150,7 @@ per-marker effect estimates change sign.
 for you. Always reconcile before passing to `masreml(...)` or
 `run_bayesa()` / `run_bayesr()`:
 
-```{r}
-#| eval: false
+```r
 stopifnot(identical(rownames(d$snp), d$pheno$id))
 ```
 :::
@@ -172,9 +171,7 @@ conservative pre-filter is `MAF >= 0.05`. The demo dataset's MAF is
 uniformly drawn from `[0.1, 0.5]` so no filter is needed.
 :::
 
-📐 **Related theory:** [Mixed Model & BLUP Family](../theory/mixed-model-blup-family.qmd) ·
-[Biallelic & Multi-allelic](../theory/biallelic-and-multiallelic.qmd) ·
-[Bayesian Alphabet](../theory/bayesian-alphabet.qmd)
+📐 **Related theory:** [Theory overview](../theory/index.qmd)
 
 🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd) ·
 [GWAS](../tasks/gwas/index.qmd)
