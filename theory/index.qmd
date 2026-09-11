@@ -81,3 +81,5 @@ This section connects quantitative genetics with the marker-based models used to
 
 1. [Quantitative genetics: from phenotype to breeding value](genomic-prediction/quantitative-genetics.qmd)
 2. [From markers to genomic prediction](genomic-prediction/markers-to-prediction.qmd)
+5. [Covariance and correlation](mathematical-fundamentals/covariance-correlation.qmd)
+6. [Vectors and matrices](mathematical-fundamentals/vectors-matrices.qmd)

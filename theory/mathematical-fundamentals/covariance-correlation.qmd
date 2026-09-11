@@ -1,0 +1,145 @@
+---
+title: "Covariance and correlation"
+---
+
+When a breeding programme records both a phenotype and a genetic target, it
+needs more than two separate measures of spread. Do animals above the
+phenotype mean also tend to be above the target mean? **[Covariance and
+correlation](https://www.itl.nist.gov/div898/handbook/ppc/section1/ppc136.htm)**
+describe how two variables vary together in a stated sample. They are useful
+summaries of association, but neither identifies the mechanism that produced
+it.
+
+## Paired deviations reveal the direction of association
+
+For paired observations $(x_i,y_i)$ from $n$ individuals, let $\bar x$ and
+$\bar y$ be their sample means. The sample covariance is
+
+$$
+s_{xy}=\frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar x)(y_i-\bar y).
+$$
+
+Each product compares two deviations for the same individual. A positive
+product occurs when both values are above their means or both are below them.
+Negative products occur when one is above its mean and the other below it.
+Their average is therefore positive for a tendency to move together, negative
+for a tendency to move in opposite directions, and near zero when there is no
+*linear* tendency in the sample. Covariance has the combined units of its two
+variables, so its magnitude changes if either variable is rescaled.
+
+Consider the hypothetical paired values $x=(1,2,3)$ and $y=(2,4,3)$. Their
+means are $\bar x=2$ and $\bar y=3$. The paired deviations and products are
+
+| Individual | $x_i-\bar x$ | $y_i-\bar y$ | Product |
+|---:|---:|---:|---:|
+| 1 | -1 | -1 | 1 |
+| 2 | 0 | 1 | 0 |
+| 3 | 1 | 0 | 0 |
+
+Thus $s_{xy}=(1+0+0)/(3-1)=0.5$. If both deviations had usually had the
+same sign with larger magnitude, covariance would be more positive. A
+negative value would instead indicate that the paired deviations commonly
+have opposite signs.
+
+## Correlation puts covariance on a common scale
+
+The **[Pearson correlation coefficient](https://www.itl.nist.gov/div898/handbook/eda/section3/eda33g.htm)** standardises covariance by the sample standard deviations $s_x$ and $s_y$:
+
+$$
+r_{xy}=\frac{s_{xy}}{s_xs_y}.
+$$
+
+For the hypothetical data, $s_x=s_y=1$, hence $r_{xy}=0.5$. Correlation has
+no units and lies between $-1$ and $1$ when both variables vary. A value near
+$1$ describes points close to an increasing straight line, a value near $-1$
+points close to a decreasing straight line, and a value near zero describes
+little linear association. Zero correlation does not rule out a curved
+relationship.
+
+Correlation is sensitive to an influential outlier: one unusual pair can
+alter the means, standard deviations, and the products of deviations. It is
+also sensitive to restricted range. For example, correlation among selected
+candidates with very similar phenotypes can be lower than correlation in the
+broader population even when the underlying relationship has not changed.
+Scatterplots, measurement checks, and the population being summarised should
+therefore be considered before interpreting a coefficient.
+
+## A phenotype and simulation-known genetic target
+
+The recurring project dataset is simulated. It records a continuous phenotype
+and a true breeding value because the data generator knows the simulated
+causal effects. In empirical breeding records, a true breeding value is not
+usually observed directly. The following code calculates their covariance,
+correlation, and the $2\times2$ covariance matrix for all 200 offspring.
+
+```{r}
+#| label: covariance-phenotype-tbv
+d <- readRDS("../../demo-data/main/demo_data.rds")
+phenotype <- d$pheno$y_cont_qtl_snp
+tbv <- d$pheno$tbv_qtl_snp
+cov(phenotype, tbv)
+cor(phenotype, tbv)
+cov(cbind(phenotype, tbv))
+```
+
+The covariance is approximately 0.892 and the correlation is approximately
+0.670. The matrix has phenotype and true breeding value in the same order on
+its rows and columns; its diagonal contains their variances, about 1.774 and
+1.000, while its matching off-diagonal entries contain their covariance. The
+positive correlation says that higher phenotypes tend to occur with higher
+simulation-known breeding values in these records. It does not mean that the
+phenotype causes the breeding value, that every high phenotype has a high
+breeding value, or that a prediction would be calibrated for another
+population.
+
+The records are also not independent draws from a freely mating population:
+they are simulated offspring in ten full-sib families. Any inferential model
+or validation design must represent that family structure rather than treating
+this descriptive correlation as a causal estimate or a prediction assessment.
+
+## Correlation matrices organise several relationships
+
+For $q$ variables measured on the same $n$ individuals, a covariance matrix
+is $q\times q$. Its entry in row $j$, column $k$ is the covariance of
+variables $j$ and $k$. A correlation matrix has the same dimensions, ones on
+the diagonal, and correlations off the diagonal. Both matrices are symmetric:
+the entry in row $j$, column $k$ equals the one in row $k$, column $j$.
+
+This compact arrangement becomes useful when a model must represent many
+phenotypes, marker columns, or related individuals. The next page introduces
+the vector and matrix operations that make these arrays usable in regression
+and mixed models.
+
+## Exercises
+
+1. For paired deviations $(-2,-1)$, $(1,-3)$, and $(1,4)$, calculate the
+   sample covariance. Is its direction positive or negative?
+
+::: {.callout-note collapse="true" title="Solution"}
+The products are $2$, $-3$, and $4$, whose sum is $3$. With three pairs, the
+sample covariance is $3/(3-1)=1.5$, so its direction is positive.
+:::
+
+2. A phenotype and a marker dosage have correlation $r=-0.70$ in a training
+   sample. What does the sign describe, and what does it not establish?
+
+::: {.callout-note collapse="true" title="Solution"}
+The sign describes a decreasing linear association under the chosen dosage
+coding: higher dosage tends to occur with lower phenotype. It does not show
+that the marker causes the phenotype, because LD, family structure, or other
+variables can produce an association.
+:::
+
+3. Why can a correlation calculated only among very similarly performing
+   selected candidates differ from the correlation in the whole population?
+
+::: {.callout-note collapse="true" title="Solution"}
+Selection restricts the range of at least one variable. Correlation is
+standardised by the variation present in the analysed sample, so reducing that
+variation can change the coefficient even if the broader biological process
+has not changed.
+:::
+
+Correlation summarises paired variation. Regression and mixed models need a
+notation that can hold many observations and predictors at once, so the next
+page develops vectors and matrices.

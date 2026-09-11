@@ -1,0 +1,155 @@
+---
+title: "Vectors and matrices"
+---
+
+A genomic prediction dataset may contain one phenotype for each animal and
+hundreds of marker dosages for the same animals. Writing a separate equation
+for every animal and marker quickly hides the structure of the problem.
+**[Vectors and matrices](https://stat.ethz.ch/R-manual/R-devel/library/base/html/matmult.html)** provide compact notation that preserves which values belong to individuals and which belong to markers.
+
+## Rows are individuals and columns are markers
+
+A column vector holds one value per individual. For $n$ phenotypes, write
+$\mathbf y$ as an $n\times1$ vector. A genotype matrix $\mathbf M$ has $n$
+rows for individuals and $p$ columns for markers, so its dimensions are
+$n\times p$. Its entry $m_{ij}$ is the dosage for individual $i$ at marker
+$j$. This orientation matters: a row compares marker information within an
+individual, whereas a column compares individuals at one marker.
+
+The project slice below has six individuals and three markers. It is a small,
+inspectable view of a much larger simulated matrix; the dosage labels are
+coding counts, not effect estimates.
+
+| Individual | SNP007 | SNP008 | SNP017 |
+|:--|--:|--:|--:|
+| IND001 | 0 | 1 | 1 |
+| IND002 | 0 | 1 | 1 |
+| IND003 | 2 | 0 | 0 |
+| IND004 | 1 | 0 | 2 |
+| IND005 | 0 | 1 | 0 |
+| IND006 | 0 | 2 | 1 |
+
+The table labels both dimensions explicitly. In prose, this means each row is
+one of six individuals and each column is one of three SNP dosages; it is not
+a table of three individuals measured at six markers.
+
+```{r}
+#| label: matrices-marker-slice
+d <- readRDS("../../demo-data/main/demo_data.rds")
+M <- d$snp[1:6, c("SNP007", "SNP008", "SNP017"), drop = FALSE]
+dim(M)
+t(M)
+crossprod(M)
+tcrossprod(M)
+eigen(crossprod(M), symmetric = TRUE)$values
+```
+
+`dim(M)` confirms that $\mathbf M$ is $6\times3$. Its transpose,
+$\mathbf M^\mathsf T$, is $3\times6$: rows become markers and columns become
+individuals. Transposition does not change any dosage; it changes only how
+the array is oriented for an operation.
+
+## Multiplication follows dimensions, not names
+
+If $\mathbf A$ is $a\times b$ and $\mathbf B$ is $b\times c$, then
+$\mathbf A\mathbf B$ is defined and has dimensions $a\times c$. The inner
+dimensions must match. Thus $\mathbf M^\mathsf T\mathbf M$ is
+$(3\times6)(6\times3)=3\times3$, while
+$\mathbf M\mathbf M^\mathsf T$ is $(6\times3)(3\times6)=6\times6$.
+The product $\mathbf M\mathbf M$ is not defined because its inner dimensions
+would be 3 and 6.
+
+The code uses `crossprod(M)` for $\mathbf M^\mathsf T\mathbf M$ and
+`tcrossprod(M)` for $\mathbf M\mathbf M^\mathsf T$. The first is a marker-by-
+marker cross-product matrix; for this uncentred teaching slice its diagonal
+contains sums of squared dosages. The second is an individual-by-individual
+cross-product matrix. Neither is yet a genomic relationship matrix: marker
+centring, allele frequencies, and the appropriate scaling will be introduced
+in Genomic prediction.
+
+A matrix product is generally not interchangeable in order:
+$\mathbf A\mathbf B$ and $\mathbf B\mathbf A$ can have different dimensions
+or different values. Matching names such as “marker” and “individual” do not
+override this rule; the dimensions determine whether the calculation is
+meaningful.
+
+## Identity, inverse, rank, and quadratic forms
+
+The $q\times q$ identity matrix $\mathbf I_q$ has ones on its diagonal and
+zeros elsewhere. It leaves a compatible matrix unchanged:
+$\mathbf I_q\mathbf A=\mathbf A$. An inverse is more restrictive. A square
+$q\times q$ matrix $\mathbf A$ has an inverse $\mathbf A^{-1}$ only when
+
+$$
+\mathbf A^{-1}\mathbf A=\mathbf A\mathbf A^{-1}=\mathbf I_q.
+$$
+
+For example, $\begin{pmatrix}2&1\\1&1\end{pmatrix}$ has an inverse, but a
+matrix with two identical columns cannot have one because its columns repeat
+the same information. The **rank** of a matrix is the number of linearly
+independent directions represented by its columns (equivalently, its rows).
+Repeated or exactly combined columns lower rank and can make a square matrix
+singular.
+
+An inverse is useful algebraically, but production software usually solves a
+linear system such as $\mathbf A\mathbf b=\mathbf c$ without forming
+$\mathbf A^{-1}$ explicitly. R's **[`qr.solve`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/qr.html)** uses a QR decomposition for this purpose. This avoids treating inversion as a required first step and is typically a more stable route for regression calculations.
+
+For an $n\times1$ vector $\mathbf v$ and compatible $n\times n$ matrix
+$\mathbf A$, the scalar
+
+$$
+\mathbf v^\mathsf T\mathbf A\mathbf v
+$$
+
+is a **quadratic form**. When $\mathbf A=\mathbf I_n$, it is the sum of
+squared entries in $\mathbf v$. With a relationship or covariance matrix, a
+quadratic form can weight deviations according to the structure represented
+by that matrix. Its meaning depends on how that matrix was constructed.
+
+## Eigenvalues describe matrix directions
+
+For a square $q\times q$ matrix $\mathbf A$, an eigenvector $\mathbf v$ and
+eigenvalue $\lambda$ satisfy $\mathbf A\mathbf v=\lambda\mathbf v$.
+The transformation changes the length of that special direction by
+$\lambda$ without turning it away from the same line. For the $3\times3$
+matrix $\mathbf M^\mathsf T\mathbf M$ above, the three eigenvalues are about
+11.328, 5.454, and 2.217. They are all positive because this cross-product
+matrix has three independent marker columns in the six-row teaching slice.
+
+Eigenvalues later help describe the structure and numerical behaviour of
+relationship matrices. They do not, on their own, identify causal markers or
+biological pathways. The next page uses these vector and matrix operations to
+express a regression model linking marker information to a phenotype.
+
+## Exercises
+
+1. A marker matrix has 120 rows and 500 columns. What do its dimensions mean
+   if rows are individuals and columns are markers? What are the dimensions of
+   its transpose?
+
+::: {.callout-note collapse="true" title="Solution"}
+The matrix is $120\times500$: it records 500 marker values for each of 120
+individuals. Its transpose is $500\times120$, with markers as rows and
+individuals as columns.
+:::
+
+2. Let $\mathbf A$ be $4\times3$ and $\mathbf B$ be $3\times2$. Is
+$\mathbf A\mathbf B$ defined, and what dimensions does it have? Is
+$\mathbf B\mathbf A$ defined?
+
+::: {.callout-note collapse="true" title="Solution"}
+$\mathbf A\mathbf B$ is defined because the inner dimensions are both 3, and
+its result is $4\times2$. $\mathbf B\mathbf A$ is not defined because its
+inner dimensions would be 2 and 4.
+:::
+
+3. Why is $\mathbf M\mathbf M^\mathsf T$ for the teaching slice not already
+a genomic relationship matrix?
+
+::: {.callout-note collapse="true" title="Solution"}
+It is only an uncentred cross-product of three dosage columns. A genomic
+relationship construction must state how dosages are centred, whether they
+are scaled by allele frequency, and which marker set and population define
+those quantities. Those choices affect the interpretation of similarity.
+:::

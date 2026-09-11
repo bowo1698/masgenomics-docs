@@ -164,3 +164,5 @@ execute:
 
 bibliography: CITATION.bib
 csl: https://www.zotero.org/styles/apa
+            - theory/mathematical-fundamentals/covariance-correlation.qmd
+            - theory/mathematical-fundamentals/vectors-matrices.qmd
