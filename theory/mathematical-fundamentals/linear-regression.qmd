@@ -1,0 +1,244 @@
+---
+title: "Linear regression"
+---
+
+A breeder may notice that animals carrying more copies of one marker allele
+also tend to have different phenotypes. How can that pattern be summarised,
+and how much of the observed variation does it describe? **[Linear least
+squares regression](https://www.itl.nist.gov/div898/handbook/pmd/section1/pmd141.htm)**
+fits a line through paired observations by choosing coefficients that make
+the squared discrepancies between the observations and the line as small as
+possible. The fitted association can support prediction, but it does not show
+that the marker is a causal QTL.
+
+## A line separates the fitted pattern from unexplained variation
+
+For individual $i$, let $y_i$ be a phenotype and $x_i$ the dosage of the
+counted allele at one marker. The simple linear regression model is
+
+$$
+y_i = \beta_0 + \beta_1x_i + \varepsilon_i,
+$$
+
+where $\beta_0$ is the intercept, $\beta_1$ is the slope, and
+$\varepsilon_i$ is the unobserved model error. The intercept is the
+modelled mean phenotype when $x_i=0$. The slope is the modelled difference in
+mean phenotype for a one-copy increase in dosage. Because a biallelic diploid
+marker has dosages 0, 1, and 2, the fitted line compares those coding levels.
+Changing which allele is counted changes the coding and therefore the
+coefficient signs; it does not change the underlying observations.
+
+After the coefficients have been estimated, the **fitted value** for
+individual $i$ is
+
+$$
+\hat y_i = \hat\beta_0 + \hat\beta_1x_i.
+$$
+
+The **[residual](https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm)**
+is $e_i=y_i-\hat y_i$. A positive residual means that the observed phenotype
+lies above the fitted line, while a negative residual means that it lies
+below. Residuals contain variation not represented by this one-predictor
+model. They should not be interpreted as purely environmental effects because
+they can also contain omitted genetic effects, measurement error, nonlinear
+structure, and other unmodelled sources of variation.
+
+## Least squares chooses the slope and intercept
+
+**Least squares** chooses $\hat\beta_0$ and $\hat\beta_1$ to minimise the
+residual sum of squares
+
+$$
+\operatorname{RSS}=\sum_{i=1}^{n}e_i^2
+=\sum_{i=1}^{n}(y_i-\hat\beta_0-\hat\beta_1x_i)^2,
+$$
+
+where $n$ is the number of individuals. When the marker dosage varies, the
+least-squares slope can be written using the sample covariance and variance
+introduced on the preceding pages:
+
+$$
+\hat\beta_1=\frac{s_{xy}}{s_x^2},
+\qquad
+\hat\beta_0=\bar y-\hat\beta_1\bar x.
+$$
+
+The common $n-1$ denominators in $s_{xy}$ and $s_x^2$ cancel. A positive
+slope means that phenotype tends to increase with the counted-allele dosage
+in the fitted sample; a negative slope means it tends to decrease. If all
+individuals have the same dosage, then $s_x^2=0$ and the slope cannot be
+estimated from those data.
+
+The coefficient of determination compares the residual sum of squares with
+the total sum of squares,
+
+$$
+R^2=1-\frac{\operatorname{RSS}}{\operatorname{TSS}},
+\qquad
+\operatorname{TSS}=\sum_{i=1}^{n}(y_i-\bar y)^2.
+$$
+
+For an ordinary least-squares model with an intercept, $R^2$ is the fraction
+of sample phenotype variation described by the fitted predictors. It is a
+training-data summary, not proof of a sound model or accurate prediction for
+new individuals. The NIST model-validation guidance emphasises that **[$R^2$
+alone is not enough](https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm)**;
+residual patterns and out-of-sample evaluation can reveal failures hidden by
+one summary number.
+
+## One marker in the recurring project data
+
+The following example uses the first six animals in the simulated project
+dataset. The phenotype is recorded on the simulation's arbitrary scale, and
+`SNP007` is coded as counted-allele dosage 0, 1, or 2. These six observations
+make the arithmetic inspectable, but they are not an independent random sample
+from a breeding population.
+
+```{r}
+#| label: linear-regression-data
+d <- readRDS("../../demo-data/main/demo_data.rds")
+animals <- data.frame(
+  phenotype = d$pheno$y_cont_qtl_snp[1:6],
+  genotype_m1 = d$snp[1:6, "SNP007"]
+)
+animals
+```
+
+For this teaching slice, the sample covariance between dosage and phenotype
+is approximately 0.2391 and the sample dosage variance is 0.7000. Their ratio
+gives
+
+$$
+\hat\beta_1=\frac{0.2391}{0.7000}=0.3416.
+$$
+
+The mean dosage is 0.5 and the mean phenotype is approximately $-1.5616$, so
+the intercept is
+
+$$
+\hat\beta_0=-1.5616-(0.3416)(0.5)=-1.7323.
+$$
+
+The fitted line is therefore $\hat y=-1.7323+0.3416x$. At dosage 2 it gives
+$\hat y=-1.0492$. The observed phenotype for that animal is $-2.1248$, so
+its residual is $-2.1248-(-1.0492)=-1.0756$.
+
+R's [`lm()`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html)
+fits the same least-squares model and provides the fitted values and
+residuals.
+
+```{r}
+#| label: linear-regression-fit
+fit <- lm(phenotype ~ genotype_m1, data = animals)
+cbind(animals, fitted = fitted(fit), residual = resid(fit))
+coef(fit)
+summary(fit)$r.squared
+```
+
+The fitted coefficients agree with the manual calculation. The residual sum
+of squares is approximately 9.1479 and the total sum of squares is 9.5562,
+giving $R^2=0.0427$. Thus the fitted line describes about 4.3% of phenotype
+variation among these six records. That small value does not prove that
+`SNP007` is biologically unimportant, just as a large value would not prove
+causality. Sampling variation, family structure, linkage disequilibrium, and
+other loci all affect a one-marker association.
+
+## Assumptions determine what the line can support
+
+Least squares can always produce coefficients when the design has sufficient
+rank, but statistical interpretation needs assumptions. The model assumes
+that the conditional mean of the phenotype is linear in the predictors and
+that the unobserved model error has conditional mean zero. For the usual
+standard errors and tests, errors from independent individuals are assumed to
+be independent and to have constant conditional variance. A normal-error
+assumption is additionally used for exact small-sample tests and intervals;
+it is not required merely to calculate the least-squares line. Fitted
+residuals estimate aspects of those unobserved errors for model checking, but
+they are not the errors themselves. With an intercept, their sum is zero by
+the least-squares calculation, and fitted residuals need not be statistically
+independent.
+
+These assumptions are conditional on the variables included in the model.
+Relatives can have correlated model errors, management groups can shift the
+phenotype mean, and a curved relationship can leave a pattern in residuals.
+The six project animals come from the same simulated full-sib family, so this
+example is a calculation rather than evidence for independent-population
+inference. Residual plots, study design, and biological knowledge are needed
+before the line is used beyond this slice.
+
+Prediction also requires care. A fitted value describes the modelled mean at
+a supplied predictor value. It does not predict every individual's phenotype
+exactly, and extrapolation beyond the dosage range used for fitting has no
+support from these observations. Prediction for new breeding candidates must
+eventually be assessed on records that were not used to fit the model.
+
+## Exercises
+
+1. In the fitted project example, what do the intercept $-1.7323$ and slope
+   $0.3416$ mean, and why is the slope not a causal QTL effect?
+
+::: {.callout-note collapse="true" title="Solution"}
+The intercept is the fitted mean phenotype at dosage 0. The slope is the
+fitted phenotype difference for a one-copy increase in the counted allele, so
+dosage 1 is fitted 0.3416 units above dosage 0. The coefficient summarises an
+association in six simulated records. LD, family structure, and omitted loci
+can generate that association, so the coefficient does not establish that
+`SNP007` causes the trait difference.
+:::
+
+2. Use $\hat y=-1.7323+0.3416x$ to calculate the fitted value at dosage 2.
+   If the observed phenotype is $-2.1248$, what is its residual?
+
+::: {.callout-note collapse="true" title="Solution"}
+The fitted value is $-1.7323+0.3416(2)=-1.0491$, with the difference from the
+unrounded page result caused by rounding the coefficients. The residual is
+$-2.1248-(-1.0491)=-1.0757$. Using the full coefficients gives fitted value
+$-1.0492$ and residual $-1.0756$.
+:::
+
+3. A teaching sample has marker-phenotype covariance 0.36 and marker-dosage
+   variance 0.80. Calculate the least-squares slope.
+
+::: {.callout-note collapse="true" title="Solution"}
+The slope is $s_{xy}/s_x^2=0.36/0.80=0.45$ phenotype units per additional
+copy of the counted allele. This calculation assumes that the marker dosage
+varies; if its variance were zero, the slope would be undefined.
+:::
+
+4. A fitted model has $\operatorname{RSS}=18$ and
+   $\operatorname{TSS}=24$. Calculate $R^2$ and give one conclusion that the
+   value cannot support by itself.
+
+::: {.callout-note collapse="true" title="Solution"}
+$R^2=1-18/24=0.25$, so the fitted predictors describe 25% of the sample
+variation around the sample mean. This value alone cannot establish causality,
+validate the residual assumptions, or show that prediction will be accurate
+for new individuals.
+:::
+
+5. Fitted residuals grow more variable as fitted phenotypes increase. Which
+   model-error assumption is doubtful, and why should the coefficient table
+   be interpreted cautiously?
+
+::: {.callout-note collapse="true" title="Solution"}
+The constant conditional error-variance assumption is doubtful. Ordinary
+least-squares coefficients can still be calculated, but standard errors and
+intervals derived under constant variance may be inappropriate. The pattern
+also indicates that a single summary such as $R^2$ is not a complete model
+check.
+:::
+
+6. Explain why predicting at marker dosage 3 from this fitted line would be
+   invalid for the stated biallelic diploid coding.
+
+::: {.callout-note collapse="true" title="Solution"}
+The stated dosage counts copies of one allele in a diploid individual, so its
+possible values are only 0, 1, and 2. Dosage 3 is outside both the biological
+coding and the fitted data range. Substituting it into the equation produces
+a number, but not a supported biological prediction.
+:::
+
+One marker gives a readable line, but genomic datasets contain many correlated
+markers. The next page extends the same model to a design matrix and explains
+why regularisation is needed when ordinary least squares becomes unstable or
+has no unique coefficient solution.

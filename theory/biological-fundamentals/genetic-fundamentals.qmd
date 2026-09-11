@@ -8,33 +8,43 @@ editor:
 ## DNA: The storage of biological information
 
 Every living organism has cells, which are the smallest units of the
-organism and act differently in the body. For example, **[somatic cells](https://www.genome.gov/genetics-glossary/Somatic-Cells)** are
+organism and act differently in the body. For example, [**somatic
+cells**](https://www.genome.gov/genetics-glossary/Somatic-Cells) are
 responsible for growth, formation of body structure, and repair of
-damaged tissue, while **[gamete cells](https://www.genome.gov/genetics-glossary/Gamete)** (sex cells) are responsible for the
-reproductive process to pass on genetic material to offspring. Inside
-the cells, there are two divisions: the nucleus and the cytoplasm. The
-cytoplasm contains several particles called organelles, such as
-mitochondria, Golgi apparatus, ribosomes, lysosomes and so on. However,
-here we are not going into details about these organelles; we are going
-to focus on the nucleus instead.
+damaged tissue, while [**gamete
+cells**](https://www.genome.gov/genetics-glossary/Gamete) (sex cells)
+are responsible for the reproductive process to pass on genetic material
+to offspring. Inside the cells, particularly in animals, plants, humans,
+and some fungi cells, there are two divisions: the nucleus and the
+cytoplasm. The cytoplasm contains several particles called organelles,
+such as mitochondria, Golgi apparatus, ribosomes, lysosomes and so on.
+However, as we are interested in genetics, particularly how an organism
+transmits genetic information to the offspring, here we are going to
+focus only on the nucleus.
 
-![An animal cell, showing the nucleus and surrounding organelles.
-The chromatin label identifies the DNA-containing material inside the
-nucleus. OpenStax, [source](https://commons.wikimedia.org/wiki/File:0312_Animal_Cell_and_Components.jpg),
+![An animal cell, showing the nucleus and surrounding organelles. The
+chromatin label identifies the DNA-containing material inside the
+nucleus. OpenStax,
+[source](https://commons.wikimedia.org/wiki/File:0312_Animal_Cell_and_Components.jpg),
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); unchanged.
-[View full-size image](../../assets/genetic-fundamentals/animal-cell.jpg).](../../assets/genetic-fundamentals/animal-cell.jpg){#fig-animal-cell
-fig-align="center" width="720" .scientific-illustration
+[View full-size
+image](../../assets/genetic-fundamentals/animal-cell.jpg).](../../assets/genetic-fundamentals/animal-cell.jpg){#fig-animal-cell
+.scientific-illustration fig-align="center" width="720"
 fig-alt="Labelled animal cell with a nucleus containing chromatin, surrounded by cytoplasm, mitochondria, ribosomes, and other organelles."}
 
 The nucleus is the core of cells, containing all of the genetic
 information for development, metabolism, and behaviour of the organism.
 Within the nuclear membrane, there are threadlike bodies called
-**[chromosomes](https://www.genome.gov/genetics-glossary/Chromosome)** that organise nucleic acids, such as **[deoxyribonucleic acid (DNA)](https://www.genome.gov/genetics-glossary/Deoxyribonucleic-Acid-DNA)** and **[ribonucleic acid (RNA)](https://www.genome.gov/genetics-glossary/Ribonucleic-Acid-RNA)**. Chromosomes appear in pairs, in which
-one chromosome inherited from the male parent and one from the female
-parent. In addition, the number of chromosomes varies among species, and
-in fact, chromosome number can be used to characterise species. For
-example, humans typically have 23 chromosome pairs or 46 in total, while
-orangutans have 24 chromosome pairs.
+[**chromosomes**](https://www.genome.gov/genetics-glossary/Chromosome)
+that organise nucleic acids, such as [**deoxyribonucleic acid
+(DNA)**](https://www.genome.gov/genetics-glossary/Deoxyribonucleic-Acid-DNA)
+and [**ribonucleic acid
+(RNA)**](https://www.genome.gov/genetics-glossary/Ribonucleic-Acid-RNA).
+Chromosomes appear in pairs, in which one chromosome inherited from the
+male parent and one from the female parent. In addition, the number of
+chromosomes varies among species, which are used to characterise
+species. For example, humans typically have 23 chromosome pairs or 46 in
+total, while orangutans have 24 chromosome pairs.
 
 Since we are focusing on biological substances that carry genetic
 information, we are going to focus only on DNA or RNA. The main
@@ -54,46 +64,71 @@ cell, as summarised in the table below.
 contain A, C, and G; RNA contains U where DNA contains T. Sponk, with
 contributions by MesserWoland and Roland1952,
 [source](https://commons.wikimedia.org/wiki/File:Difference_DNA_RNA-EN.svg),
-[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); unchanged.
-[View full-size image](../../assets/genetic-fundamentals/dna-rna.svg).](../../assets/genetic-fundamentals/dna-rna.svg){#fig-dna-rna
-fig-align="center" width="720" .scientific-illustration
+[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/);
+unchanged. [View full-size
+image](../../assets/genetic-fundamentals/dna-rna.svg).](../../assets/genetic-fundamentals/dna-rna.svg){#fig-dna-rna
+.scientific-illustration fig-align="center" width="720"
 fig-alt="Single-stranded RNA beside double-stranded DNA. Letter labels identify C, G, A, and U in RNA, and C, G, A, and T in DNA."}
 
 Between nitrogenous bases are hydrogen bonds that always pair C with G
 and A with T. So there are always four combinations: A-T, T-A, G-C, C-G.
 
 So, the question is, how do cells transmit their genetic information to
-build a new cell, for example?
+build a new cell?
 
 To answer that question, I am going to introduce a critical concept
-called the **[central
-dogma](https://en.wikipedia.org/wiki/Central_dogma_of_molecular_biology)**.
+called the [**central
+dogma**](https://en.wikipedia.org/wiki/Central_dogma_of_molecular_biology).
 
 In simple terms, the central dogma describes how proteins, the building
 blocks of cells, are made from DNA. Not every stretch of DNA codes for a
-protein; only specific segments, called **[genes](https://www.genome.gov/genetics-glossary/Gene)**, are used for this
-purpose.
+protein; only specific segments, called
+[**genes**](https://www.genome.gov/genetics-glossary/Gene), are used for
+this purpose.
+
+::: {.callout-tip appearance="simple"}
+Indeed, the central dogma of molecular biology describes the
+conventional flow of genetic information from DNA to RNA and ultimately
+to protein. However, subsequent discoveries have revealed that the flow
+of biological information is more complex. For instance, RNA can serve
+as a template for DNA synthesis through a process known as [reverse
+transcription](https://www.nature.com/articles/2261209a0?utm_source=chatgpt.com),
+catalysed by the enzyme reverse transcriptase. More intriguingly, a
+recent study by [Deng et al.
+(2026)](https://doi.org/10.1126/science.aed1656) revealed an
+unconventional mechanism in which a protein can act as a template for
+sequence-specific DNA synthesis. In this system, an antiphage reverse
+transcriptase called Drt3b synthesises alternating poly(AC) DNA without
+a nucleic acid template. Instead, specific amino acid residues within
+the protein's active site directly control nucleotide selection,
+effectively allowing the protein itself to function as a template for
+DNA synthesis.
+:::
 
 Consider what happens when the body needs a new muscle cell. A gene
 called MyoD1 switches on muscle-cell formation, prompting uncommitted
 stem cells to commit to becoming muscle cells. The MyoD1 gene is first
-transcribed into **[messenger RNA (mRNA)](https://www.genome.gov/genetics-glossary/Messenger-RNA-mRNA)**, which is then translated into
-proteins that assemble the muscle tissue. This sounds like a
-straightforward chain of events, but in reality it unfolds through a
-complex web of interactions with many other genes.
+transcribed into [**messenger RNA
+(mRNA)**](https://www.genome.gov/genetics-glossary/Messenger-RNA-mRNA),
+which is then translated into proteins that assemble the muscle tissue.
+This sounds like a straightforward chain of events, but in reality it
+unfolds through a complex web of interactions with many other genes.
 
 In organisms that reproduce sexually, chromosomes from both parents mix
-through a process called **[crossing over](https://www.genome.gov/genetics-glossary/Crossing-Over)**, which is why every
-individual ends up with a genetic combination all their own. A child of
-a brown-eyed mother and a blue-eyed father, for example, may end up with
-an eye colour that blends or leans toward one parent's trait. These
-observable, physical characteristics are called **[phenotypes](https://www.genome.gov/genetics-glossary/Phenotype)**.
+through a process called [**crossing
+over**](https://www.genome.gov/genetics-glossary/Crossing-Over), which
+is why every individual ends up with a genetic combination all their
+own. A child of a brown-eyed mother and a blue-eyed father, for example,
+may end up with an eye colour that blends or leans toward one parent's
+trait. These observable, physical characteristics are called
+[**phenotypes**](https://www.genome.gov/genetics-glossary/Phenotype).
 
 Even though children inherit the same set of genes as their parents, the
 exact version of each gene, and the DNA sequence behind it, can differ.
-These gene variants are called **[alleles](https://www.genome.gov/genetics-glossary/Allele)**, while the specific
-combination of DNA sequences an individual carries is called their
-**[genotype](https://en.wikipedia.org/wiki/Genotype)**.
+These gene variants are called
+[**alleles**](https://www.genome.gov/genetics-glossary/Allele), while
+the specific combination of DNA sequences an individual carries is
+called their [**genotype**](https://en.wikipedia.org/wiki/Genotype).
 
 ## Cell division
 
@@ -105,100 +140,131 @@ chromosomes from two parents without doubling that number in every
 generation? Mitosis and meiosis solve these different problems.
 
 For the examples below, consider an organism with two chromosome sets,
-one inherited from each parent. Such a cell is **[diploid](https://www.genome.gov/genetics-glossary/Diploid)**, written as
-$2n$, whereas a **[haploid](https://en.wikipedia.org/wiki/Ploidy#Haploidy)** cell has one set, written as $n$. The
-members of a **[homologous chromosome](https://en.wikipedia.org/wiki/Homologous_chromosome)** pair carry corresponding genes at the
-same positions, or **[loci](https://www.genome.gov/genetics-glossary/Locus)**, but may carry different alleles. Before either
-mitosis or meiosis, **[DNA replication](https://www.genome.gov/genetics-glossary/DNA-Replication)** produces two copies of each
-chromosome, called **[sister chromatids](https://en.wikipedia.org/wiki/Sister_chromatids)**, joined at the **[centromere](https://www.genome.gov/genetics-glossary/Centromere)**. This
-doubles the amount of DNA without changing the number of chromosome
+one inherited from each parent. Such a cell is
+[**diploid**](https://www.genome.gov/genetics-glossary/Diploid), written
+as $2n$, whereas a
+[**haploid**](https://en.wikipedia.org/wiki/Ploidy#Haploidy) cell has
+one set, written as $n$. The members of a [**homologous
+chromosome**](https://en.wikipedia.org/wiki/Homologous_chromosome) pair
+carry corresponding genes at the same positions, or
+[**loci**](https://www.genome.gov/genetics-glossary/Locus), but may
+carry different alleles. Before either mitosis or meiosis, [**DNA
+replication**](https://www.genome.gov/genetics-glossary/DNA-Replication)
+produces two copies of each chromosome, called [**sister
+chromatids**](https://en.wikipedia.org/wiki/Sister_chromatids), joined
+at the
+[**centromere**](https://www.genome.gov/genetics-glossary/Centromere).
+This doubles the amount of DNA without changing the number of chromosome
 sets: a replicated diploid cell is still diploid.
 
 ### Mitosis
 
-**[Mitosis](https://www.genome.gov/genetics-glossary/Mitosis)** divides the nucleus so that each daughter nucleus receives one
-copy of every chromosome. In a dividing skin cell, for example, it
-preserves the chromosome complement needed by the replacement cells. DNA
-replication occurs beforehand, during the **[S phase](https://en.wikipedia.org/wiki/S_phase)** of **[interphase](https://en.wikipedia.org/wiki/Interphase)**.
-Provided replication and chromosome separation proceed without errors,
-the daughter cells inherit the same nuclear genetic information as the
-parent cell. **[Mutations](https://www.genome.gov/genetics-glossary/Mutation)** can introduce differences, so genetic identity is
-the expected outcome rather than an absolute guarantee. The [NHGRI
-description of
+[**Mitosis**](https://www.genome.gov/genetics-glossary/Mitosis) divides
+the nucleus so that each daughter nucleus receives one copy of every
+chromosome. In a dividing skin cell, for example, it preserves the
+chromosome complement needed by the replacement cells. DNA replication
+occurs beforehand, during the [**S
+phase**](https://en.wikipedia.org/wiki/S_phase) of
+[**interphase**](https://en.wikipedia.org/wiki/Interphase). Provided
+replication and chromosome separation proceed without errors, the
+daughter cells inherit the same nuclear genetic information as the
+parent cell.
+[**Mutations**](https://www.genome.gov/genetics-glossary/Mutation) can
+introduce differences, so genetic identity is the expected outcome
+rather than an absolute guarantee. The [NHGRI description of
 mitosis](https://www.genome.gov/genetics-glossary/Mitosis) summarises
 this role in growth and cell replacement.
 
-During **[prophase](https://en.wikipedia.org/wiki/Prophase)**, chromosomes condense and the **[mitotic spindle](https://en.wikipedia.org/wiki/Spindle_apparatus)** begins to
-form. As the nuclear envelope breaks down in **[prometaphase](https://en.wikipedia.org/wiki/Prometaphase)**, spindle
-microtubules attach to structures called **[kinetochores](https://en.wikipedia.org/wiki/Kinetochore)** on the
-chromosomes. At **[metaphase](https://en.wikipedia.org/wiki/Metaphase)**, the replicated chromosomes align near the
-centre of the cell, with sister chromatids attached towards opposite
-poles. This arrangement allows **[anaphase](https://en.wikipedia.org/wiki/Anaphase)** to separate the sisters so that
-each pole receives a complete chromosome set. During **[telophase](https://en.wikipedia.org/wiki/Telophase)**, nuclear
+During [**prophase**](https://en.wikipedia.org/wiki/Prophase),
+chromosomes condense and the [**mitotic
+spindle**](https://en.wikipedia.org/wiki/Spindle_apparatus) begins to
+form. As the nuclear envelope breaks down in
+[**prometaphase**](https://en.wikipedia.org/wiki/Prometaphase), spindle
+microtubules attach to structures called
+[**kinetochores**](https://en.wikipedia.org/wiki/Kinetochore) on the
+chromosomes. At
+[**metaphase**](https://en.wikipedia.org/wiki/Metaphase), the replicated
+chromosomes align near the centre of the cell, with sister chromatids
+attached towards opposite poles. This arrangement allows
+[**anaphase**](https://en.wikipedia.org/wiki/Anaphase) to separate the
+sisters so that each pole receives a complete chromosome set. During
+[**telophase**](https://en.wikipedia.org/wiki/Telophase), nuclear
 envelopes form around the separated sets and the chromosomes begin to
 decondense.
 
-Division of the cytoplasm, called **[cytokinesis](https://en.wikipedia.org/wiki/Cytokinesis)**, usually overlaps with the
-end of mitosis and completes the formation of two cells. It is a
-separate process from nuclear division. For a diploid parent cell, the
-usual outcome is two diploid daughter cells: each retains both members
-of every homologous pair. Mitosis therefore maintains the chromosome
-number across successive divisions during growth.
+Division of the cytoplasm, called
+[**cytokinesis**](https://en.wikipedia.org/wiki/Cytokinesis), usually
+overlaps with the end of mitosis and completes the formation of two
+cells. It is a separate process from nuclear division. For a diploid
+parent cell, the usual outcome is two diploid daughter cells: each
+retains both members of every homologous pair. Mitosis therefore
+maintains the chromosome number across successive divisions during
+growth.
 
 In @fig-mitosis, follow the arrows from interphase through chromosome
 alignment and separation. The two daughter cells return to interphase
 after nuclear division and cytokinesis.
 
-![Stages of mitosis, with interphase shown for context. Sister chromatids
-separate at anaphase, and daughter nuclei form at telophase. Jpablo cad
-and Juliana Osorio; translation by Matt; derivative by M3.dahl,
+![Stages of mitosis, with interphase shown for context. Sister
+chromatids separate at anaphase, and daughter nuclei form at telophase.
+Jpablo cad and Juliana Osorio; translation by Matt; derivative by
+M3.dahl,
 [source](https://commons.wikimedia.org/wiki/File:Mitosis_schematic_diagram-en.svg),
-[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); unchanged.
-[View full-size diagram](../../assets/genetic-fundamentals/mitosis.svg).](../../assets/genetic-fundamentals/mitosis.svg){#fig-mitosis
-fig-align="center" width="760" .scientific-illustration
+[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/);
+unchanged. [View full-size
+diagram](../../assets/genetic-fundamentals/mitosis.svg).](../../assets/genetic-fundamentals/mitosis.svg){#fig-mitosis
+.scientific-illustration fig-align="center" width="760"
 fig-alt="Arrows connect interphase, prophase, prometaphase, metaphase, anaphase, and telophase. Chromosomes align centrally, sister chromatids move to opposite poles, and two daughter cells form."}
 
 ### Meiosis
 
-In animals, **[meiosis](https://www.genome.gov/genetics-glossary/Meiosis)** produces the haploid cells that develop into
-gametes. It involves one round of DNA replication followed by two
-divisions. During meiosis I, homologous chromosomes pair and then
-separate, reducing the number of chromosome sets from two to one. During
-meiosis II, sister chromatids separate, without another round of DNA
-replication between the divisions. The distinction is in what separates:
-homologues first, then sister chromatids.
+In animals,
+[**meiosis**](https://www.genome.gov/genetics-glossary/Meiosis) produces
+the haploid cells that develop into gametes. It involves one round of
+DNA replication followed by two divisions. During meiosis I, homologous
+chromosomes pair and then separate, reducing the number of chromosome
+sets from two to one. During meiosis II, sister chromatids separate,
+without another round of DNA replication between the divisions. The
+distinction is in what separates: homologues first, then sister
+chromatids.
 
 The usual description gives four haploid products from one diploid cell,
 but these do not always become four functional gametes. In mammalian egg
 formation, unequal cytoplasmic divisions produce one large egg and small
-**[polar bodies](https://en.wikipedia.org/wiki/Polar_body)**. In plants, meiosis produces **[spores](https://en.wikipedia.org/wiki/Spore)**; gametes form later in
-the haploid phase of the life cycle. These differences in development
-share the same chromosome-reduction process described in the [NHGRI
-overview of meiosis](https://www.genome.gov/genetics-glossary/Meiosis).
+[**polar bodies**](https://en.wikipedia.org/wiki/Polar_body). In plants,
+meiosis produces [**spores**](https://en.wikipedia.org/wiki/Spore);
+gametes form later in the haploid phase of the life cycle. These
+differences in development share the same chromosome-reduction process
+described in the [NHGRI overview of
+meiosis](https://www.genome.gov/genetics-glossary/Meiosis).
 
 Meiosis also changes which alleles travel together. During prophase I,
-crossing over exchanges corresponding DNA segments between
-non-sister chromatids of homologous chromosomes. A chromosome passed to
-an offspring can therefore contain segments derived from both of that
-parent's parents. This **[recombination](https://en.wikipedia.org/wiki/Genetic_recombination)** rearranges existing alleles into
-new combinations; mutation is the source of new alleles. The [NHGRI
-explanation of crossing
+crossing over exchanges corresponding DNA segments between non-sister
+chromatids of homologous chromosomes. A chromosome passed to an
+offspring can therefore contain segments derived from both of that
+parent's parents. This
+[**recombination**](https://en.wikipedia.org/wiki/Genetic_recombination)
+rearranges existing alleles into new combinations; mutation is the
+source of new alleles. The [NHGRI explanation of crossing
 over](https://www.genome.gov/genetics-glossary/Crossing-Over) describes
 how this exchange contributes to variation among gametes.
 
 At metaphase I, each homologous pair can orient towards either pole
-independently of the other pairs. This **[independent assortment](https://en.wikipedia.org/wiki/Mendelian_inheritance#Law_of_Independent_Assortment)** mixes
-chromosomes of maternal and paternal origin. In a simple example with
-two chromosome pairs, assortment alone permits four combinations of
+independently of the other pairs. This [**independent
+assortment**](https://en.wikipedia.org/wiki/Mendelian_inheritance#Law_of_Independent_Assortment)
+mixes chromosomes of maternal and paternal origin. In a simple example
+with two chromosome pairs, assortment alone permits four combinations of
 whole chromosomes in gametes across many meioses. Crossing over adds
 further possibilities within each chromosome.
 
-**[Fertilisation](https://en.wikipedia.org/wiki/Fertilisation)** occurs after meiosis, when two haploid gametes unite to
-form a diploid **[zygote](https://en.wikipedia.org/wiki/Zygote)**. Which gametes combine contributes additional
-variation among offspring. Thus, meiosis reduces the chromosome number
-and reshuffles inherited DNA, while fertilisation restores the diploid
-number. Together these processes explain why siblings can inherit
-different combinations of alleles from the same parents.
+[**Fertilisation**](https://en.wikipedia.org/wiki/Fertilisation) occurs
+after meiosis, when two haploid gametes unite to form a diploid
+[**zygote**](https://en.wikipedia.org/wiki/Zygote). Which gametes
+combine contributes additional variation among offspring. Thus, meiosis
+reduces the chromosome number and reshuffles inherited DNA, while
+fertilisation restores the diploid number. Together these processes
+explain why siblings can inherit different combinations of alleles from
+the same parents.
 
 The numbered steps in @fig-meiosis separate replication (1), pairing of
 homologues (2), crossing over (3), meiosis I (4), and meiosis II (5).
@@ -207,11 +273,13 @@ Notice that the first division separates homologues while the second
 separates sister chromatids.
 
 ![Chromosome behaviour before and during meiosis. One replication is
-followed by two divisions, producing four haploid cells in this schematic.
-Peter coxhead, [source](https://commons.wikimedia.org/wiki/File:Meiosis_main_steps.svg),
-[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/); unchanged.
-[View full-size diagram](../../assets/genetic-fundamentals/meiosis.svg).](../../assets/genetic-fundamentals/meiosis.svg){#fig-meiosis
-fig-align="center" width="800" .scientific-illustration
+followed by two divisions, producing four haploid cells in this
+schematic. Peter coxhead,
+[source](https://commons.wikimedia.org/wiki/File:Meiosis_main_steps.svg),
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/);
+unchanged. [View full-size
+diagram](../../assets/genetic-fundamentals/meiosis.svg).](../../assets/genetic-fundamentals/meiosis.svg){#fig-meiosis
+.scientific-illustration fig-align="center" width="800"
 fig-alt="Five numbered steps show chromosome duplication, homologous pairing, crossing over, separation of homologues into two cells, and separation of sister chromatids into four haploid cells. Long and short chromosomes distinguish the two pairs."}
 
 ## Mendelian inheritance
@@ -219,27 +287,34 @@ fig-alt="Five numbered steps show chromosome duplication, homologous pairing, cr
 Gregor Mendel's experiments with pea plants showed that inheritance
 follows predictable patterns when particular traits are tracked across
 generations. We can now connect those patterns to the behaviour of
-chromosomes during meiosis. At an **[autosomal](https://www.genome.gov/genetics-glossary/Autosome)** locus in a diploid organism,
-an individual usually carries two alleles, one from each parent. An
-individual with matching alleles is **[homozygous](https://en.wikipedia.org/wiki/Zygosity#Homozygous)** at that locus; one
-with different alleles is **[heterozygous](https://en.wikipedia.org/wiki/Zygosity#Heterozygous)**. These terms describe a
-specific locus, so an individual can be homozygous at one locus and
-heterozygous at another.
+chromosomes during meiosis. At an
+[**autosomal**](https://www.genome.gov/genetics-glossary/Autosome) locus
+in a diploid organism, an individual usually carries two alleles, one
+from each parent. An individual with matching alleles is
+[**homozygous**](https://en.wikipedia.org/wiki/Zygosity#Homozygous) at
+that locus; one with different alleles is
+[**heterozygous**](https://en.wikipedia.org/wiki/Zygosity#Heterozygous).
+These terms describe a specific locus, so an individual can be
+homozygous at one locus and heterozygous at another.
 
-The **[law of segregation](https://en.wikipedia.org/wiki/Mendelian_inheritance#Law_of_Segregation)** states that the two alleles separate during
-gamete formation. For a heterozygote $Pp$, ordinary Mendelian
-segregation gives a probability of one-half for a gamete to receive $P$
-and one-half to receive $p$. Fertilisation pairs one allele from each
-parent again. This transmission of discrete alleles explains how a trait
-absent from the parents' appearance can reappear in their offspring.
+The [**law of
+segregation**](https://en.wikipedia.org/wiki/Mendelian_inheritance#Law_of_Segregation)
+states that the two alleles separate during gamete formation. For a
+heterozygote $Pp$, ordinary Mendelian segregation gives a probability of
+one-half for a gamete to receive $P$ and one-half to receive $p$.
+Fertilisation pairs one allele from each parent again. This transmission
+of discrete alleles explains how a trait absent from the parents'
+appearance can reappear in their offspring.
 
 The law of independent assortment concerns different loci. For example,
 an individual $AaBb$ produces $AB$, $Ab$, $aB$, and $ab$ gametes in
 equal expected proportions when the loci assort independently. Loci on
 different chromosomes usually satisfy this condition. Nearby loci on the
-same chromosome are **[linked](https://www.genome.gov/genetics-glossary/Linkage)** and tend to pass together, although crossing
-over can separate them. Consequently, segregation at a single locus does
-not imply independence between all loci.
+same chromosome are
+[**linked**](https://www.genome.gov/genetics-glossary/Linkage) and tend
+to pass together, although crossing over can separate them.
+Consequently, segregation at a single locus does not imply independence
+between all loci.
 
 Dominance describes how the two alleles in a heterozygote affect the
 phenotype. It does not change their probabilities of transmission.
@@ -257,9 +332,11 @@ and the purple allele ($P$) is completely dominant over the white allele
 $Pp \times Pp$
 
 Each parent produces $P$ and $p$ gametes in equal expected proportions.
-In the **[Punnett square](https://en.wikipedia.org/wiki/Punnett_square)** below, the row and column identify the alleles
-contributed by the two parents. Each intersection has probability
-$1/2 \times 1/2 = 1/4$ under random union of these gametes.
+In the [**Punnett
+square**](https://en.wikipedia.org/wiki/Punnett_square) below, the row
+and column identify the alleles contributed by the two parents. Each
+intersection has probability $1/2 \times 1/2 = 1/4$ under random union
+of these gametes.
 
 | Gamete from parent 1 | $P$ from parent 2 | $p$ from parent 2 |
 |----------------------|-------------------|-------------------|
@@ -289,12 +366,14 @@ and the conditions in which the organism develops.
 
 ### Complete dominance
 
-In **[complete dominance](https://en.wikipedia.org/wiki/Dominance_(genetics)#Complete_dominance)**, the heterozygote has the same phenotype as one of
-the homozygotes for the trait being considered. In the example above,
-$PP$ and $Pp$ are both purple. One possible biochemical explanation is
-that a single functional copy produces enough enzyme for the purple
-phenotype. This is an illustrative mechanism; dominance can arise in
-other ways and depends on what phenotype is measured.
+In [**complete
+dominance**](https://en.wikipedia.org/wiki/Dominance_(genetics)#Complete_dominance),
+the heterozygote has the same phenotype as one of the homozygotes for
+the trait being considered. In the example above, $PP$ and $Pp$ are both
+purple. One possible biochemical explanation is that a single functional
+copy produces enough enzyme for the purple phenotype. This is an
+illustrative mechanism; dominance can arise in other ways and depends on
+what phenotype is measured.
 
 The recessive allele remains present in a heterozygote and can pass to
 its offspring. A dominant allele is not necessarily more common in the
@@ -304,12 +383,14 @@ or reproduction are separate properties.
 
 ### Incomplete dominance
 
-In **[incomplete dominance](https://en.wikipedia.org/wiki/Dominance_(genetics)#Incomplete_dominance)**, the heterozygous phenotype lies between the two
-homozygous phenotypes. Consider a hypothetical flower-colour locus with
-alleles $C^R$ and $C^W$: $C^R C^R$ plants have red flowers, $C^W C^W$
-plants have white flowers, and $C^R C^W$ plants have pink flowers. A
-possible explanation is that the heterozygote produces less pigment than
-the red homozygote, enough to give an intermediate colour.
+In [**incomplete
+dominance**](https://en.wikipedia.org/wiki/Dominance_(genetics)#Incomplete_dominance),
+the heterozygous phenotype lies between the two homozygous phenotypes.
+Consider a hypothetical flower-colour locus with alleles $C^R$ and
+$C^W$: $C^R C^R$ plants have red flowers, $C^W C^W$ plants have white
+flowers, and $C^R C^W$ plants have pink flowers. A possible explanation
+is that the heterozygote produces less pigment than the red homozygote,
+enough to give an intermediate colour.
 
 Crossing two pink plants still gives a genotypic ratio of $1:2:1$, but
 the phenotypic ratio is now also $1\text{ red} : 2\text{ pink} :
@@ -317,31 +398,34 @@ the phenotypic ratio is now also $1\text{ red} : 2\text{ pink} :
 they have not permanently blended. Red and white flowers can therefore
 reappear among the offspring of pink parents.
 
-The cross in @fig-incomplete-dominance shows the preceding generation:
-a red homozygote crossed with a white homozygote produces only pink
+The cross in @fig-incomplete-dominance shows the preceding generation: a
+red homozygote crossed with a white homozygote produces only pink
 heterozygotes. The diagram uses $R$ and $r$ for the alleles called $C^R$
-and $C^W$ above; the capital letter does not imply complete dominance
-in this example.
+and $C^W$ above; the capital letter does not imply complete dominance in
+this example.
 
-![A red-by-white homozygote cross produces pink heterozygotes in all four
-cells of the Punnett square. Crossing those heterozygotes with one
+![A red-by-white homozygote cross produces pink heterozygotes in all
+four cells of the Punnett square. Crossing those heterozygotes with one
 another would give the 1:2:1 ratio described above. Spencerbaron,
 [source](https://commons.wikimedia.org/wiki/File:Incomplete_dominance.svg),
-[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); unchanged.
-[View full-size diagram](../../assets/genetic-fundamentals/incomplete-dominance.svg).](../../assets/genetic-fundamentals/incomplete-dominance.svg){#fig-incomplete-dominance
-fig-align="center" width="560" .scientific-illustration
+[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/);
+unchanged. [View full-size
+diagram](../../assets/genetic-fundamentals/incomplete-dominance.svg).](../../assets/genetic-fundamentals/incomplete-dominance.svg){#fig-incomplete-dominance
+.scientific-illustration fig-align="center" width="560"
 fig-alt="Punnett square for a red RR flower crossed with a white rr flower. Both column gametes carry R and both row gametes carry r; all four offspring cells are labelled Rr and show pink flowers."}
 
 ### Codominance
 
-In **[codominance](https://en.wikipedia.org/wiki/Dominance_(genetics)#Codominance)**, the heterozygote shows distinguishable contributions
-from both alleles. In the standard model of human ABO blood groups,
-$I^A$ and $I^B$ encode enzymes that produce different carbohydrate
-antigens on red blood cells. An individual with genotype $I^A I^B$
-expresses both A and B antigens and has blood type AB. These are two
-detectable products, rather than an intermediate antigen. The [NCBI
-record for the ABO gene](https://www.ncbi.nlm.nih.gov/gene/28) describes
-the enzymes responsible for these antigen differences.
+In
+[**codominance**](https://en.wikipedia.org/wiki/Dominance_(genetics)#Codominance),
+the heterozygote shows distinguishable contributions from both alleles.
+In the standard model of human ABO blood groups, $I^A$ and $I^B$ encode
+enzymes that produce different carbohydrate antigens on red blood cells.
+An individual with genotype $I^A I^B$ expresses both A and B antigens
+and has blood type AB. These are two detectable products, rather than an
+intermediate antigen. The [NCBI record for the ABO
+gene](https://www.ncbi.nlm.nih.gov/gene/28) describes the enzymes
+responsible for these antigen differences.
 
 The distinction from incomplete dominance concerns the phenotype used to
 classify the heterozygote. With incomplete dominance, we observe an
@@ -368,12 +452,12 @@ group](https://www.ncbi.nlm.nih.gov/books/NBK2267/).
 
 ### Epistasis
 
-**[Epistasis](https://www.genome.gov/genetics-glossary/Epistasis)** occurs when the phenotypic effect of a genotype at one locus
-depends on the genotype at another locus. This can happen when the
-products of different genes participate in the same pathway. Blocking an
-early step may prevent a later step from affecting the phenotype, even
-when the gene for that later step functions normally. The [NHGRI
-definition of
+[**Epistasis**](https://www.genome.gov/genetics-glossary/Epistasis)
+occurs when the phenotypic effect of a genotype at one locus depends on
+the genotype at another locus. This can happen when the products of
+different genes participate in the same pathway. Blocking an early step
+may prevent a later step from affecting the phenotype, even when the
+gene for that later step functions normally. The [NHGRI definition of
 epistasis](https://www.genome.gov/genetics-glossary/Epistasis) describes
 this modification of one gene's effect by other genes.
 
@@ -389,17 +473,18 @@ this example of epistasis concerns two loci.
 
 ### Pleiotropy
 
-**[Pleiotropy](https://en.wikipedia.org/wiki/Pleiotropy)** means that variation in one gene influences more than one
-trait. A gene product may function in several tissues or regulate a
-process with several downstream consequences. For an illustrative
-example, a change in a growth regulator could affect both body size and
-the timing of maturity. These effects need not be equally large or
-beneficial for every trait.
+[**Pleiotropy**](https://en.wikipedia.org/wiki/Pleiotropy) means that
+variation in one gene influences more than one trait. A gene product may
+function in several tissues or regulate a process with several
+downstream consequences. For an illustrative example, a change in a
+growth regulator could affect both body size and the timing of maturity.
+These effects need not be equally large or beneficial for every trait.
 
 In breeding, a pleiotropic allele can help explain why selecting for one
 trait also changes another. However, correlated traits alone do not
 prove pleiotropy: separate genes that are closely linked can also be
-inherited together. Pleiotropy also differs from **[polygenic inheritance](https://www.genome.gov/genetics-glossary/Polygenic-Trait)**,
+inherited together. Pleiotropy also differs from [**polygenic
+inheritance**](https://www.genome.gov/genetics-glossary/Polygenic-Trait),
 in which many genes contribute to one trait. A trait can be polygenic
 while some of its contributing genes also have pleiotropic effects.
 
@@ -412,13 +497,15 @@ light, and other exposures can alter development or gene expression
 without changing the inherited DNA sequence. A difference in phenotype
 therefore does not, by itself, establish a genetic difference.
 
-An environmental effect becomes a **[genotype-by-environment interaction](https://www.genome.gov/genetics-glossary/Gene-Environment-Interaction)** when genotypes respond differently to the environmental
-change. Consider a hypothetical comparison of two plant genotypes: one
-grows more than the other under ample water, but loses that advantage
-during drought. Their response to water availability differs. If drought
-reduced both by the same amount on the measurement scale, that would be
-an environmental effect without an interaction. The [NHGRI explanation
-of gene-environment
+An environmental effect becomes a [**genotype-by-environment
+interaction**](https://www.genome.gov/genetics-glossary/Gene-Environment-Interaction)
+when genotypes respond differently to the environmental change. Consider
+a hypothetical comparison of two plant genotypes: one grows more than
+the other under ample water, but loses that advantage during drought.
+Their response to water availability differs. If drought reduced both by
+the same amount on the measurement scale, that would be an environmental
+effect without an interaction. The [NHGRI explanation of
+gene-environment
 interaction](https://www.genome.gov/genetics-glossary/Gene-Environment-Interaction)
 describes this dependence of genetic effects on environmental exposure.
 
@@ -441,3 +528,83 @@ lines. A higher observed value may reflect inherited differences, better
 growing conditions, or both. Replication across relevant environments
 helps separate those contributions and assess whether a genetic
 advantage persists under the conditions where selection will be used.
+
+## Exercises
+
+1.  A cell uses a gene to make a protein. Describe the information flow
+    from DNA to protein, and identify the base present in RNA where DNA
+    has thymine.
+
+::: {.callout-note collapse="true" title="Solution"}
+The gene's DNA sequence is transcribed into messenger RNA, and the mRNA
+is translated to make a protein. RNA uses uracil (U) where DNA uses
+thymine (T). Only particular DNA segments are genes used in this
+information flow; not every DNA sequence codes for a protein.
+:::
+
+2.  A diploid cell has replicated its chromosomes. Compare the usual
+    products of mitosis and meiosis, including which chromosome
+    structures separate in each process.
+
+::: {.callout-note collapse="true" title="Solution"}
+Mitosis normally produces two diploid daughter cells and separates
+sister chromatids, preserving the chromosome number. Meiosis follows one
+replication with two divisions: meiosis I separates homologous
+chromosomes and reduces the chromosome-set number, while meiosis II
+separates sister chromatids. Its usual schematic outcome is four haploid
+products.
+:::
+
+3.  Explain how crossing over, independent assortment, and fertilisation
+    can make siblings genetically different. Which of these processes
+    creates a new allele?
+
+::: {.callout-note collapse="true" title="Solution"}
+Crossing over rearranges parental chromosome segments, independent
+assortment mixes whole chromosomes of maternal and paternal origin into
+gametes, and fertilisation combines one gamete from each parent. These
+processes reshuffle alleles that already exist. Mutation, rather than
+any of the three processes, is the source of a new allele.
+:::
+
+4.  For the stated complete-dominance cross $Pp \times Pp$, calculate
+    the expected genotype probabilities and the expected purple-to-white
+    phenotype ratio. Why need not a family of four offspring have
+    exactly that ratio?
+
+::: {.callout-note collapse="true" title="Solution"}
+The expected genotype probabilities are $P(PP)=1/4$, $P(Pp)=1/2$, and
+$P(pp)=1/4$. Because $PP$ and $Pp$ are purple, the expected phenotype
+ratio is $3$ purple to $1$ white. These are probabilities across
+repeated crosses; random variation means one family of four need not
+have exactly three purple and one white offspring.
+:::
+
+5.  Two heterozygous flowers have the intermediate pink phenotype
+    between red and white. What pattern of gene action does this
+    illustrate, and how does it differ from codominance? Also state how
+    many allele copies one diploid individual carries at a locus with
+    multiple alleles in the population.
+
+::: {.callout-note collapse="true" title="Solution"}
+This is incomplete dominance: the heterozygote has an intermediate
+phenotype. In codominance, both allelic contributions can be
+distinguished in the heterozygote, as with the A and B antigens in blood
+type AB. A diploid individual still carries only two allele copies at
+one autosomal locus, even when many alleles occur in the population.
+:::
+
+6.  Distinguish epistasis, pleiotropy, and genotype-by-environment
+    interaction. In the article's examples, what would show that a
+    difference between two plants is an environmental effect without a
+    genotype-by-environment interaction?
+
+::: {.callout-note collapse="true" title="Solution"}
+Epistasis means that a genotype at one locus changes the phenotypic
+effect of a genotype at another locus. Pleiotropy means that variation
+in one gene influences more than one trait. A genotype-by-environment
+interaction occurs when genotypes respond differently to an
+environmental change. If drought reduced both plant genotypes by the
+same amount on the measurement scale, it would be an environmental
+effect without that interaction.
+:::

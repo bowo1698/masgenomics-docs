@@ -63,12 +63,17 @@ website:
             - theory/biological-fundamentals/genetic-fundamentals.qmd
             - theory/biological-fundamentals/genetic-variation-markers.qmd
             - theory/biological-fundamentals/population-genetic-variation.qmd
+            - theory/biological-fundamentals/linkage-recombination-ld.qmd
         - section: "2. Mathematical fundamentals"
           contents:
             - theory/mathematical-fundamentals/descriptive-statistics.qmd
             - theory/mathematical-fundamentals/probability-random-variables.qmd
             - theory/mathematical-fundamentals/probability-distributions.qmd
             - theory/mathematical-fundamentals/sampling-uncertainty.qmd
+            - theory/mathematical-fundamentals/covariance-correlation.qmd
+            - theory/mathematical-fundamentals/vectors-matrices.qmd
+            - theory/mathematical-fundamentals/linear-regression.qmd
+            - theory/mathematical-fundamentals/multiple-regression-regularisation.qmd
         - section: "3. Genomic prediction"
           contents:
             - theory/genomic-prediction/quantitative-genetics.qmd
@@ -148,7 +153,7 @@ format:
     code-overflow: wrap
     code-link: true
     code-tools: false
-    code-fold: false
+    code-fold: true
     highlight-style: github-dark
     fig-cap-location: bottom
     tbl-cap-location: top
@@ -164,5 +169,3 @@ execute:
 
 bibliography: CITATION.bib
 csl: https://www.zotero.org/styles/apa
-            - theory/mathematical-fundamentals/covariance-correlation.qmd
-            - theory/mathematical-fundamentals/vectors-matrices.qmd

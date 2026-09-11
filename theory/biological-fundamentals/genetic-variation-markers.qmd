@@ -11,145 +11,158 @@ section](genetic-fundamentals.qmd#meiosis) explains how recombination
 reshuffles parental chromosomes. Recombination changes which existing
 alleles travel together, but it does not create those alleles. To
 understand why individuals carry different sequence versions in the
-first place, we need to examine the origin and forms of **[genomic
-variation](https://www.genome.gov/about-genomics/educational-resources/fact-sheets/human-genomic-variation)**.
+first place, we need to examine the origin and forms of [**genomic
+variation**](https://www.genome.gov/about-genomics/educational-resources/fact-sheets/human-genomic-variation).
 
 ## Mutation creates new sequence variants
 
-A **[mutation](https://www.genome.gov/genetics-glossary/Mutation)** is a
+A [**mutation**](https://www.genome.gov/genetics-glossary/Mutation) is a
 change in a DNA sequence. It may arise through an error during DNA
 replication, damage to DNA, or imperfect repair. Once a mutation has
 occurred, later DNA replication can copy the changed sequence. Mutation
 is therefore the original source of new sequence variants, whereas
 recombination and segregation redistribute variants that already exist.
 
-Where the change occurs determines whether it can contribute to inherited
-variation. A **[germline
-variant](https://www.genome.gov/genetics-glossary/Mutation)** occurs in a
-cell lineage that contributes to gametes and can be transmitted to
-offspring. A **[somatic
-variant](https://www.genome.gov/genetics-glossary/Somatic-Cells)** occurs
-in another cell lineage. In the usual animal-breeding setting, a somatic
-variant can affect the descendant cells within that individual but is not
-transmitted through its sperm or eggs. The boundary between reproductive
-and somatic lineages depends on the organism and mode of reproduction, so
-this distinction must be interpreted carefully in plants and clonally
-propagated populations.
+Where the change occurs determines whether it can contribute to
+inherited variation. A [**germline
+variant**](https://www.genome.gov/genetics-glossary/Mutation) occurs in
+a cell lineage that contributes to gametes and can be transmitted to
+offspring. A [**somatic
+variant**](https://www.genome.gov/genetics-glossary/Somatic-Cells)
+occurs in another cell lineage. In the usual animal-breeding setting, a
+somatic variant can affect the descendant cells within that individual
+but is not transmitted through its sperm or eggs. The boundary between
+reproductive and somatic lineages depends on the organism and mode of
+reproduction, so this distinction must be interpreted carefully in
+plants and clonally propagated populations.
 
-An inherited variant was already present in a parent and passed through a
-gamete. A **[de novo
-variant](https://medlineplus.gov/genetics/understanding/mutationsanddisorders/genemutation/)** is newly observed
-in an offspring rather than in the sampled parental genotypes. It may have
-arisen while a parental germ cell was forming or early in the offspring's
-development. Calling a variant de novo also depends on measurement: low
-coverage, genotyping error, or parental mosaicism can make an inherited
-change appear absent from the parental samples.
+An inherited variant was already present in a parent and passed through
+a gamete. A [***de novo***
+**variant**](https://medlineplus.gov/genetics/understanding/mutationsanddisorders/genemutation/)
+is newly observed in an offspring rather than in the sampled parental
+genotypes. It may have arisen while a parental germ cell was forming or
+early in the offspring's development. Calling a variant de novo also
+depends on measurement: low coverage, genotyping error, or parental
+mosaicism can make an inherited change appear absent from the parental
+samples.
 
 ## Variant classes describe the scale and form of change
 
-The [DNA section](genetic-fundamentals.qmd#dna-the-storage-of-biological-information)
-introduced a sequence as an ordered series of bases. Variants can alter one
-base, a few adjacent bases, the number of copies of a region, or the order
-and location of much larger segments. The schematic examples below use
-letters and blocks only to show the form of each change. They are not
-records from the project dataset.
+The [DNA
+section](genetic-fundamentals.qmd#dna-the-storage-of-biological-information)
+introduced a sequence as an ordered series of bases. Variants can alter
+one base, a few adjacent bases, the number of copies of a region, or the
+order and location of much larger segments. The schematic examples below
+use letters and blocks only to show the form of each change. They are
+not records from the project dataset.
 
 | Variant class | Conceptual comparison | What changed |
-|---|---|---|
-| **[Single-nucleotide polymorphism (SNP)](https://www.genome.gov/genetics-glossary/Single-Nucleotide-Polymorphisms-SNPs)** | `...A...` becomes `...G...` | One base differs at one genomic position. |
-| **[Insertion or deletion (indel)](https://www.genome.gov/about-genomics/educational-resources/fact-sheets/human-genomic-variation)** | `ACGT` becomes `ACGGT`, or `ACGT` becomes `ACT` | One or more adjacent bases are added or removed. |
-| **[Copy-number variant (CNV)](https://www.genome.gov/genetics-glossary/Copy-Number-Variation-CNV)** | `A-B-C` becomes `A-B-B-B-C` | The number of copies of a DNA segment differs. |
-| **[Structural variant](https://www.genome.gov/genetics-glossary/Structural-Variation)** | `A-B-C-D` becomes `A-C-B-D`, or a block moves elsewhere | A larger segment is deleted, duplicated, inverted, inserted, or translocated. |
+|------------------------|------------------------|------------------------|
+| [**Single-nucleotide polymorphism (SNP)**](https://www.genome.gov/genetics-glossary/Single-Nucleotide-Polymorphisms-SNPs) | `...A...` becomes `...G...` | One base differs at one genomic position. |
+| [**Insertion or deletion (indel)**](https://www.genome.gov/about-genomics/educational-resources/fact-sheets/human-genomic-variation) | `ACGT` becomes `ACGGT`, or `ACGT` becomes `ACT` | One or more adjacent bases are added or removed. |
+| [**Copy-number variant (CNV)**](https://www.genome.gov/genetics-glossary/Copy-Number-Variation-CNV) | `A-B-C` becomes `A-B-B-B-C` | The number of copies of a DNA segment differs. |
+| [**Structural variant**](https://www.genome.gov/genetics-glossary/Structural-Variation) | `A-B-C-D` becomes `A-C-B-D`, or a block moves elsewhere | A larger segment is deleted, duplicated, inverted, inserted, or translocated. |
 
 These classes describe different aspects of sequence change and can
-overlap. A deletion is an indel when it is short under the convention used
-by an analysis, but a sufficiently large deletion is commonly treated as a
-structural variant. A CNV is also a form of structural variation. Size
-thresholds and reporting conventions can differ among technologies and
-software, so the operational definition should accompany an analysis.
+overlap. A deletion is an indel when it is short under the convention
+used by an analysis, but a sufficiently large deletion is commonly
+treated as a structural variant. A CNV is also a form of structural
+variation. Size thresholds and reporting conventions can differ among
+technologies and software, so the operational definition should
+accompany an analysis.
 
 Variant size does not determine biological importance. A one-base change
-can disrupt a coding or regulatory sequence, while a large change may have
-little measured effect in a particular environment. Conversely, most
-observed sequence variants should not be assumed to change a trait. The
-effect depends on location, molecular consequence, genetic background, and
-the phenotype being studied.
+can disrupt a coding or regulatory sequence, while a large change may
+have little measured effect in a particular environment. Conversely,
+most observed sequence variants should not be assumed to change a trait.
+The effect depends on location, molecular consequence, genetic
+background, and the phenotype being studied.
 
 ## Variant, polymorphism, causal variant, and marker are different roles
 
 A *variant* is a sequence difference relative to another sequence or a
-chosen reference. **[Polymorphism](https://www.genome.gov/genetics-glossary/Polymorphism)**
+chosen reference.
+[**Polymorphism**](https://www.genome.gov/genetics-glossary/Polymorphism)
 emphasises that two or more sequence forms occur among individuals or
 populations. Some fields have historically used frequency thresholds to
 separate a polymorphism from a rare variant, but no single threshold is
 appropriate for every population and purpose. This curriculum therefore
-uses *variant* as the general term and states frequency explicitly when it
-matters.
+uses *variant* as the general term and states frequency explicitly when
+it matters.
 
-A **[causal variant](https://doi.org/10.1038/nature13127)** contributes to
-a biological process that changes the trait under study. Establishing that
-role requires evidence beyond statistical association. A nearby variant
-may show a similar population pattern because the two variants tend to be
-inherited together, even if only one participates in the mechanism.
+A [**causal variant**](https://doi.org/10.1038/nature13127) contributes
+to a biological process that changes the trait under study. Establishing
+that role requires evidence beyond statistical association. A nearby
+variant may show a similar population pattern because the two variants
+tend to be inherited together, even if only one participates in the
+mechanism.
 
-A **[molecular marker](https://www.genome.gov/genetics-glossary/Genetic-Marker)**
-is an identifiable DNA feature at a known genomic location whose inheritance
-can be followed. A marker can lie within a gene, outside a gene, or have no
-known function. Its value in genomic prediction comes from the information
-it carries about inherited chromosome segments. A marker may itself be
-causal, may track a nearby causal variant, or may carry little useful
-information for a particular trait and population. Marker and causal variant
-are therefore roles supported by evidence, not interchangeable names.
+A [**molecular
+marker**](https://www.genome.gov/genetics-glossary/Genetic-Marker) is an
+identifiable DNA feature at a known genomic location whose inheritance
+can be followed. A marker can lie within a gene, outside a gene, or have
+no known function. Its value in genomic prediction comes from the
+information it carries about inherited chromosome segments. A marker may
+itself be causal, may track a nearby causal variant, or may carry little
+useful information for a particular trait and population. Marker and
+causal variant are therefore roles supported by evidence, not
+interchangeable names.
 
 ## Reference and alternative alleles are coding labels
 
-A **[reference sequence](https://www.genome.gov/genetics-glossary/Human-Genome-Reference-Sequence)**
+A [**reference
+sequence**](https://www.genome.gov/genetics-glossary/Human-Genome-Reference-Sequence)
 provides coordinates and a comparison sequence. At a biallelic site, the
-allele matching that sequence is often labelled *reference*, and the other
-observed allele is labelled *alternative*. Suppose the reference base at a
-site is `A` and a breeding candidate carries `A/G`. The label tells us which
-base matches the chosen reference and allows the genotype to be encoded. It
-does not tell us that `A` is ancestral, common, favourable, or biologically
-inactive. It also does not tell us that `G` is derived, rare, harmful, or
-causal.
+allele matching that sequence is often labelled *reference*, and the
+other observed allele is labelled *alternative*. Suppose the reference
+base at a site is `A` and a breeding candidate carries `A/G`. The label
+tells us which base matches the chosen reference and allows the genotype
+to be encoded. It does not tell us that `A` is ancestral, common,
+favourable, or biologically inactive. It also does not tell us that `G`
+is derived, rare, harmful, or causal.
 
-Those biological and population properties require separate evidence. The
-alternative allele can be the common allele in a particular population, and
-changing the reference assembly or reversing the counted allele changes the
-code without changing the individual's DNA. Later pages will define allele
-frequency and numerical dosage. For now, the important point is that coding
-conventions must not be mistaken for biological conclusions.
+Those biological and population properties require separate evidence.
+The alternative allele can be the common allele in a particular
+population, and changing the reference assembly or reversing the counted
+allele changes the code without changing the individual's DNA. Later
+pages will define allele frequency and numerical dosage. For now, the
+important point is that coding conventions must not be mistaken for
+biological conclusions.
 
 ## Sequencing and genotyping measure variation differently
 
-**[DNA sequencing](https://www.genome.gov/about-genomics/fact-sheets/DNA-Sequencing-Fact-Sheet)**
-determines the order of bases across the DNA regions that an assay covers.
-Those reads can reveal variants relative to a reference sequence, subject to
-coverage, alignment, and variant-calling uncertainty. Sequencing may target
-one region, a set of genes, or much of a genome; the word does not by itself
-guarantee that every base was measured accurately.
+[**DNA
+sequencing**](https://www.genome.gov/about-genomics/fact-sheets/DNA-Sequencing-Fact-Sheet)
+determines the order of bases across the DNA regions that an assay
+covers. Those reads can reveal variants relative to a reference
+sequence, subject to coverage, alignment, and variant-calling
+uncertainty. Sequencing may target one region, a set of genes, or much
+of a genome; the word does not by itself guarantee that every base was
+measured accurately.
 
-**[Genotyping](https://www.ncbi.nlm.nih.gov/books/NBK82217/)** determines
-which allele or genotype an individual carries at specified loci. A marker
-array, for example, can measure a predefined set of SNPs efficiently across
-many candidates, but it does not directly inspect every unassayed position
-between them. Genotypes can also be called from sequence data, so sequencing
-and genotyping are not mutually exclusive labels for instruments. The useful
-distinction is between reading sequence across assayed regions and assigning
-genotypes at defined variant sites.
+[**Genotyping**](https://www.ncbi.nlm.nih.gov/books/NBK82217/)
+determines which allele or genotype an individual carries at specified
+loci. A marker array, for example, can measure a predefined set of SNPs
+efficiently across many candidates, but it does not directly inspect
+every unassayed position between them. Genotypes can also be called from
+sequence data, so sequencing and genotyping are not mutually exclusive
+labels for instruments. The useful distinction is between reading
+sequence across assayed regions and assigning genotypes at defined
+variant sites.
 
-These measurements require quality control before modelling. File layouts,
-missing-value codes, dosage matrices, and software-ready SNP inputs belong in
-the [SNP input guide](../../input-data/snp.qmd), rather than on this
-biological page.
+These measurements require quality control before modelling. File
+layouts, missing-value codes, dosage matrices, and software-ready SNP
+inputs belong in the [SNP input guide](../../input-data/snp.qmd), rather
+than on this biological page.
 
 ## Observed markers and causal truth in the project data
 
-The recurring project dataset is simulated. Its SNP map records 500 observed
-markers with identifiers, chromosomes, and base-pair positions. The
-simulation also records which of those markers generated the genetic signal.
-This second piece of information is available because the data-generating
-process is known, not because an ordinary genotyping assay reveals causality.
+The recurring project dataset is simulated. Its SNP map records 500
+observed markers with identifiers, chromosomes, and base-pair positions.
+The simulation also records which of those markers generated the genetic
+signal. This second piece of information is available because the
+data-generating process is known, not because an ordinary genotyping
+assay reveals causality.
 
 ```{r}
 #| label: variation-marker-map
@@ -172,60 +185,85 @@ marker_map[
 ]
 ```
 
-The output separates 20 simulated causal SNPs from 480 other observed SNPs.
-The latter group should not be called biologically irrelevant: a non-causal
-marker may still predict a causal chromosome segment, and the usefulness of
-that association can depend on the population. Conversely, inclusion among
-the 20 causal indices is simulation truth for this teaching dataset, not a
-claim that real breeding data contain exactly 20 causal loci.
+The output separates 20 simulated causal SNPs from 480 other observed
+SNPs. The latter group should not be called biologically irrelevant: a
+non-causal marker may still predict a causal chromosome segment, and the
+usefulness of that association can depend on the population. Conversely,
+inclusion among the 20 causal indices is simulation truth for this
+teaching dataset, not a claim that real breeding data contain exactly 20
+causal loci.
 
-The map contains marker identifiers and positions, but it does not contain
-the nucleotide identities used as reference and alternative alleles. We can
-therefore discuss marker locations and the simulated causal set, but we
-cannot infer an `A/G` coding or label a favourable allele from this object.
-Doing so would add information that the dataset does not provide.
+The map contains marker identifiers and positions, but it does not
+contain the nucleotide identities used as reference and alternative
+alleles. We can therefore discuss marker locations and the simulated
+causal set, but we cannot infer an `A/G` coding or label a favourable
+allele from this object. Doing so would add information that the dataset
+does not provide.
 
 ## Exercises
 
-1. A sequence comparison changes `ACCT` to `ACGT` at one position. Classify
-   the change. Does that classification show that the changed base causes a
-   trait difference?
+1.  A sequence comparison changes `ACCT` to `ACGT` at one position.
+    Classify the change. Does that classification show that the changed
+    base causes a trait difference?
 
 ::: {.callout-note collapse="true" title="Solution"}
 The comparison contains a single-base substitution, so it is a
 single-nucleotide variant. Whether a field calls it an SNP or reserves
-*polymorphism* for variants observed in a population depends on the stated
-convention. The classification describes the form of the change. It provides
-no evidence by itself that the site affects a trait.
+*polymorphism* for variants observed in a population depends on the
+stated convention. The classification describes the form of the change.
+It provides no evidence by itself that the site affects a trait.
 :::
 
-2. At one locus, `C` matches the reference sequence and `T` is labelled the
-   alternative allele. List three conclusions that cannot be obtained from
-   those labels alone.
+2.  At one locus, `C` matches the reference sequence and `T` is labelled
+    the alternative allele. List three conclusions that cannot be
+    obtained from those labels alone.
 
 ::: {.callout-note collapse="true" title="Solution"}
-The labels alone do not identify which allele is ancestral, which is more
-common in the target population, or which has a favourable trait effect.
-They also do not establish whether either allele is causal. Each conclusion
-needs population, evolutionary, functional, or trait evidence beyond the
-reference comparison.
+The labels alone do not identify which allele is ancestral, which is
+more common in the target population, or which has a favourable trait
+effect. They also do not establish whether either allele is causal. Each
+conclusion needs population, evolutionary, functional, or trait evidence
+beyond the reference comparison.
 :::
 
-3. The project map contains 500 observed SNP markers, of which 20 are marked
-   causal by the simulation. How many observed markers are not causal in the
-   generating model, and why might some of them still contribute to genomic
-   prediction?
+3.  The project map contains 500 observed SNP markers, of which 20 are
+    marked causal by the simulation. How many observed markers are not
+    causal in the generating model, and why might some of them still
+    contribute to genomic prediction?
 
 ::: {.callout-note collapse="true" title="Solution"}
-There are $500-20=480$ observed markers outside the simulated causal set.
-Some may carry information about nearby causal variants when their alleles
-are inherited together in the population. The next pages develop the
-population frequencies and multi-locus associations needed to explain when
-that marker information persists.
+There are $500-20=480$ observed markers outside the simulated causal
+set. Some may carry information about nearby causal variants when their
+alleles are inherited together in the population. The next pages develop
+the population frequencies and multi-locus associations needed to
+explain when that marker information persists.
 :::
 
-Identifying a variant in one candidate does not yet tell us whether it is
-rare, common, or fixed in the breeding population. Those descriptions
+4.  A DNA change is found in a skin cell but not in the individual's
+    gametes. Is it usually inherited by offspring? Contrast mutation
+    with recombination as a source of genetic variation.
+
+::: {.callout-note collapse="true" title="Solution"}
+This is a somatic variant, so in the usual animal-breeding setting it is
+not transmitted through sperm or eggs. Mutation changes a DNA sequence
+and is the source of new variants. Recombination rearranges variants
+already present on parental chromosomes into new combinations.
+:::
+
+5.  A marker array reports genotypes at predefined SNPs for many
+    candidates. What information can it provide, and what does it not
+    directly determine about unassayed sequence positions?
+
+::: {.callout-note collapse="true" title="Solution"}
+The array can determine which allele or genotype each candidate carries
+at its specified marker loci. It does not directly read every sequence
+position between those markers. Sequencing reads bases across the
+regions that an assay covers, although both measurements still require
+quality control.
+:::
+
+Identifying a variant in one candidate does not yet tell us whether it
+is rare, common, or fixed in the breeding population. Those descriptions
 require counts across individuals. Genetic variation in populations is
-therefore the next step from molecular differences to the population-level
-patterns used in genomic prediction.
+therefore the next step from molecular differences to the
+population-level patterns used in genomic prediction.

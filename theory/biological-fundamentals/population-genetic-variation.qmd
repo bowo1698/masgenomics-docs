@@ -241,31 +241,65 @@ and sometimes scale marker dosages. This page stops at their biological and
 population interpretation so that the modelling operation is introduced
 where its purpose can be made explicit.
 
-## Check your understanding
+## Exercises
 
-::: {.callout-note collapse="true" title="Exercise 1: Count allele copies"}
-A sample of 20 individuals has genotype counts $n_0=8$, $n_1=10$, and
-$n_2=2$. Calculate the alternative-allele count and frequency.
+1. A sample of 20 individuals has genotype counts $n_0=8$, $n_1=10$, and
+   $n_2=2$. Calculate the alternative-allele count and frequency.
 
+::: {.callout-note collapse="true" title="Solution"}
 The alternative-allele count is $10+2(2)=14$. There are $2(20)=40$
 allele copies, so $f_A=14/40=0.35$.
 :::
 
-::: {.callout-note collapse="true" title="Exercise 2: Calculate reference proportions"}
-For $N=100$ and $f_A=0.30$, calculate the Hardy-Weinberg reference counts
-for dosages 0, 1, and 2.
+2. For $N=100$ and $f_A=0.30$, calculate the Hardy-Weinberg reference counts
+   for dosages 0, 1, and 2.
 
+::: {.callout-note collapse="true" title="Solution"}
 The proportions are $0.70^2=0.49$, $2(0.30)(0.70)=0.42$, and
 $0.30^2=0.09$. Multiplying by 100 gives expected counts of 49, 42, and 9.
 :::
 
-::: {.callout-note collapse="true" title="Exercise 3: Distinguish frequency from pairing"}
-Suppose relatives mate more often than expected, but no allele copies enter
-or leave the population. What can change immediately?
+3. Suppose relatives mate more often than expected, but no allele copies enter
+   or leave the population. What can change immediately?
 
+::: {.callout-note collapse="true" title="Solution"}
 The pairing of alleles into genotypes can change, commonly producing more
 homozygotes and fewer heterozygotes. The allele frequency need not change in
 that generation because the same allele copies are being paired differently.
+:::
+
+4. Explain the difference between allele frequency and genotype frequency at
+   a biallelic autosomal locus. Which quantity counts allele copies rather
+   than individuals?
+
+::: {.callout-note collapse="true" title="Solution"}
+Allele frequency is the proportion of all allele copies that are a chosen
+allele, whereas genotype frequencies are the proportions of individuals with
+dosages 0, 1, and 2. Allele frequency counts copies, so its denominator is
+$2N$ for $N$ diploid individuals.
+:::
+
+5. A breeding population has many animals alive but only a few parents that
+   contribute very unequally to the next generation. What does this imply
+   about effective population size and genetic drift?
+
+::: {.callout-note collapse="true" title="Solution"}
+Its effective population size can be much smaller than its census size. The
+idealised effective size reflects the rate of drift, and unequal reproductive
+contribution increases that rate because relatively few parents transmit the
+alleles represented in the next generation.
+:::
+
+6. Observed counts at one marker are close to its Hardy-Weinberg reference
+   counts in the project data. Why does this not prove equilibrium or that the
+   200 offspring are independent draws from a freely mating population?
+
+::: {.callout-note collapse="true" title="Solution"}
+A close numerical match can occur by chance and one locus cannot diagnose all
+model assumptions. The records are offspring from ten full-sib families, so
+siblings share parents and are not independent draws. Selection, migration,
+genotyping error, and population structure also cannot be ruled out from this
+one comparison.
 :::
 
 Allele frequencies describe one locus at a time. The next question is how

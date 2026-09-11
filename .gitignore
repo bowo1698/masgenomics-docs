@@ -2,6 +2,7 @@
 _site/
 .quarto/
 _theory/
+_scripts/
 
 # Freeze cache: generally regenerated locally on render.
 _freeze/*
@@ -24,11 +25,8 @@ Thumbs.db
 
 /.quarto/
 **/*.quarto_ipynb
-
-# Internal planning
 docs/
 
-# Local backups (created before edits to source files; never commit)
 *.bak
 *.bak.*
 _quarto.yml.bak

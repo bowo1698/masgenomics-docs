@@ -260,6 +260,25 @@ $32/(3-1)=16$. The equal means identify the same centre, while the
 variances show that Group D is much more dispersed.
 :::
 
+4. A sample has $Q_1=4$ and $Q_3=10$. Calculate its IQR. Why can this be
+   more informative than the range when one observation is unusually distant?
+
+::: {.callout-note collapse="true" title="Solution"}
+The IQR is $10-4=6$. It describes the middle half of the ordered data, so it
+is less sensitive than the range, which depends only on the minimum and
+maximum values.
+:::
+
+5. A phenotype is flagged by the boxplot rule. Should it be deleted
+   automatically? State two checks that the article recommends before deciding.
+
+::: {.callout-note collapse="true" title="Solution"}
+No. The rule is a screening convention, not proof that a record is false. The
+breeder should examine the record and its metadata or measurement protocol,
+then consider biological context such as disease, environment, or genuine
+genetic variation before correction, exclusion, or retention.
+:::
+
 Descriptive statistics treat the recorded values as fixed observations. The
 next step is to describe uncertain outcomes before they are observed.
 Probability and random variables provide that language and connect Mendelian

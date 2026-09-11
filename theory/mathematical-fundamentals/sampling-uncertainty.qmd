@@ -227,7 +227,7 @@ $10/\sqrt{100}=1$. Quadrupling the sample size halves the standard error under
 the independence assumption.
 :::
 
-2. A 95% confidence interval calculated from one sample is $(12,18)`. Is it
+2. A 95% confidence interval calculated from one sample is $(12,18)$. Is it
    correct to say that the fixed population mean has probability 0.95 of lying
    in this realised interval?
 
@@ -248,6 +248,35 @@ was sampled. They do not add the allele frequencies, linkage patterns, or
 environments present in unobserved families. The estimate may therefore be
 precise for the sampled family but systematically unrepresentative of the
 broader target population.
+:::
+
+4. Distinguish a parameter, a statistic, and a sampling distribution in the
+   context of a training-sample mean.
+
+::: {.callout-note collapse="true" title="Solution"}
+The target-population mean is a fixed but unknown parameter. A mean calculated
+from one training sample is a statistic. The sampling distribution describes
+the means that would result from repeated samples drawn by the same procedure.
+:::
+
+5. The project resampling example compares means from samples of 10 and 100
+   records. What becomes narrower as sample size increases, and what does not?
+
+::: {.callout-note collapse="true" title="Solution"}
+The sampling distribution of the mean becomes narrower, so its standard error
+decreases. The spread of the 200 source phenotypes does not change merely
+because larger resamples are taken.
+:::
+
+6. A mean is estimated very precisely from a systematically unrepresentative
+   training sample. Is the estimate necessarily unbiased for the target
+   population? Explain.
+
+::: {.callout-note collapse="true" title="Solution"}
+No. Precision is the spread of an estimator across repeated samples, whereas
+bias is its average difference from the target parameter. More records can
+narrow the sampling distribution without repairing systematic omission of a
+subpopulation or mismatch of measurement conditions.
 :::
 
 Sampling uncertainty concerns the behaviour of one statistic across possible

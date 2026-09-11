@@ -65,6 +65,7 @@ This section introduces the biological concepts that connect inheritance, geneti
 - [Genetic Fundamentals](biological-fundamentals/genetic-fundamentals.qmd)
 - [Genetic variation and molecular markers](biological-fundamentals/genetic-variation-markers.qmd)
 - [Genetic variation in populations](biological-fundamentals/population-genetic-variation.qmd)
+- [Linkage, recombination, and linkage disequilibrium](biological-fundamentals/linkage-recombination-ld.qmd)
 
 ## 2. Mathematical fundamentals
 
@@ -74,6 +75,10 @@ This section develops the statistical and mathematical ideas needed to understan
 2. [Probability and random variables](mathematical-fundamentals/probability-random-variables.qmd)
 3. [Probability distributions](mathematical-fundamentals/probability-distributions.qmd)
 4. [Sampling and statistical uncertainty](mathematical-fundamentals/sampling-uncertainty.qmd)
+5. [Covariance and correlation](mathematical-fundamentals/covariance-correlation.qmd)
+6. [Vectors and matrices](mathematical-fundamentals/vectors-matrices.qmd)
+7. [Linear regression](mathematical-fundamentals/linear-regression.qmd)
+8. [Multiple regression and regularisation](mathematical-fundamentals/multiple-regression-regularisation.qmd)
 
 ## 3. Genomic prediction
 
@@ -81,5 +86,3 @@ This section connects quantitative genetics with the marker-based models used to
 
 1. [Quantitative genetics: from phenotype to breeding value](genomic-prediction/quantitative-genetics.qmd)
 2. [From markers to genomic prediction](genomic-prediction/markers-to-prediction.qmd)
-5. [Covariance and correlation](mathematical-fundamentals/covariance-correlation.qmd)
-6. [Vectors and matrices](mathematical-fundamentals/vectors-matrices.qmd)

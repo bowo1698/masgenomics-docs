@@ -207,6 +207,24 @@ $1/4$. Conditional on this two-outcome set, one outcome is $AA$, so the
 conditional probability is $(1/4)/(1/2)=1/2$.
 :::
 
+4. For the $Aa\times Aa$ model, list the ordered outcomes in the event that
+   an offspring carries at least one $A$ allele. Why are $(A,a)$ and $(a,A)$
+   separate outcomes but the same genotype?
+
+::: {.callout-note collapse="true" title="Solution"}
+The event is $\{(A,A),(A,a),(a,A)\}$. The ordered pair records which parent
+contributed each allele, so the two heterozygous transmissions differ as
+outcomes. Both contain one $A$ and one $a$, so both give genotype $Aa$.
+:::
+
+5. Let $A$ and $B$ be events with $P(A)=0.6$, $P(B)=0.5$, and
+   $P(A\cap B)=0.2$. Calculate $P(A\cup B)$ and $P(A^c)$.
+
+::: {.callout-note collapse="true" title="Solution"}
+$P(A\cup B)=0.6+0.5-0.2=0.9$, because the intersection is subtracted once.
+The complement probability is $P(A^c)=1-0.6=0.4$.
+:::
+
 A random variable is fully described only after probabilities have been
 assigned to its possible values. The next page develops probability
 distributions, which provide reusable models for genotype counts, binary

@@ -188,30 +188,30 @@ change the relevant parameters enough to invalidate the approximation.
 Assortative mating, inbreeding, genotype-by-environment interaction, maternal
 effects, or strong changes in allele frequencies can require a richer model.
 
-## Check your understanding
+## Exercises
 
-::: {.callout-note collapse="true" title="Exercise 1: Separate phenotype components"}
-For a hypothetical individual, let $\mu=10$, $A_i=1.2$, $D_i=-0.3$,
-$I_i=0.1$, and $E_i=0.5$. Calculate its genotypic and phenotypic values.
+1. For a hypothetical individual, let $\mu=10$, $A_i=1.2$, $D_i=-0.3$,
+   $I_i=0.1$, and $E_i=0.5$. Calculate its genotypic and phenotypic values.
 
+::: {.callout-note collapse="true" title="Solution"}
 The genotypic value is $G_i=1.2-0.3+0.1=1.0$ relative to the mean. The
 phenotypic value is $P_i=10+1.0+0.5=11.5$. Only $A_i=1.2$ is the breeding
 value in this decomposition.
 :::
 
-::: {.callout-note collapse="true" title="Exercise 2: Interpret heritability"}
-A population has $\sigma_A^2=4$ and $\sigma_P^2=10$. Calculate $h^2$ and
-state one conclusion that the result does not support.
+2. A population has $\sigma_A^2=4$ and $\sigma_P^2=10$. Calculate $h^2$ and
+   state one conclusion that the result does not support.
 
+::: {.callout-note collapse="true" title="Solution"}
 The narrow-sense heritability is $h^2=4/10=0.4$. It does not mean that 40% of
 one individual's phenotype is genetic. The ratio describes variance among
 individuals in the specified population and environment.
 :::
 
-::: {.callout-note collapse="true" title="Exercise 3: Predict response to selection"}
-If $h^2=0.25$ and selected parents exceed the population mean by 3 units,
-what response does the breeder's equation predict?
+3. If $h^2=0.25$ and selected parents exceed the population mean by 3 units,
+   what response does the breeder's equation predict?
 
+::: {.callout-note collapse="true" title="Solution"}
 The selection differential is $S=3$, so $R=h^2S=0.25(3)=0.75$ units. This is
 an expected change in the population mean under the equation's assumptions,
 not a prediction for each offspring.

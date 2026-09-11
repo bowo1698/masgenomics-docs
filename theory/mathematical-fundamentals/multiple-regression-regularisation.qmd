@@ -1,0 +1,287 @@
+---
+title: "Multiple regression and regularisation"
+---
+
+A breeding programme usually genotypes hundreds or thousands of markers, not
+one. How can their information enter one prediction model when markers are
+correlated and may outnumber the phenotyped individuals? **[Multiple linear
+regression](https://www.itl.nist.gov/div898/handbook/pmd/section1/pmd141.htm)**
+places all predictors in one design matrix. **[Ridge
+regression](https://doi.org/10.1080/00401706.1970.10488634)** adds a penalty
+that stabilises the fitted marker coefficients by shrinking them toward zero.
+
+## One design matrix holds several predictors
+
+For $n$ individuals and $p$ markers, let $\mathbf y$ be the $n\times1$
+phenotype vector. Let $\mathbf X$ be the $n\times(p+1)$ design matrix whose
+first column is an intercept and whose remaining $p$ columns are marker
+dosages. The coefficient vector $\boldsymbol\beta$ is $(p+1)\times1$, and the
+unobserved model-error vector $\boldsymbol\varepsilon$ is $n\times1$. The
+model is
+
+$$
+\mathbf y=\mathbf X\boldsymbol\beta+\boldsymbol\varepsilon.
+$$
+
+The fitted vector $\hat{\mathbf y}=\mathbf X\hat{\boldsymbol\beta}$ is
+$n\times1$. Each marker coefficient is a **partial effect**: it is the fitted
+change associated with that marker while the other columns in the design
+matrix are held fixed. This conditional meaning differs from fitting each
+marker separately. It also remains statistical rather than molecular. A
+nonzero coefficient can reflect LD with a causal locus, shared family
+structure, or adjustment for correlated predictors.
+
+Ordinary least squares minimises
+
+$$
+\lVert\mathbf y-\mathbf X\boldsymbol\beta\rVert_2^2,
+$$
+
+where the squared Euclidean norm is the residual sum of squares. If
+$\mathbf X$ has full column rank, the algebraic solution can be written
+
+$$
+\hat{\boldsymbol\beta}_{\mathrm{OLS}}
+=(\mathbf X^\mathsf T\mathbf X)^{-1}
+\mathbf X^\mathsf T\mathbf y.
+$$
+
+Software normally solves the corresponding linear system instead of forming
+the inverse explicitly. If columns repeat the same information exactly,
+$\mathbf X$ is rank deficient and the inverse does not exist. Coefficients are
+then not uniquely identified without an additional constraint.
+
+## Correlated markers make coefficients unstable
+
+**[Collinearity](https://itl.nist.gov/div898/software/dataplot/refman1/auxillar/regrdiag.htm)**
+occurs when one predictor column is closely approximated by other columns.
+Linked markers often carry similar information, so small changes in the
+sampled animals or phenotypes can shift the fitted effect among those markers.
+The combined predictions may change less than the individual coefficients,
+but interpreting one unstable coefficient as a distinct locus effect is
+unsafe.
+
+The dimensional problem is even clearer when $p>n$. The full project data
+contain 200 phenotyped offspring and 500 SNP columns. Adding an intercept
+would give a $200\times501$ design matrix, whose rank cannot exceed 200.
+Ordinary least squares therefore cannot identify a unique coefficient for
+every column from these records alone.
+
+A flexible model can also **overfit** by adapting to noise and sample-specific
+patterns. Its training error may be small because the same observations were
+used to choose the coefficients. Test error measures prediction on records
+held out from fitting and can increase even while training error decreases.
+This is why model complexity and tuning choices must be assessed with a split
+that represents the intended candidate population.
+
+## Ridge regression trades some fit for stability
+
+Ridge regression estimates coefficients by minimising
+
+$$
+\lVert\mathbf y-\mathbf X\boldsymbol\beta\rVert_2^2
++\lambda\sum_{j=1}^{p}\beta_j^2,
+$$
+
+where $\lambda\geq0$ is the penalty strength and the sum excludes the
+intercept. With
+
+$$
+\mathbf P=\operatorname{diag}(0,1,\ldots,1),
+$$
+
+an $(p+1)\times(p+1)$ penalty matrix, the ridge solution is
+
+$$
+\hat{\boldsymbol\beta}_{\mathrm{ridge}}
+=(\mathbf X^\mathsf T\mathbf X+\lambda\mathbf P)^{-1}
+\mathbf X^\mathsf T\mathbf y.
+$$
+
+The zero in the first diagonal position leaves the intercept unpenalised.
+Positive entries penalise large marker coefficients. At $\lambda=0$, the
+criterion reduces to ordinary least squares when its solution is unique. As
+$\lambda$ increases, the penalty increasingly favours a smaller coefficient
+vector. Its overall size moves toward zero, although an individual coefficient
+need not decrease monotonically when predictors are correlated. Ridge usually
+does not set coefficients exactly to zero, so it performs shrinkage rather
+than automatic marker selection or causal-locus discovery.
+
+This added bias can reduce variation in fitted coefficients and improve
+prediction on new data. The **bias-variance tradeoff** describes that exchange:
+weak penalisation can leave a high-variance model, whereas excessive
+penalisation can erase useful signal and cause underfitting. The value of
+$\lambda$ should therefore be chosen using training data and an appropriate
+validation design, never from final test performance.
+
+The penalty also depends on predictor units. A coefficient attached to a
+large-scale predictor can be penalised differently from one attached to a
+small-scale predictor for the same predictive change. Genomic models commonly
+centre and sometimes scale marker columns using values derived from the
+training data. Those operations are developed later in the genomic-data
+encoding page. The teaching calculation below uses raw 0, 1, and 2 dosages so
+that its matrix can be inspected directly.
+
+## A three-marker ridge calculation
+
+The recurring teaching view contains six simulated individuals and three
+markers. The design matrix $\mathbf X$ has dimensions $6\times4$: one
+intercept column followed by `SNP007`, `SNP008`, and `SNP017`. The phenotype
+vector $\mathbf y$ is $6\times1$, the coefficient vector is $4\times1$, and
+$\mathbf P$ is $4\times4$.
+
+```{r}
+#| label: ridge-data
+d <- readRDS("../../demo-data/main/demo_data.rds")
+marker_view <- d$snp[
+  1:6,
+  c("SNP007", "SNP008", "SNP017"),
+  drop = FALSE
+]
+X <- cbind(intercept = 1, marker_view)
+y <- d$pheno$y_cont_qtl_snp[1:6]
+X
+y
+```
+
+For the supplied teaching value $\lambda=2$, the penalty matrix has diagonal
+$(0,1,1,1)$. The calculation uses `solve(A, b)` to solve the system
+$\mathbf A\mathbf b=\mathbf c$ directly.
+
+```{r}
+#| label: ridge-fit
+lambda <- 2
+penalty <- diag(c(0, rep(1, ncol(marker_view))))
+ridge_beta <- solve(
+  crossprod(X) + lambda * penalty,
+  crossprod(X, y)
+)
+ridge_fitted <- drop(X %*% ridge_beta)
+ridge_beta
+ridge_fitted
+```
+
+The fitted intercept is approximately $-1.8728$. The coefficients for
+`SNP007`, `SNP008`, and `SNP017` are approximately 0.1274, $-0.3216$, and
+0.6186. These are coefficients for one raw-dosage, six-animal teaching model.
+They are not estimates of causal effects, and $\lambda=2$ was supplied rather
+than selected from validation data.
+
+Comparing several penalty strengths makes the shrinkage visible.
+
+```{r}
+#| label: ridge-penalty-comparison
+ridge_coefficient <- function(lambda) {
+  solve(
+    crossprod(X) + lambda * penalty,
+    crossprod(X, y)
+  )
+}
+
+coefficient_comparison <- cbind(
+  lambda_0 = ridge_coefficient(0),
+  lambda_2 = ridge_coefficient(2),
+  lambda_20 = ridge_coefficient(20)
+)
+coefficient_comparison
+```
+
+As $\lambda$ rises from 0 to 20, the sum of squared marker coefficients falls
+from approximately 1.388 to 0.026. Over the same training records, RSS rises
+from approximately 5.264 to 8.439. The `SNP007` coefficient first changes
+from 0.0944 to 0.1274 and then falls to 0.0451, illustrating why shrinkage is
+best understood through the penalised vector rather than a monotonic path for
+every correlated predictor. Ridge accepts a worse unpenalised training fit in
+exchange for a smaller coefficient vector. These training values do not
+identify which $\lambda$ predicts new candidates best.
+
+## The bridge to genomic prediction
+
+The same high-dimensional problem appears when genome-wide marker effects are
+estimated jointly. Ridge supplies every penalised marker coefficient with the
+same quadratic penalty after coding and scaling choices have been fixed. Its
+shrinkage principle connects directly to genomic best linear unbiased
+prediction, although that connection requires a covariance model and variance
+components that have not yet been introduced.
+
+Ridge also does not solve every modelling problem. A linear predictor can
+miss dominance, epistasis, nonlinear trends, or management effects if the
+design matrix omits them. Correlated relatives can violate an independent-
+error assumption, and preprocessing can leak information across a data
+split. Regularisation controls coefficient size under a stated model; it does
+not repair the sampling design or supply a biological mechanism.
+
+## Exercises
+
+1. A study has 200 individuals and 500 marker columns. After adding an
+   intercept, what are the dimensions of $\mathbf X$ and
+   $\boldsymbol\beta$, and why can ordinary least squares not identify a
+   unique coefficient for every column?
+
+::: {.callout-note collapse="true" title="Solution"}
+$\mathbf X$ is $200\times501$, and $\boldsymbol\beta$ is $501\times1$. The
+rank of a matrix with 200 rows cannot exceed 200, so the 501 columns cannot be
+linearly independent. The ordinary least-squares coefficient vector is
+therefore not unique without an additional constraint.
+:::
+
+2. In a model containing three correlated markers, what does one marker's
+   coefficient describe, and why should it not automatically be called that
+   marker's causal effect?
+
+::: {.callout-note collapse="true" title="Solution"}
+It describes the fitted change associated with that marker while the other
+included columns are held fixed. Correlation among marker columns can move
+shared information between their coefficients, and a marker can tag a causal
+locus through LD. The partial coefficient is therefore a model-dependent
+association, not direct proof of a molecular effect.
+:::
+
+3. Suppose one design-matrix marker column is an exact copy of another. What
+   happens to rank and the ordinary least-squares solution?
+
+::: {.callout-note collapse="true" title="Solution"}
+The copied column adds no independent direction, so the design matrix loses
+full column rank. The cross-product matrix is singular and the separate
+ordinary least-squares coefficients for those duplicate columns are not
+uniquely identified.
+:::
+
+4. For the $\lambda=2$ teaching fit, RSS is 5.9205 and the sum of squared
+   marker coefficients is 0.5023. Calculate the ridge objective.
+
+::: {.callout-note collapse="true" title="Solution"}
+The objective is
+$5.9205+2(0.5023)=6.9251$. The intercept is excluded from the squared-
+coefficient sum because the first diagonal entry of $\mathbf P$ is zero.
+:::
+
+5. When $\lambda$ rises from 0 to 20 in the project slice, the squared marker
+   coefficient sum falls while training RSS rises. Explain why this does not
+   show that either value of $\lambda$ will predict new candidates better.
+
+::: {.callout-note collapse="true" title="Solution"}
+The penalised fit deliberately trades training fit for smaller coefficients.
+Training RSS favours the model fitted most closely to the same records, while
+the smaller coefficient norm indicates stronger shrinkage. Prediction must be
+compared on appropriate held-out records because either weak shrinkage can
+overfit or strong shrinkage can underfit.
+:::
+
+6. Why is the intercept left unpenalised, and what preprocessing issue must be
+   addressed before comparing penalties across predictors measured on
+   different scales?
+
+::: {.callout-note collapse="true" title="Solution"}
+The intercept represents the baseline level rather than a marker contribution,
+so $\mathbf P$ assigns it a zero penalty. Because a quadratic penalty acts on
+coefficient magnitude, predictor scale changes how strongly equivalent fitted
+changes are penalised. Predictors should be centred and, when the model calls
+for it, scaled using quantities estimated from training data and then applied
+unchanged to validation or test data.
+:::
+
+Multiple regression distinguishes observations, parameters, fitted values,
+and residuals, but it has not yet explained how parameters are estimated from
+a probability model. The next page develops likelihood, estimators, and
+identifiability before linear mixed models add covariance among individuals.

@@ -230,6 +230,32 @@ density at 1, not an area over the interval and not the probability of the
 single value 1.
 :::
 
+4. A disease indicator is coded 0 or 1. Which distribution models one such
+   outcome, and what assumption is needed before using one common probability?
+
+::: {.callout-note collapse="true" title="Solution"}
+A Bernoulli distribution models one binary outcome. Its probability parameter
+must be appropriate for the individual and setting; family, environment, or
+management differences can make one common value inadequate.
+:::
+
+5. Why might a Student-t model assign more prior plausibility to large marker
+   effects than a normal model with the same centre and scale?
+
+::: {.callout-note collapse="true" title="Solution"}
+The Student-t distribution has heavier tails, especially at smaller degrees
+of freedom, so it assigns more probability far from its centre. This is a
+model choice, not proof that observed marker effects follow that distribution.
+:::
+
+6. Which R prefix returns a cumulative probability, and why is a chi-squared
+   variable not negative under the article's construction?
+
+::: {.callout-note collapse="true" title="Solution"}
+The `p` prefix returns a cumulative probability. A chi-squared variable is a
+sum of squared standard normal variables, and squares cannot be negative.
+:::
+
 A probability distribution describes variation in repeated outcomes under a
 model. A dataset supplies only one realised sample. The next page examines
 how estimates change across samples, how standard errors quantify that

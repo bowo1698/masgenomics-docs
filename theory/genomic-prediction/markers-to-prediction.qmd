@@ -164,32 +164,32 @@ generation or another population. The project split is useful for teaching
 within-family prediction, but its result should not be described as evidence
 of performance in unrelated populations.
 
-## Check your understanding
+## Exercises
 
-::: {.callout-note collapse="true" title="Exercise 1: Identify the analysis goal"}
-A breeder wants to rank 500 unphenotyped juveniles for a polygenic growth
-trait using dense genome-wide markers. Is the immediate task MAS, genomic
-selection, or GWAS?
+1. A breeder wants to rank 500 unphenotyped juveniles for a polygenic growth
+   trait using dense genome-wide markers. Is the immediate task MAS, genomic
+   selection, or GWAS?
 
+::: {.callout-note collapse="true" title="Solution"}
 The immediate task is genomic selection because the desired output is a
 genome-wide prediction of breeding value for each candidate. A GWAS would
 instead seek locus-level associations, while MAS would target a limited set
 of previously established loci.
 :::
 
-::: {.callout-note collapse="true" title="Exercise 2: Locate the missing information"}
-A model has been fitted with phenotypes only, and candidate genotypes are
-available. Which part of the prediction flow is missing?
+2. A model has been fitted with phenotypes only, and candidate genotypes are
+   available. Which part of the prediction flow is missing?
 
+::: {.callout-note collapse="true" title="Solution"}
 Training genotypes are missing. Without them, the fitted model cannot learn
 how training phenotypes relate to marker patterns that can also be observed
 in candidates.
 :::
 
-::: {.callout-note collapse="true" title="Exercise 3: Interpret a high GEBV"}
-A candidate has the highest GEBV for growth. What does this establish, and
-what does it leave unresolved?
+3. A candidate has the highest GEBV for growth. What does this establish, and
+   what does it leave unresolved?
 
+::: {.callout-note collapse="true" title="Solution"}
 It establishes that the fitted model predicts the highest additive genetic
 merit for growth among the candidates being compared. It does not reveal the
 candidate's true breeding value, guarantee its offspring mean, establish that
