@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Strong linkage disequilibrium compared with linkage equilibrium</title>
+  <desc id="desc">Two panels compare chromosome haplotype frequencies. In strong linkage disequilibrium, A-Q-B and a-q-b combinations are common and recombinant combinations are rare. In linkage equilibrium, all four two-locus combinations are equally frequent.</desc>
+  <rect width="960" height="540" fill="#fff"/>
+  <style>
+    .heading { font: bold 24px sans-serif; fill: #202020; }
+    .subheading { font: bold 18px sans-serif; fill: #202020; }
+    .label { font: 17px sans-serif; fill: #202020; }
+    .small { font: 15px sans-serif; fill: #202020; }
+    .allele { font: bold 18px sans-serif; fill: #202020; text-anchor: middle; }
+    .note { font: italic 15px sans-serif; fill: #303030; }
+    .panel { fill: #f6f6f6; stroke: #444; stroke-width: 2; }
+    .line { stroke: #333; stroke-width: 7; stroke-linecap: round; }
+    .box { fill: #fff; stroke: #333; stroke-width: 2; }
+    .qtl { fill: #d9d9d9; stroke: #333; stroke-width: 2; }
+  </style>
+  <text x="480" y="34" class="heading" text-anchor="middle">Alleles at linked loci can show different population associations</text>
+  <rect x="30" y="62" width="435" height="420" rx="10" class="panel"/>
+  <rect x="495" y="62" width="435" height="420" rx="10" class="panel"/>
+  <text x="248" y="99" class="subheading" text-anchor="middle">Strong LD</text>
+  <text x="713" y="99" class="subheading" text-anchor="middle">Linkage equilibrium</text>
+  <text x="248" y="128" class="small" text-anchor="middle">The same allele combinations are transmitted together often.</text>
+  <text x="713" y="128" class="small" text-anchor="middle">Knowing one locus does not predict the other.</text>
+
+  <text x="62" y="171" class="label">Frequent (70%)</text>
+  <line x1="297" y1="164" x2="436" y2="164" class="line"/>
+  <rect x="275" y="142" width="44" height="44" rx="5" class="box"/><text x="297" y="171" class="allele">A</text>
+  <rect x="345" y="142" width="44" height="44" rx="5" class="qtl"/><text x="367" y="171" class="allele">Q</text>
+  <rect x="414" y="142" width="44" height="44" rx="5" class="box"/><text x="436" y="171" class="allele">B</text>
+  <text x="62" y="232" class="label">Frequent (25%)</text>
+  <line x1="297" y1="225" x2="436" y2="225" class="line"/>
+  <rect x="275" y="203" width="44" height="44" rx="5" class="box"/><text x="297" y="232" class="allele">a</text>
+  <rect x="345" y="203" width="44" height="44" rx="5" class="qtl"/><text x="367" y="232" class="allele">q</text>
+  <rect x="414" y="203" width="44" height="44" rx="5" class="box"/><text x="436" y="232" class="allele">b</text>
+  <text x="62" y="293" class="label">Recombinant (5%)</text>
+  <line x1="297" y1="286" x2="436" y2="286" class="line"/>
+  <rect x="275" y="264" width="44" height="44" rx="5" class="box"/><text x="297" y="293" class="allele">A</text>
+  <rect x="345" y="264" width="44" height="44" rx="5" class="qtl"/><text x="367" y="293" class="allele">q</text>
+  <rect x="414" y="264" width="44" height="44" rx="5" class="box"/><text x="436" y="293" class="allele">b</text>
+  <text x="248" y="354" class="note" text-anchor="middle">Observing A makes Q likely in this population.</text>
+  <text x="248" y="383" class="note" text-anchor="middle">Recombination creates less-common new combinations.</text>
+
+  <text x="527" y="171" class="label">A-Q (25%)</text>
+  <line x1="750" y1="164" x2="856" y2="164" class="line"/>
+  <rect x="728" y="142" width="44" height="44" rx="5" class="box"/><text x="750" y="171" class="allele">A</text>
+  <rect x="834" y="142" width="44" height="44" rx="5" class="qtl"/><text x="856" y="171" class="allele">Q</text>
+  <text x="527" y="226" class="label">A-q (25%)</text>
+  <line x1="750" y1="219" x2="856" y2="219" class="line"/>
+  <rect x="728" y="197" width="44" height="44" rx="5" class="box"/><text x="750" y="226" class="allele">A</text>
+  <rect x="834" y="197" width="44" height="44" rx="5" class="qtl"/><text x="856" y="226" class="allele">q</text>
+  <text x="527" y="281" class="label">a-Q (25%)</text>
+  <line x1="750" y1="274" x2="856" y2="274" class="line"/>
+  <rect x="728" y="252" width="44" height="44" rx="5" class="box"/><text x="750" y="281" class="allele">a</text>
+  <rect x="834" y="252" width="44" height="44" rx="5" class="qtl"/><text x="856" y="281" class="allele">Q</text>
+  <text x="527" y="336" class="label">a-q (25%)</text>
+  <line x1="750" y1="329" x2="856" y2="329" class="line"/>
+  <rect x="728" y="307" width="44" height="44" rx="5" class="box"/><text x="750" y="336" class="allele">a</text>
+  <rect x="834" y="307" width="44" height="44" rx="5" class="qtl"/><text x="856" y="336" class="allele">q</text>
+  <text x="713" y="393" class="note" text-anchor="middle">Observing A provides no information about Q.</text>
+  <text x="480" y="520" class="small" text-anchor="middle">Boxes mark loci on a chromosome copy. Q/q denotes alleles at a QTL; A/a and B/b are marker alleles.</text>
+</svg>
