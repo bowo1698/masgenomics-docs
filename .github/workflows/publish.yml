@@ -43,7 +43,7 @@ jobs:
         run: |
           install.packages(c(
             "tidyverse", "DT", "gt", "knitr", "rmarkdown", "data.table",
-            "downlit", "xml2", "BiocManager"
+            "downlit", "xml2", "BiocManager", "genetics"
           ), repos = "https://packagemanager.posit.co/cran/__linux__/jammy/latest")
           BiocManager::install("snpStats", ask = FALSE, update = FALSE)
           install.packages(
