@@ -43,10 +43,13 @@ jobs:
         run: |
           install.packages(c(
             "tidyverse", "DT", "gt", "knitr", "rmarkdown", "data.table",
-            "downlit", "xml2", "BiocManager", "remotes"
+            "downlit", "xml2", "BiocManager"
           ), repos = "https://packagemanager.posit.co/cran/__linux__/jammy/latest")
           BiocManager::install("snpStats", ask = FALSE, update = FALSE)
-          remotes::install_github("SFUStatgen/LDheatmap", dependencies = FALSE)
+          install.packages(
+            "https://github.com/SFUStatgen/LDheatmap/archive/refs/heads/master.tar.gz",
+            repos = NULL, type = "source"
+          )
         shell: Rscript {0}
 
       # NOTE: do NOT restore _freeze from actions/cache. The freeze cache is

@@ -173,8 +173,9 @@ Here, `LDheatmap` calculates pairwise $r^2$ directly from the genotype matrix
 and places the result against physical marker positions. This is a realised
 association in one human population; it is neither a phased-haplotype
 calculation nor an estimate of recombination. The package is installed once
-in the R environment, rather than when this page runs, with
-`remotes::install_github("SFUStatgen/LDheatmap")`.
+in the R environment, rather than when this page runs. It requires the
+Bioconductor package `snpStats` and can then be installed from its public
+source tarball with `install.packages("https://github.com/SFUStatgen/LDheatmap/archive/refs/heads/master.tar.gz", repos = NULL, type = "source")`.
 
 ```{r}
 #| label: linkage-ldheatmap-demo
