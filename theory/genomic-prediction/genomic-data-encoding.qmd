@@ -77,12 +77,14 @@ mh <- d$mh[1:6, 5:6, drop = FALSE]
 colnames(mh) <- c("block_3_copy_1", "block_3_copy_2")
 alleles <- sort(unique(as.vector(mh)))
 mh_counts <- sapply(alleles, function(a) rowSums(mh == a))
+colnames(mh_counts) <- as.character(alleles)
 mh_frequency <- colMeans(mh_counts) / 2
 baseline_allele <- names(which.max(mh_frequency))
+non_baseline <- setdiff(colnames(mh_counts), baseline_allele)
 W_alpha_h <- sweep(
-  mh_counts[, setdiff(colnames(mh_counts), baseline_allele), drop = FALSE],
+  mh_counts[, non_baseline, drop = FALSE],
   2,
-  2 * mh_frequency[setdiff(names(mh_frequency), baseline_allele)],
+  2 * mh_frequency[non_baseline],
   FUN = function(count, expected) expected - count
 )
 mh

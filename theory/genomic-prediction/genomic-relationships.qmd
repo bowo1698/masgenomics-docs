@@ -85,12 +85,14 @@ d <- readRDS("../../demo-data/main/demo_data.rds")
 mh <- d$mh[1:6, 5:6, drop = FALSE]
 alleles <- sort(unique(as.vector(mh)))
 counts <- sapply(alleles, function(a) rowSums(mh == a))
+colnames(counts) <- as.character(alleles)
 frequency <- colMeans(counts) / 2
 baseline <- names(which.max(frequency))
+non_baseline <- setdiff(colnames(counts), baseline)
 W_alpha_h <- sweep(
-  counts[, setdiff(colnames(counts), baseline), drop = FALSE],
+  counts[, non_baseline, drop = FALSE],
   2,
-  2 * frequency[setdiff(names(frequency), baseline)],
+  2 * frequency[non_baseline],
   FUN = function(count, expected) expected - count
 )
 k_alpha_h <- mean(diag(tcrossprod(W_alpha_h)))
