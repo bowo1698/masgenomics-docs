@@ -81,6 +81,8 @@ This section develops the statistical and mathematical ideas needed to understan
 6.  [Vectors and matrices](mathematical-fundamentals/vectors-matrices.qmd)
 7.  [Linear regression](mathematical-fundamentals/linear-regression.qmd)
 8.  [Multiple regression and regularisation](mathematical-fundamentals/multiple-regression-regularisation.qmd)
+9.  [Statistical models and estimation](mathematical-fundamentals/statistical-models-estimation.qmd)
+10. [Linear mixed models](mathematical-fundamentals/linear-mixed-models.qmd)
 
 ## 3. Genomic prediction
 

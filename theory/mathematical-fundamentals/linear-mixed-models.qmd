@@ -1,0 +1,137 @@
+---
+title: "Linear mixed models"
+---
+
+Phenotypes reflect both systematic management conditions and differences among
+animals. A **[linear mixed model](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4194460/)** treats those roles differently, allowing animal effects to share information through an explicit covariance structure.
+
+## Fixed and random effects have different modelling roles
+
+A fixed effect represents included comparisons, such as observed management
+groups. A random effect represents values treated as draws from a distribution,
+such as animal effects in a breeding population. The distinction is about the
+model target and covariance assumption, not whether a quantity was measured.
+
+For $n$ phenotype records and $q$ animal effects,
+
+$$
+\mathbf y=\mathbf X\boldsymbol\beta+\mathbf Z\mathbf u+
+\boldsymbol\varepsilon.
+$$
+
+$\mathbf y$ is $n\times1$; $\mathbf X$ is the $n\times k$ fixed-effect design
+matrix; $\boldsymbol\beta$ is $k\times1$; $\mathbf Z$ is the $n\times q$
+incidence matrix; $\mathbf u$ is $q\times1$; and
+$\boldsymbol\varepsilon$ is $n\times1$. A simple animal model assumes
+
+$$
+\mathbf u\sim N(\mathbf0,\mathbf G\sigma_u^2),\qquad
+\boldsymbol\varepsilon\sim N(\mathbf0,\mathbf I_n\sigma_e^2).
+$$
+
+Here $\mathbf G$ is a $q\times q$ relationship covariance template,
+$\sigma_u^2$ and $\sigma_e^2$ are variance components, and random effects and
+residuals are assumed independent. Off-diagonal entries of $\mathbf G$ allow
+related animals to share information. Pedigree and genomic matrices are
+introduced later.
+
+## Covariance produces partial pooling
+
+The phenotype covariance is
+
+$$
+\operatorname{Var}(\mathbf y)=\mathbf Z\mathbf G\mathbf Z^\mathsf T
+\sigma_u^2+\mathbf I_n\sigma_e^2.
+$$
+
+An animal with little information is pulled more strongly toward the modelled
+population mean than an animal with informative records or relatives. This
+**partial pooling** is model-based shrinkage, not evidence that an animal has
+no genetic merit. Its strength depends on
+$\lambda=\sigma_e^2/\sigma_u^2$: larger residual variation makes individual
+records less decisive. Estimating variance components, including REML, comes
+later.
+
+## A four-animal mixed-model equation
+
+This simulated teaching example has one intercept, so $\mathbf X$ is
+$4\times1$. It assigns an independent random effect to each record, so
+$\mathbf Z=\mathbf I_4$ is $4\times4$, and supplies $\lambda=2$. It is
+preparation for relationship matrices, not a pedigree or genomic analysis.
+
+```{r}
+#| label: mixed-model-data
+#| code-fold: true
+d <- readRDS("../../demo-data/main/demo_data.rds")
+y <- round(d$pheno$y_cont_qtl_snp[1:4])
+X <- matrix(1, nrow = 4, ncol = 1)
+Z <- diag(4)
+lambda <- 2
+y
+```
+
+With supplied variance components, solve
+
+$$
+\begin{bmatrix}
+\mathbf X^\mathsf T\mathbf X & \mathbf X^\mathsf T\mathbf Z\\
+\mathbf Z^\mathsf T\mathbf X & \mathbf Z^\mathsf T\mathbf Z+\lambda\mathbf I_4
+\end{bmatrix}
+\begin{bmatrix}\hat{\boldsymbol\beta}\\\hat{\mathbf u}\end{bmatrix}
+=
+\begin{bmatrix}\mathbf X^\mathsf T\mathbf y\\\mathbf Z^\mathsf T\mathbf y\end{bmatrix}.
+$$
+
+```{r}
+#| label: mixed-model-solution
+#| code-fold: true
+lhs <- rbind(
+  cbind(crossprod(X), crossprod(X, Z)),
+  cbind(crossprod(Z, X), crossprod(Z) + lambda * diag(4))
+)
+rhs <- rbind(crossprod(X, y), crossprod(Z, y))
+solution <- solve(lhs, rhs)
+solution
+```
+
+The intercept is $-1.25$ and predicted animal deviations are approximately
+0.083, $-0.583$, $-0.250$, and 0.750. They are shrunk toward zero relative to
+raw deviations because $\lambda=2$ penalises large random effects. They are
+not observed breeding values, and this toy model does not use simulated truth.
+
+## BLUP and prediction uncertainty
+
+With known or estimated covariance parameters, $\hat{\mathbf u}$ is the
+**[best linear unbiased prediction](https://doi.org/10.2307/2529430)** (BLUP)
+under the stated model. “Best” means minimum prediction-error variance among
+linear unbiased predictors in that model. It does not mean causal, biologically
+true, or guaranteed best in another population.
+
+Prediction error variance describes uncertainty in
+$\hat{\mathbf u}-\mathbf u$, not variation among predicted values. It depends
+on record number, residual noise, fixed-effect design, and relationships. The
+next genomic-prediction pages replace this independent toy covariance with
+pedigree and genomic relationships, then explain REML estimation of the
+variance components controlling shrinkage.
+
+## Exercises
+
+1. With 120 records, three fixed-effect columns, and 150 animal effects, what are the dimensions of $\mathbf X$ and $\mathbf Z$?
+
+::: {.callout-note collapse="true" title="Solution"}
+$\mathbf X$ is $120\times3$ and $\mathbf Z$ is $120\times150$.
+:::
+
+2. What does a positive off-diagonal entry in $\mathbf G$ allow the model to do?
+
+::: {.callout-note collapse="true" title="Solution"}
+It models the corresponding random effects as positively correlated, allowing
+one animal's information to contribute to prediction of the other's effect.
+:::
+
+3. Holding other quantities fixed, what generally happens to shrinkage when $\lambda=\sigma_e^2/\sigma_u^2$ increases?
+
+::: {.callout-note collapse="true" title="Solution"}
+Individual deviations are usually pulled more strongly toward their modelled
+mean because residual variation is larger relative to animal-effect variation.
+:::

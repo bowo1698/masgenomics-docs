@@ -1,0 +1,120 @@
+---
+title: "Statistical models and estimation"
+---
+
+A breeder records phenotypes and wants a defensible estimate of average
+performance. A **[statistical model](https://www.itl.nist.gov/div898/handbook/pri/section1/pri11.htm)** turns that question into assumptions and unknown quantities that can be estimated from records.
+
+## From observations to an estimate
+
+For a first model, let phenotype $y_i$ of animal $i$ among $n$ observed
+animals satisfy
+
+$$
+y_i=\mu+\varepsilon_i, \qquad \varepsilon_i\sim N(0,\sigma^2).
+$$
+
+The parameter $\mu$ is the fixed but unknown population mean and $\sigma$ is
+the assumed residual standard deviation. The normal, independent, common-
+variance residual model is an assumption, not a biological fact. Family,
+management, or environmental structure can make it inadequate.
+
+An *estimator* is a rule applied to possible datasets, while an *estimate* is
+the number it returns for this dataset. Thus the sample mean $\bar y$ is an
+estimator of $\mu$, and $\hat\mu$ is its realised estimate. A *prediction*
+instead concerns an unobserved outcome, such as a future offspring phenotype.
+Estimating a mean and predicting a new record are related but different tasks.
+
+```{r}
+#| label: estimation-data
+#| code-fold: true
+d <- readRDS("../../demo-data/main/demo_data.rds")
+y <- d$pheno$y_cont_qtl_snp[1:5]
+mean(y)
+```
+
+The result is about $-1.518$. It estimates the mean under this simple model;
+it is neither the true mean of every possible animal nor a prediction that all
+five animals should have the same phenotype. The data are simulated project
+data, not measurements from an empirical trial.
+
+## Likelihood holds data fixed and compares parameters
+
+A probability model asks which data could arise if $\mu$ and $\sigma$ were
+known. A **[likelihood](https://www.itl.nist.gov/div898/handbook/apr/section1/apr161.htm)** uses the same formula after data are observed, holding
+$\mathbf y$ fixed and comparing candidate parameter values:
+
+$$
+L(\mu;\mathbf y)=\prod_{i=1}^{n}
+\frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left\{-\frac{(y_i-\mu)^2}{2\sigma^2}\right\}.
+$$
+
+Likelihood is not a probability distribution over $\mu$: in frequentist
+estimation, the parameter is fixed and unknown. Its maximiser is the
+maximum-likelihood estimate. Software commonly uses log-likelihoods because
+they turn products into sums.
+
+```{r}
+#| label: normal-likelihood
+#| code-fold: true
+mu_grid <- seq(-4, 2, length.out = 401)
+log_likelihood <- vapply(
+  mu_grid,
+  function(mu) sum(dnorm(y, mean = mu, sd = 3, log = TRUE)),
+  numeric(1)
+)
+mu_grid[which.max(log_likelihood)]
+```
+
+The grid gives $-1.525$, close to the exact sample mean because grid points
+are 0.015 apart. With known $\sigma$, maximising this normal likelihood gives
+$\hat\mu=\bar y$. Here $\sigma=3$ is supplied to focus on estimating $\mu$.
+
+The same estimate minimises squared-error loss,
+
+$$Q(\mu)=\sum_{i=1}^{n}(y_i-\mu)^2.$$
+
+That agreement depends on the chosen normal model and loss. Absolute-error
+loss targets a median, and another probability model can yield a different
+estimator.
+
+## Identifiability limits what records can separate
+
+An **[identifiable parameter](https://www.itl.nist.gov/div898/handbook/pri/section5/pri541.htm)** has a unique implication for the distribution of observed data. If two parameter values always give the same fitted values, the data cannot distinguish them.
+
+For $\mathbf y=\mathbf X\boldsymbol\beta+\boldsymbol\varepsilon$, suppose
+two columns of the $n\times p$ marker matrix $\mathbf X$ are exact copies.
+Increasing one coefficient and decreasing the other by the same amount leaves
+$\mathbf X\boldsymbol\beta$ unchanged. Their separate coefficients are not
+identified, although their combined fitted contribution can be. Near-copy
+markers create collinearity: effects may be identifiable but unstable. A
+marker coefficient is therefore not proof of a unique causal locus.
+
+Identifiability also does not establish out-of-sample prediction quality. A
+well-estimated training-population parameter can still predict poorly in a new
+generation or environment. The next page adds fixed management effects and
+correlated animal effects before genomic relationship matrices and REML.
+
+## Exercises
+
+1. A rule returns 2.1 for one dataset while a model parameter is $\theta$. Which is the estimator and which is the estimate?
+
+::: {.callout-note collapse="true" title="Solution"}
+The estimator is the rule mapping data to a value. The value 2.1 is its
+estimate for this dataset; $\theta$ is the fixed but unknown parameter.
+:::
+
+2. After observing data, what varies in a likelihood comparison?
+
+::: {.callout-note collapse="true" title="Solution"}
+The observations are held fixed and candidate parameter values vary.
+Likelihood ranks how well those values explain the same observed data.
+:::
+
+3. Can two exact-copy marker columns have separately identified regression coefficients from phenotypes alone?
+
+::: {.callout-note collapse="true" title="Solution"}
+No. Opposite coefficient changes can leave every fitted value unchanged, so an
+extra constraint or representation is needed to separate the effects.
+:::

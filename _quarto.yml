@@ -76,6 +76,8 @@ website:
             - theory/mathematical-fundamentals/vectors-matrices.qmd
             - theory/mathematical-fundamentals/linear-regression.qmd
             - theory/mathematical-fundamentals/multiple-regression-regularisation.qmd
+            - theory/mathematical-fundamentals/statistical-models-estimation.qmd
+            - theory/mathematical-fundamentals/linear-mixed-models.qmd
         - section: "3. Genomic prediction"
           contents:
             - theory/genomic-prediction/quantitative-genetics.qmd
