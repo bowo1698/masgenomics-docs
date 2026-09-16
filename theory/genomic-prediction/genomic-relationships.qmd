@@ -1,0 +1,96 @@
+---
+title: "Genomic relationships"
+---
+
+Pedigrees describe expected sharing from known ancestry, whereas markers show
+realised sharing at the variants that were measured. A **[genomic relationship
+matrix](https://doi.org/10.3168/jds.2007-0980)** summarises that realised
+marker similarity for a specified coding and base population.
+
+## Expected pedigree relationships and realised marker similarity
+
+The pedigree relationship matrix $\mathbf A$ records expected additive
+relationships implied by a pedigree. Full siblings have the same expected
+relationship, although meiosis gives each pair a different realised mosaic of
+parental chromosome segments. A genomic relationship matrix $\mathbf G$ uses
+observed markers to estimate that realised sharing. Neither matrix directly
+reveals every causal variant; both depend on the available information and
+their population assumptions. See the [pedigree input guide](../../input-data/pedigree.qmd)
+for pedigree records and the [SNP input guide](../../input-data/snp.qmd) for
+marker data.
+
+## VanRaden's centred-marker matrix
+
+For $n$ individuals and $p$ biallelic markers, let $\mathbf W$ be the
+$n\times p$ centred dosage matrix from the previous page. VanRaden method 1
+uses
+
+$$
+\mathbf G=\frac{\mathbf W\mathbf W^\mathsf T}
+{2\sum_{j=1}^{p}f_j(1-f_j)}.
+$$
+
+The denominator is the expected marker heterozygosity under this allele-
+frequency convention. This page uses sample frequencies from its six-animal
+teaching view, so the matrix is illustrative rather than a production GRM.
+Other scaling, weighting, allele-frequency, and base-population choices give
+other legitimate genomic relationship definitions.
+
+```{r}
+#| label: vanraden-grm
+#| code-fold: true
+d <- readRDS("../../demo-data/main/demo_data.rds")
+M <- d$snp[1:6, c("SNP007", "SNP008", "SNP017"), drop = FALSE]
+allele_frequency <- colMeans(M) / 2
+W <- sweep(M, 2, 2 * allele_frequency, FUN = "-")
+denominator <- 2 * sum(allele_frequency * (1 - allele_frequency))
+G <- tcrossprod(W) / denominator
+round(G, 3)
+eigen(G, symmetric = TRUE)$values
+```
+
+Diagonal entries describe self-similarity relative to the chosen base and can
+vary among animals. Off-diagonal entries compare pairs after centring; a
+negative value means the pair shares fewer counted-marker alleles than the
+reference expectation, not negative kinship or a biological impossibility.
+With only three markers, this example has rank at most three, so several
+eigenvalues are numerically zero. Practical GRMs use many markers and still
+need quality control and a population-appropriate frequency reference.
+
+## Covariance is an assumption for prediction
+
+In a mixed model, a relationship template can enter as
+
+$$\operatorname{Var}(\mathbf u)=\mathbf G\sigma_u^2,$$
+
+where $\mathbf u$ is a vector of animal effects and $\sigma_u^2$ is an
+additive variance component. This says genetically similar animals are
+modelled as having correlated effects. It enables information to be shared
+between phenotyped animals and genotyped candidates, but it does not convert a
+similarity score into a causal explanation or a guaranteed prediction.
+
+The next page develops GBLUP, where this covariance assumption, residual
+variation, and shrinkage produce genomic estimated breeding values.
+
+## Exercises
+
+1. Why can two full siblings have the same expected pedigree relationship but different genomic relationships?
+
+::: {.callout-note collapse="true" title="Solution"}
+They inherit different realised chromosome segments through meiosis. The
+pedigree gives an expectation, while marker data sample the realised sharing.
+:::
+
+2. What does a negative off-diagonal element of a centred GRM not mean?
+
+::: {.callout-note collapse="true" title="Solution"}
+It does not mean negative biological kinship. It means lower marker similarity
+than the chosen centred reference expectation.
+:::
+
+3. Why are several eigenvalues zero in the three-marker, six-animal example?
+
+::: {.callout-note collapse="true" title="Solution"}
+$\mathbf W$ has only three columns, so $\mathbf W\mathbf W^\mathsf T$ can
+have rank no greater than three even though it has six rows and columns.
+:::

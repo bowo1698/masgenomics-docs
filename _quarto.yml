@@ -82,6 +82,8 @@ website:
           contents:
             - theory/genomic-prediction/quantitative-genetics.qmd
             - theory/genomic-prediction/markers-to-prediction.qmd
+            - theory/genomic-prediction/genomic-data-encoding.qmd
+            - theory/genomic-prediction/genomic-relationships.qmd
     - title: "Input Data"
       collapse-level: 1
       contents:

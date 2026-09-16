@@ -1,0 +1,106 @@
+---
+title: "Genomic data encoding"
+---
+
+A prediction model cannot compare a training animal with a candidate unless
+their genotypes use exactly the same representation. This page turns marker
+states into matrices while keeping a coding convention separate from biological
+meaning.
+
+## SNP dosage counts a chosen allele
+
+At a biallelic SNP, let $M_{ij}$ be the number of copies of a chosen counted
+allele carried by individual $i$ at marker $j$. Thus $M_{ij}$ is 0, 1, or 2.
+The reference and counted alleles are labels: reversing them changes the
+numbers and coefficient signs, but not the individual's DNA or the evidence
+that a locus is causal. For $n$ animals and $p$ SNPs, $\mathbf M$ is an
+$n\times p$ dosage matrix and the allele frequency is
+
+$$f_j=\frac{1}{2n}\sum_{i=1}^{n}M_{ij}.$$
+
+Centred coding removes the expected dosage under the chosen reference
+population,
+
+$$W_{ij}=M_{ij}-2f_j,$$
+
+giving an $n\times p$ matrix $\mathbf W$. Optional variance scaling changes
+the relative weighting of marker columns and must be stated. Missing calls
+need a documented imputation or model strategy; silently treating them as zero
+copies changes allele frequencies and similarity.
+
+```{r}
+#| label: centre-snp-dosages
+#| code-fold: true
+d <- readRDS("../../demo-data/main/demo_data.rds")
+M <- d$snp[1:6, c("SNP007", "SNP008", "SNP017"), drop = FALSE]
+allele_frequency <- colMeans(M) / 2
+W <- sweep(M, 2, 2 * allele_frequency, FUN = "-")
+M
+allele_frequency
+colMeans(W)
+```
+
+The three frequencies in this six-animal teaching view are 0.25, 0.417, and
+0.417. The centred column means are zero apart from floating-point rounding.
+For prediction, frequencies and imputation values must be estimated from the
+training population and then applied unchanged to candidates. Re-estimating
+them in a test set changes the fitted representation and can leak information.
+
+## A microhaplotype is categorical before it is encoded
+
+A phased microhaplotype records one local haplotype state on each chromosome
+copy. Its stored identifiers are category labels, not dosages: identifier 8 is
+not twice identifier 4. A useful representation first creates one column per
+observed allele, then counts its 0, 1, or 2 copies for every individual. This
+one-hot or allele-count design retains multiallelic states without inventing an
+order among them.
+
+```{r}
+#| label: encode-microhaplotype
+#| code-fold: true
+mh <- d$mh[1:6, 5:6, drop = FALSE]
+colnames(mh) <- c("block_3_copy_1", "block_3_copy_2")
+alleles <- sort(unique(as.vector(mh)))
+mh_counts <- sapply(alleles, function(a) rowSums(mh == a))
+mh
+mh_counts
+```
+
+The project representation contains labels 4, 7, and 8 in this block. The
+count matrix says how many copies of each label occur; it does not say that
+allele 8 is quantitatively larger than allele 4. The haplotype and
+[microhaplotype input guide](../../input-data/microhaplotypes.qmd) explains
+how phase and compact input objects are obtained.
+
+## Encoding fixes the comparison population
+
+Centred SNP columns and multiallelic allele-count columns are both statistical
+representations. They depend on marker order, allele definitions, phase, and
+the population used for frequency estimates. They do not by themselves prove
+identity by descent, establish a causal variant, or make one marker type
+universally better. The next page uses the centred SNP matrix to describe
+realised genomic similarity through a genomic relationship matrix.
+
+## Exercises
+
+1. A SNP has counted-allele dosage 2. What happens to its dosage if the other allele becomes the counted allele?
+
+::: {.callout-note collapse="true" title="Solution"}
+It becomes 0. The coding changes from $M$ to $2-M$, but the diploid genotype
+and biological evidence do not change.
+:::
+
+2. Why must a candidate use allele frequencies estimated in the training population?
+
+::: {.callout-note collapse="true" title="Solution"}
+The fitted parameters refer to the training-derived centring. Re-estimating
+frequencies in candidates changes the columns supplied to the model and can
+leak information during evaluation.
+:::
+
+3. Why is it invalid to regress directly on a compact haplotype label such as 4, 7, or 8?
+
+::: {.callout-note collapse="true" title="Solution"}
+The labels identify categories, not ordered measurements. A direct numeric
+slope would impose artificial distances between haplotype states.
+:::

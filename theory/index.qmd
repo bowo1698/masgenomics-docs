@@ -90,3 +90,5 @@ This section connects quantitative genetics with the marker-based models used to
 
 1.  [Quantitative genetics: from phenotype to breeding value](genomic-prediction/quantitative-genetics.qmd)
 2.  [From markers to genomic prediction](genomic-prediction/markers-to-prediction.qmd)
+3.  [Genomic data encoding](genomic-prediction/genomic-data-encoding.qmd)
+4.  [Genomic relationships](genomic-prediction/genomic-relationships.qmd)
