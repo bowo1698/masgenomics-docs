@@ -1,0 +1,191 @@
+---
+title: "Pedigrees, relatedness, and inbreeding"
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    code-fold: true
+---
+
+Genotypes and haplotypes describe chromosome copies in an individual. A
+[**pedigree**](https://www.genome.gov/genetics-glossary/Pedigree)
+records the parentage links that explain how chromosome segments can
+pass among individuals. It lets a breeding programme distinguish a close
+relative from an unrelated candidate before any relationship matrix is
+calculated. The previous page described transmission within a family;
+this page follows those paths across a pedigree.
+
+## Pedigrees describe possible transmission paths
+
+A founder is an individual with no recorded parents in the pedigree. Its
+offspring form the next generation, and their descendants form later
+generations. Two relatives have a common ancestor when their pedigree
+paths meet at an earlier individual. A parent and offspring have one
+direct path; full siblings have both parents in common; half siblings
+have one parent in common.
+
+For an autosomal pedigree with non-inbred, unrelated founders, the
+expected proportion of genome shared by a parent and offspring is
+one-half. Full siblings also share one-half on average, whereas half
+siblings share one-quarter on average. These are expectations over
+meioses, not a claim that every pair has exactly that proportion at
+every region. Independent assortment and
+[recombination](linkage-recombination-ld.qmd) make the realised
+chromosome segments inherited by particular relatives differ.
+
+| Relationship | Shared pedigree paths | Expected autosomal sharing under the stated assumptions |
+|----------------------|----------------------|----------------------------:|
+| Parent and offspring | One parent transmits one of two chromosome copies | 1/2 |
+| Full siblings | The same two parents contribute to both offspring | 1/2 |
+| Half siblings | One parent contributes to both offspring | 1/4 |
+
+The [**kinship coefficient**](https://pubmed.ncbi.nlm.nih.gov/11986874/)
+uses a different scale from the expected sharing proportion. It is the
+probability that one allele sampled from each of two individuals is
+identical by descent. For these simple non-inbred relationships, kinship
+is one-quarter for a parent-offspring or full-sibling pair and
+one-eighth for a half-sibling pair. The corresponding expected sharing
+proportions are twice those values. This distinction matters because
+terms such as "relatedness" can otherwise refer to two different
+numerical scales.
+
+## Identical copies need an ancestry statement
+
+Two allele copies are [**identical by descent
+(IBD)**](https://pubmed.ncbi.nlm.nih.gov/11986874/) when both descend
+from the same ancestral allele copy through the pedigree. IBD is
+therefore a statement about inheritance history. Two copies are
+**identical by state (IBS)** when their observed allele states match,
+whether or not they came from the same ancestral copy. Common alleles
+can be IBS without being IBD, and sparse marker data can fail to reveal
+a shared ancestral segment.
+
+For the same reason, counting matching genotypes is not a kinship
+coefficient. Genotype matching depends on which markers were observed,
+their allele frequencies, coding, and chance. Kinship describes a
+probability of shared ancestry under a pedigree or genetic model.
+Genomic marker data can help estimate realised sharing, but the
+construction of pedigree and genomic relationship matrices belongs to
+[Genomic prediction](../genomic-prediction/quantitative-genetics.qmd),
+not this biological page.
+
+## The principal family in the simulated project data
+
+The project dataset is simulated. It contains 20 founders and 200
+offspring in ten full-sib families. `SIRE01` and `DAM01` are the
+recorded parents of `IND001` through `IND020`. The code below derives
+these statements directly from the pedigree table, then displays the
+complete first family.
+
+```{r}
+#| label: pedigrees-principal-family
+d <- readRDS("../../demo-data/main/demo_data.rds")
+founders <- subset(d$pedigree, is.na(sire) & is.na(dam))
+offspring <- subset(d$pedigree, !is.na(sire) & !is.na(dam))
+family_1_ids <- c("SIRE01", "DAM01", sprintf("IND%03d", 1:20))
+family_1 <- subset(d$pedigree, id %in% family_1_ids)
+
+c(founders = nrow(founders), offspring = nrow(offspring))
+table(d$family_id)
+family_1
+```
+
+@fig-principal-family shows a readable subset of this recorded family.
+Every box is sex-neutral because the pedigree table records parent roles
+as `sire` and `dam` but has no separate sex field. The horizontal line
+joins the two recorded parents, and every vertical line shown leads to
+one of their offspring. The other 14 offspring have the same two
+recorded parents and are listed in the output above.
+
+```{r}
+#| label: fig-principal-family
+#| fig-width: 8
+#| fig-height: 4.2
+#| fig-alt: "A sex-neutral pedigree diagram. Boxes labelled SIRE01 and DAM01 are joined at the top. A shared descent line branches to six boxes labelled IND001 through IND006 below, showing that all six have the same two recorded parents."
+#| fig-cap: "A readable six-offspring subset of the simulated principal family. `SIRE01` and `DAM01` are the two recorded parents of `IND001` through `IND006`; the R output lists the remaining 14 offspring with the same parent pair. Boxes are intentionally sex-neutral because no sex field is supplied in `d$pedigree`."
+display_ids <- c("SIRE01", "DAM01", sprintf("IND%03d", 1:6))
+family_display <- subset(d$pedigree, id %in% display_ids)
+stopifnot(all(family_display$sire[3:8] == "SIRE01"))
+stopifnot(all(family_display$dam[3:8] == "DAM01"))
+
+offspring_x <- seq_len(6)
+plot(
+  NA,
+  xlim = c(0.4, 6.6), ylim = c(0.2, 2.6),
+  xlab = "", ylab = "", xaxt = "n", yaxt = "n", bty = "n"
+)
+segments(3.05, 2.1, 3.95, 2.1, lwd = 1.5)
+segments(3.5, 2.1, 3.5, 1.35, lwd = 1.5)
+segments(1, 1.35, 6, 1.35, lwd = 1.5)
+segments(offspring_x, 1.35, offspring_x, 0.81, lwd = 1.5)
+rect(1.95, 1.9, 3.05, 2.3)
+rect(3.95, 1.9, 5.05, 2.3)
+rect(offspring_x - 0.42, 0.49, offspring_x + 0.42, 0.81)
+text(c(2.5, 4.5), c(2.1, 2.1), labels = c("SIRE01", "DAM01"), cex = 0.75)
+text(offspring_x, rep(0.65, 6), labels = sprintf("IND%03d", 1:6), cex = 0.7)
+```
+
+The diagram records expected paths of descent, not the exact lengths of
+DNA segments that each offspring inherited. Full siblings share the same
+parents, but each receives a different realised mosaic of parental
+chromosome copies.
+
+## Inbreeding and homozygosity
+
+[**Inbreeding**](https://pmc.ncbi.nlm.nih.gov/articles/PMC6304688/)
+occurs when the two allele copies in an individual are more likely to
+trace to the same ancestral copy because its parents are related. It
+increases expected **homozygosity**, the state of carrying matching
+alleles at a locus. A homozygous genotype need not be IBD, because the
+same allele state can occur independently in the population. Conversely,
+inbreeding is an ancestry-based probability that may be estimated using
+pedigree or genomic information.
+
+Increased homozygosity can expose recessive deleterious alleles that
+were masked in heterozygotes. The resulting average reduction in a trait
+associated with survival, fertility, growth, or another fitness-related
+measure is called **inbreeding depression**. It is a population-level
+possibility, not an automatic diagnosis for one individual with a
+related pedigree. Its magnitude depends on the trait, the population's
+deleterious variation, its breeding and demographic history, and the
+environment.
+
+Pedigrees give a biological map of ancestry. The next page asks a
+different question: when a phenotype varies among relatives, how many
+loci and biological pathways may contribute to that variation?
+
+## Exercises
+
+1.  Under the stated non-inbred pedigree assumptions, why can full
+    siblings have the same expected sharing as a parent and offspring
+    but different realised chromosome segments?
+
+::: {.callout-note collapse="true" title="Solution"}
+Both relationships have expected autosomal sharing of one-half. A parent
+transmits a recombined chromosome copy to each offspring, and two full
+siblings receive separate meiotic samples from both shared parents.
+Their actual inherited segments can therefore differ despite the same
+expectation.
+:::
+
+2.  Two individuals have matching alleles at a marker. Why does this not
+    by itself show that the copies are IBD or give their kinship
+    coefficient?
+
+::: {.callout-note collapse="true" title="Solution"}
+Matching observed states establish IBS at that marker. The match may
+arise without a shared ancestral copy, especially for a common allele.
+IBD and kinship require information or assumptions about ancestry, not
+only one matching genotype.
+:::
+
+3.  What does the principal-family diagram establish, and what does it
+    not establish about the six displayed offspring?
+
+::: {.callout-note collapse="true" title="Solution"}
+It establishes the recorded pedigree links: `SIRE01` and `DAM01` are
+parents of each displayed offspring. It does not show their exact
+realised genome sharing, the parental origin of every allele, or whether
+any individual has inbreeding depression.
+:::

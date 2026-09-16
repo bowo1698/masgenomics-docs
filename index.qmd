@@ -18,17 +18,17 @@ Quarto](https://img.shields.io/badge/Built%20with-Quarto-2780e3?style=flat-squar
 
 ::::: hero-cards
 ::: hero-card
-[![masbayes](assets/masbayes.svg)](reference/masbayes/index.qmd){.hero-logo}
+[![masbayes](assets/masbayes.svg)](reference/masbayes/index.qmd)
 
-<a href="https://github.com/bowo1698/masbayes/releases"><img src="https://img.shields.io/github/v/release/bowo1698/masbayes?label=release&style=flat-square&color=2780e3" alt="masbayes release"></a>
+<a href="https://github.com/bowo1698/masbayes/releases"><img src="https://img.shields.io/github/v/release/bowo1698/masbayes?label=release&amp;style=flat-square&amp;color=2780e3" alt="masbayes release"/></a>
 
 [MasBayes GitHub ↗](https://github.com/bowo1698/masbayes){.hero-github}
 :::
 
 ::: hero-card
-[![masreml](assets/masreml.svg)](reference/masreml/index.qmd){.hero-logo}
+[![masreml](assets/masreml.svg)](reference/masreml/index.qmd)
 
-<a href="https://github.com/bowo1698/masreml/releases"><img src="https://img.shields.io/github/v/release/bowo1698/masreml?label=release&style=flat-square&color=2780e3" alt="masreml release"></a>
+<a href="https://github.com/bowo1698/masreml/releases"><img src="https://img.shields.io/github/v/release/bowo1698/masreml?label=release&amp;style=flat-square&amp;color=2780e3" alt="masreml release"/></a>
 
 [MasRemL GitHub ↗](https://github.com/bowo1698/masreml){.hero-github}
 :::
@@ -45,10 +45,10 @@ single API surface.
 
 MasBayes and MasRemL were developed to make genomic prediction more
 flexible and reproducible. These packages support multiple methods,
-including REML-BLUP for frequentist-based methods and the Bayesian alphabet for
-Bayesian statistical methods. The packages also work with two marker types (**SNPs**
-and **microhaplotypes**) and can analyse both **continuous** and
-**binary** traits.
+including REML-BLUP for frequentist-based methods and the Bayesian
+alphabet for Bayesian statistical methods. The packages also work with
+two marker types (**SNPs** and **microhaplotypes**) and can analyse both
+**continuous** and **binary** traits.
 
 All features are integrated into a single R environment with the Rust
 backend, shared demo datasets, and a consistent API. This allows the
@@ -61,36 +61,39 @@ workflow.](assets/overview-workflow.svg){fig-align="center" width="80%"}
 ::: callout-note
 ## Motivation
 
-Over the last few years, many great scientists have developed outstanding
-algorithms, prediction models, etc, but often rare of them
+Over the last few years, many great scientists have developed
+outstanding algorithms, prediction models, etc, but often rare of them
 share the source codes directly for reproducible analysis. Hence, this
-project is open source and free, so anyone can reproduce the same results,
-as well as providing evaluation and improvement for MasBayes and MasRemL. 
-Through this project, we also plan to develop more
+project is open source and free, so anyone can reproduce the same
+results, as well as providing evaluation and improvement for MasBayes
+and MasRemL. Through this project, we also plan to develop more
 prediction models and algorithms within the two frameworks, BLUPs &
-Bayesian, to answer current challenges in genomic selection, such as genetic
-marker relevance, EBV calculation for cross population or generation, and GxE interaction.
+Bayesian, to answer current challenges in genomic selection, such as
+genetic marker relevance, EBV calculation for cross population or
+generation, and GxE interaction.
 :::
 
 ::: callout-note
 ## Why do we use Rust?
 
-The lead developer has only been learning and implementing Rust for over four years,
-mostly for the backend of websites or desktop applications, and yes, this is the
-largest Rust project we have ever built for the purpose of end-to-end genomic
-selection, specifically based on multi-allelic markers. Indeed, Rust is not
-widely used as a backend for many current R packages (most use C++), but this
-is a good opportunity to introduce Rust as a memory-safe programming language
-for processing large genomic datasets.
+The lead developer has only been learning and implementing Rust for over
+four years, mostly for the backend of websites or desktop applications,
+and yes, this is the largest Rust project we have ever built for the
+purpose of end-to-end genomic selection, specifically based on
+multi-allelic markers. Indeed, Rust is not widely used as a backend for
+many current R packages (most use C++), but this is a good opportunity
+to introduce Rust as a memory-safe programming language for processing
+large genomic datasets.
 
-Within the MasBayes or MasRemL, all heavy numerical operations, such as variance component estimation, Gibbs
-sampling, and solving linear algebra in a dense matrix, are calculated
-within the Rust kernel, while you only face the R frontend with very
-simple syntax. The concept of ownership from Rust ensures that you can
-calculate all of those heavy operations without wasting computing
-resources. This is our motivation to build a system that enables anyone
-with limited computational resources to learn and use genomic tools for
-selective breeding in a very efficient way.
+Within the MasBayes or MasRemL, all heavy numerical operations, such as
+variance component estimation, Gibbs sampling, and solving linear
+algebra in a dense matrix, are calculated within the Rust kernel, while
+you only face the R frontend with very simple syntax. The concept of
+ownership from Rust ensures that you can calculate all of those heavy
+operations without wasting computing resources. This is our motivation
+to build a system that enables anyone with limited computational
+resources to learn and use genomic tools for selective breeding in a
+very efficient way.
 
 See [Installation](installation/index.qmd) for how to set up Rust and
 both packages on Linux, macOS, and Windows.
@@ -99,9 +102,10 @@ both packages on Linux, macOS, and Windows.
 ## Where to go next
 
 | You are... | Start here |
-|------------------------------------|------------------------------------|
+|----|----|
 | Setting up for the first time | [Installation](installation/index.qmd) |
-| Looking for code examples | [Tasks → Genomic Prediction](tasks/genomic-prediction/index.qmd) |
+| Looking for code examples | [Activities → Genomic Prediction](activities/genomic-prediction/index.qmd) |
+| Learn more about genomic selection | [Theory](theory/index.qmd) |
 | Looking for input-data formats and the bundled demo | [Input Data](input-data/index.qmd) |
 | Looking for function docs | [Reference → masreml](reference/masreml/index.qmd) · [masbayes](reference/masbayes/index.qmd) |
 | Curious about the Rust internals | [Internals](internals/index.qmd) |

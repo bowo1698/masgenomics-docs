@@ -1,0 +1,189 @@
+---
+title: "Haplotypes, phasing, and microhaplotypes"
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    code-fold: true
+---
+
+A SNP genotype says which two alleles an individual carries at one
+position, but it does not necessarily say which alleles occur together
+on either copy of a chromosome. That missing information matters when a
+breeder wants to follow a chromosome segment through a family, interpret
+a local association, or represent several nearby variants as one marker.
+The previous page showed how [recombination and linkage
+disequilibrium](linkage-recombination-ld.qmd) shape associations between
+loci. This page follows the allele combinations on individual chromosome
+copies.
+
+## A genotype is not always a phased chromosome pair
+
+A [**haplotype**](https://www.genome.gov/genetics-glossary/haplotype) is
+the combination of alleles carried on one chromosome copy over a region.
+A diploid individual carries two haplotypes in that region. Its
+multilocus genotype records the two alleles at each locus, whereas its
+[**phase**](https://pmc.ncbi.nlm.nih.gov/articles/PMC3217888/) records
+which alleles share a chromosome copy.
+
+@fig-haplotype-illustration shows this grouping across three SNP
+positions. The four displayed sequences contain two recurring allele
+combinations, `ATT` and `GAA`. Each combination is a haplotype in this
+short region. The reference sequence provides a comparison row, while
+the individual rows show which combination is observed. The figure is a
+conceptual population example, not a record from the simulated project
+data.
+
+![A reference genome sequence and four individual sequences are compared
+at three highlighted SNP positions. Green boxes connect the recurring
+`ATT` and `GAA` combinations to two haplotype labels. Amanda Simons,
+[source](https://rotel.pressbooks.pub/genetics1/chapter/haplotypes/),
+[CC BY-SA](https://creativecommons.org/licenses/by-sa/4.0/);
+unchanged.](../../assets/haplotypes-phasing/haplotypes-amanda-simons.jpg){#fig-haplotype-illustration
+fig-alt="A reference DNA sequence and sequences from four individuals show three highlighted SNP positions. The observed alleles form two repeated combinations, ATT and GAA, which are labelled as haplotypes."
+fig-cap="Three nearby SNP positions can be considered jointly. In this conceptual example, the observed allele combinations are `ATT` and `GAA`, so the combinations, rather than each SNP in isolation, define the two displayed haplotypes. Amanda Simons, [source](https://rotel.pressbooks.pub/genetics1/chapter/haplotypes/), [CC BY-SA](https://creativecommons.org/licenses/by-sa/4.0/); unchanged."}
+
+Consider an invented individual that is heterozygous at two loci, A and
+B. Both chromosome arrangements below give the same unphased genotype,
+`A/a, B/b`. They are not the same phased haplotype pair.
+
+| Arrangement | Chromosome copy 1 | Chromosome copy 2 | Unphased genotype |
+|------------------|------------------|------------------|------------------|
+| Coupling phase | `A` at locus 1, `B` at locus 2 (`AB`) | `a` at locus 1, `b` at locus 2 (`ab`) | `A/a, B/b` |
+| Repulsion phase | `A` at locus 1, `b` at locus 2 (`Ab`) | `a` at locus 1, `B` at locus 2 (`aB`) | `A/a, B/b` |
+
+This is phase ambiguity: genotype observations alone leave more than one
+haplotype pair possible. The difference is visible if the individual
+produces gametes. Without recombination between the loci, the coupling
+arrangement can transmit `AB` or `ab`, while the repulsion arrangement
+can transmit `Ab` or `aB`. A crossover between the loci can instead
+create the other combinations. Thus, parental haplotypes help trace
+transmission, but recombination means that a longer parental haplotype
+need not pass intact to every offspring.
+
+[**Phasing**](https://pmc.ncbi.nlm.nih.gov/articles/PMC2692835/) is the
+process of assigning alleles to the two chromosome copies. Statistical
+phasing uses recurring allele combinations in a sample or reference
+population to choose likely haplotype pairs. Pedigree-assisted phasing
+also uses the alleles observed in parents, offspring, and other
+relatives to constrain what could have been transmitted. Both approaches
+depend on the information in the data: a small, unrelated, or poorly
+matched reference population can leave uncertainty, and a sparse or
+erroneous pedigree can limit family-based inference.
+
+A phasing error assigns part of a chromosome to the wrong haplotype
+copy. A common form is a switch error, where the assignment changes from
+one inferred copy to the other between adjacent positions. It can make a
+continuous haplotype appear to break, or create a combination that was
+not inherited as shown. Phased results are therefore estimates or
+observations with a method and an error rate, not automatic proof of
+parental origin.
+
+## Blocks summarise local haplotype patterns
+
+A [**haplotype
+block**](https://pmc.ncbi.nlm.nih.gov/articles/PMC1857528/) is a useful
+summary of a local region in which a limited set of haplotype patterns
+is observed or represented. Blocks are not immutable units marked on the
+genome. Their boundaries and the haplotypes retained depend on the
+population, marker set, sample size, LD criterion, and algorithm used to
+define them. Recombination history can make a block defined in one
+population less useful in another population or generation.
+
+A
+[**microhaplotype**](https://pmc.ncbi.nlm.nih.gov/articles/PMC7427474/)
+is a short region (less than 150 bp) represented by the combination of
+nearby variant alleles on a chromosome copy. Because several component
+variants can form several local combinations, it is a multiallelic
+marker even when its individual SNPs are biallelic. This representation
+retains local co-occurrence information that separate unphased SNP
+genotypes can obscure. It can be informative when the local haplotype
+state distinguishes chromosome segments that have the same single-SNP
+summaries.
+
+That potential does not make microhaplotypes universally better than
+SNPs. Their observed diversity, phase quality, marker-QTL association,
+and transfer across populations depend on the region and population. A
+microhaplotype does not guarantee a stronger prediction, fewer markers,
+or an association that survives recombination and population change.
+This page describes the biological representation only; the
+[microhaplotype input guide](../../input-data/microhaplotypes.qmd)
+defines the file layouts and software-ready objects.
+
+## A compact microhaplotype view from the simulated data
+
+The project data are simulated. In their compact representation, each
+block has two columns, one for each chromosome-copy haplotype. `block_3`
+spans 1.4 to 1.5 Mb on chromosome 1. The code extracts its map row and
+the two columns for the first six individuals.
+
+```{r}
+#| label: haplotypes-block-3
+d <- readRDS("../../demo-data/main/demo_data.rds")
+block_3_map <- subset(d$map_mh, block_id == "block_3")
+block_3_columns <- which(attr(d$mh, "block_id") == "block_3")
+block_3 <- d$mh[1:6, block_3_columns, drop = FALSE]
+colnames(block_3) <- c("copy_1", "copy_2")
+
+block_3_map
+block_3
+sort(unique(as.vector(block_3)))
+```
+
+The map confirms chromosome 1 and the 1.4 to 1.5 Mb interval. In this
+six individual teaching view, the compact identifiers are 4, 7, and 8.
+They name three haplotype categories in this two-SNP block; 8 is not
+biologically larger, more favourable, or more frequent than 4. The
+`copy_1` and `copy_2` columns represent the two haplotype copies for
+each individual. Their column order is a storage convention here, not
+evidence that `copy_1` is paternal or that `copy_2` is maternal.
+
+The compact identifiers are convenient for the project data, but they do
+not by themselves reveal the component alleles. They should not be
+treated as a numeric measurement in an analysis. To inspect the
+component-SNP calls, encoding, or software inputs, use the linked
+input-data guide rather than inferring a schema from this teaching view.
+
+## What phase can and cannot establish
+
+Phase can show a proposed or observed arrangement of alleles on
+chromosome copies, helping to follow local transmission and represent
+multi-allelic markers. It does not establish that a haplotype causes a
+trait, that a block is permanent, or that one inferred copy has a
+parental origin when the data do not establish it. The next topic asks
+how chromosome segments are shared among relatives, where family records
+and inheritance paths add information that a single individual's
+genotype cannot provide.
+
+## Exercises
+
+1.  An individual has unphased genotype `A/a, B/b`. Name the two
+    haplotype pairs shown in the manual example that could produce this
+    genotype.
+
+::: {.callout-note collapse="true" title="Solution"}
+The coupling pair is `AB/ab`, and the repulsion pair is `Ab/aB`. Both
+have one `A` and one `a` allele at the first locus and one `B` and one
+`b` allele at the second locus, so the unphased genotype alone cannot
+distinguish them.
+:::
+
+2.  Why can recombination make an offspring's haplotype different from
+    either intact parental haplotype?
+
+::: {.callout-note collapse="true" title="Solution"}
+A crossover between loci can join one part of one parental chromosome
+copy to the corresponding part of the other copy. For example, a parent
+with `AB/ab` can produce `Ab` or `aB` when recombination occurs between
+the two loci.
+:::
+
+3.  What do the identifiers 4, 7, and 8 mean in the `block_3` teaching
+    view, and what would be an invalid interpretation of their order?
+
+::: {.callout-note collapse="true" title="Solution"}
+They are category labels for compactly encoded haplotype states in this
+two-SNP block. It would be invalid to treat 8 as a larger allele dosage,
+a better haplotype, or a value that can be averaged with 4 and 7.
+:::

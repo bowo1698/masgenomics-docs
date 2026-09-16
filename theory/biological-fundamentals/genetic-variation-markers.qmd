@@ -6,8 +6,8 @@ editor:
 ---
 
 Two full siblings receive chromosomes from the same parents, yet their
-DNA sequences are usually not identical. The [meiosis
-section](genetic-fundamentals.qmd#meiosis) explains how recombination
+DNA sequences are usually not identical. The
+[meiosis](genetic-fundamentals.qmd#meiosis) explains how recombination
 reshuffles parental chromosomes. Recombination changes which existing
 alleles travel together, but it does not create those alleles. To
 understand why individuals carry different sequence versions in the
@@ -22,6 +22,52 @@ replication, damage to DNA, or imperfect repair. Once a mutation has
 occurred, later DNA replication can copy the changed sequence. Mutation
 is therefore the original source of new sequence variants, whereas
 recombination and segregation redistribute variants that already exist.
+
+## From a base substitution to a population SNP
+
+The words *mutation*, *substitution*, *single-nucleotide variant*, and
+*SNP* answer different questions. A mutation is an event or process that
+changes a DNA sequence in one cell lineage. A **base substitution** is
+one possible kind of mutation: one base is replaced by another at a
+particular genomic position. For example, if a germline cell changes
+from `A` to `G` at one position, that event is a substitution mutation.
+It can be copied into a gamete and inherited by descendants, but it
+begins as one event, not as a population-wide property.
+
+A substitution between two purines (`A` and `G`) or between two
+pyrimidines (`C` and `T`) is a transition. A substitution between a
+purine and a pyrimidine is a transversion. These labels describe the
+chemical classes of the bases that changed. They do not say whether the
+change is common, ancestral, harmful, favourable, or causal for a trait.
+
+A **single-nucleotide variant (SNV)** is the observed sequence
+difference at one base position when one sequence, individual, or allele
+is compared with another. The `A/G` difference above is an SNV whether
+it is observed once or many times. The word SNP, short for
+[**single-nucleotide
+polymorphism**](https://www.genome.gov/genetics-glossary/Single-Nucleotide-Polymorphisms-SNPs),
+adds a population perspective: it refers to a single-base site at which
+more than one allele occurs among individuals in a population. In some
+human genetics resources, an allele frequency of at least 1% is used as
+a practical SNP convention. That threshold is not a universal biological
+boundary and must not be transferred uncritically to a breeding
+population with its own sample size, ancestry, and purpose.
+
+The distinction can be summarised as a sequence of questions. Did a DNA
+change occur in a lineage? That is a mutation. Was the change one base
+replaced by another? That is a substitution. Does a comparison reveal a
+one-base difference? That is an SNV. Do two or more alleles occur at
+that one-base site in the population being described? It is a
+polymorphic site and may be called an SNP under the stated convention.
+One substitution can create an allele later observed as an SNP, but the
+terms are not synonyms.
+
+![A sequence illustration compares the two chromosome copies of six
+individuals at one highlighted locus. The alleles are T, C, and A; some
+individuals carry two matching copies and others carry different
+copies.](../../assets/genetic-variation-markers/snp-illustration-storymd.jpg){#fig-snv-to-snp
+fig-alt="Six individuals each have two chromosome-2 copies. A yellow vertical band marks one sequence position, where the displayed alleles are T, C, or A across the chromosome copies."
+fig-cap="A single genomic position can carry different alleles across chromosome copies in a population. The highlighted site contains T, C, or A in this teaching illustration, showing how a one-base locus can be multiallelic. The figure illustrates observed allelic variation, not mutation history, allele frequency, or a trait effect."}
 
 Where the change occurs determines whether it can contribute to
 inherited variation. A [**germline
@@ -53,12 +99,11 @@ section](genetic-fundamentals.qmd#dna-the-storage-of-biological-information)
 introduced a sequence as an ordered series of bases. Variants can alter
 one base, a few adjacent bases, the number of copies of a region, or the
 order and location of much larger segments. The schematic examples below
-use letters and blocks only to show the form of each change. They are
-not records from the project dataset.
+use letters and blocks only to show the form of each change.
 
 | Variant class | Conceptual comparison | What changed |
 |------------------------|------------------------|------------------------|
-| [**Single-nucleotide polymorphism (SNP)**](https://www.genome.gov/genetics-glossary/Single-Nucleotide-Polymorphisms-SNPs) | `...A...` becomes `...G...` | One base differs at one genomic position. |
+| **Single-nucleotide variant (SNV)**, including an SNP when the population criterion is met | `...A...` becomes `...G...` | One base differs at one genomic position; a substitution is one mechanism that can create this difference. |
 | [**Insertion or deletion (indel)**](https://www.genome.gov/about-genomics/educational-resources/fact-sheets/human-genomic-variation) | `ACGT` becomes `ACGGT`, or `ACGT` becomes `ACT` | One or more adjacent bases are added or removed. |
 | [**Copy-number variant (CNV)**](https://www.genome.gov/genetics-glossary/Copy-Number-Variation-CNV) | `A-B-C` becomes `A-B-B-B-C` | The number of copies of a DNA segment differs. |
 | [**Structural variant**](https://www.genome.gov/genetics-glossary/Structural-Variation) | `A-B-C-D` becomes `A-C-B-D`, or a block moves elsewhere | A larger segment is deleted, duplicated, inverted, inserted, or translocated. |
@@ -81,10 +126,12 @@ background, and the phenotype being studied.
 ## Variant, polymorphism, causal variant, and marker are different roles
 
 A *variant* is a sequence difference relative to another sequence or a
-chosen reference.
+chosen reference. An SNV is the single-base member of this broad class.
 [**Polymorphism**](https://www.genome.gov/genetics-glossary/Polymorphism)
 emphasises that two or more sequence forms occur among individuals or
-populations. Some fields have historically used frequency thresholds to
+populations. An SNP is therefore a polymorphic single-base site, whereas
+a single-base substitution observed in one individual may still be a
+rare SNV. Some fields have historically used frequency thresholds to
 separate a polymorphism from a rare variant, but no single threshold is
 appropriate for every population and purpose. This curriculum therefore
 uses *variant* as the general term and states frequency explicitly when
@@ -203,15 +250,17 @@ does not provide.
 ## Exercises
 
 1.  A sequence comparison changes `ACCT` to `ACGT` at one position.
-    Classify the change. Does that classification show that the changed
-    base causes a trait difference?
+    Classify the change as a substitution and an SNV. Under what
+    additional population-level condition could the site be called an
+    SNP? Does any of those labels show that the changed base causes a
+    trait difference?
 
 ::: {.callout-note collapse="true" title="Solution"}
-The comparison contains a single-base substitution, so it is a
-single-nucleotide variant. Whether a field calls it an SNP or reserves
-*polymorphism* for variants observed in a population depends on the
-stated convention. The classification describes the form of the change.
-It provides no evidence by itself that the site affects a trait.
+The comparison contains a `C`-to-`G` substitution, which is a
+transversion, and it is an SNV because one base differs. Calling it an
+SNP requires evidence that more than one allele occurs at that site in
+the relevant population under the stated convention. None of these
+labels provides evidence by itself that the site affects a trait.
 :::
 
 2.  At one locus, `C` matches the reference sequence and `T` is labelled

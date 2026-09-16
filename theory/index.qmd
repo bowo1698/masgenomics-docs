@@ -4,13 +4,13 @@ title: "Overview of Selective Breeding"
 
 ![Selective breeding has reshaped production animals over generations.](../assets/mussle_cow.png){fig-alt="Muscular cow"}
 
-Modern dairy cows produce many times more milk than their ancestors did a century ago. Broiler chickens grow faster, and farmed salmon reach market size sooner. We might assume these improvements come from the genetically modified organisms (GMOs) that people worry about. Yet these changes are actually the result of **selective breeding**.
+Modern dairy cows produce many times more milk than their ancestors did a century ago. Broiler chickens grow faster, and farmed salmon reach market size sooner. We might assume that these improvements come from the genetically modified organisms (GMOs) that people worry about. Yet, these advancements are actually the result of **selective breeding**.
 
-Selective breeding aims to produce offspring with specific desired traits by choosing as parents those individuals that already carry those traits. It can therefore only work with the traits and genetic variation that already exist in a population. This is why diversity matters. If a population holds no variation for a trait, there is nothing to select on.
+Selective breeding aims to produce offspring with specific desired traits by choosing parents that already carry those traits. It can therefore only work with the traits and genetic variation that already exist in a population. This is why diversity matters. If a population holds no variation for a trait, there is nothing to select on.
 
 ## Challenges in traditional selection
 
-Traditional selection chooses parents by looking only at their own visible traits. This works very well for simple traits, but it struggles with several important ones. Some traits appear late in life, so we must wait years before we can measure them. Some can only be measured after an animal is slaughtered, such as meat quality. Others are expressed in only one sex, such as milk yield in females.
+Traditional selection chooses parents by looking only at their own visible traits. This works very well for simple traits, but it struggles with several important ones. Some traits appear late in life, and we must wait years before we can measure them. Some can only be measured after an animal is slaughtered, such as meat quality. Others are expressed in only one sex, such as milk yield in females.
 
 Disease resistance is a good example. To find individuals that tolerate a certain disease, we have to expose them to it, and only the survivors are kept as candidate parents. This is wasteful, slow, and destructive. We may lose valuable individuals to the test itself, and the benefit of selection can take a very long time to arrive.
 
@@ -66,23 +66,25 @@ This section introduces the biological concepts that connect inheritance, geneti
 - [Genetic variation and molecular markers](biological-fundamentals/genetic-variation-markers.qmd)
 - [Genetic variation in populations](biological-fundamentals/population-genetic-variation.qmd)
 - [Linkage, recombination, and linkage disequilibrium](biological-fundamentals/linkage-recombination-ld.qmd)
+- [Haplotypes, phasing, and microhaplotypes](biological-fundamentals/haplotypes-phasing-microhaplotypes.qmd)
+- [Pedigrees, relatedness, and inbreeding](biological-fundamentals/pedigrees-relatedness-inbreeding.qmd)
 
 ## 2. Mathematical fundamentals
 
 This section develops the statistical and mathematical ideas needed to understand how genomic prediction models learn from phenotypes and markers.
 
-1. [Descriptive statistics](mathematical-fundamentals/descriptive-statistics.qmd)
-2. [Probability and random variables](mathematical-fundamentals/probability-random-variables.qmd)
-3. [Probability distributions](mathematical-fundamentals/probability-distributions.qmd)
-4. [Sampling and statistical uncertainty](mathematical-fundamentals/sampling-uncertainty.qmd)
-5. [Covariance and correlation](mathematical-fundamentals/covariance-correlation.qmd)
-6. [Vectors and matrices](mathematical-fundamentals/vectors-matrices.qmd)
-7. [Linear regression](mathematical-fundamentals/linear-regression.qmd)
-8. [Multiple regression and regularisation](mathematical-fundamentals/multiple-regression-regularisation.qmd)
+1.  [Descriptive statistics](mathematical-fundamentals/descriptive-statistics.qmd)
+2.  [Probability and random variables](mathematical-fundamentals/probability-random-variables.qmd)
+3.  [Probability distributions](mathematical-fundamentals/probability-distributions.qmd)
+4.  [Sampling and statistical uncertainty](mathematical-fundamentals/sampling-uncertainty.qmd)
+5.  [Covariance and correlation](mathematical-fundamentals/covariance-correlation.qmd)
+6.  [Vectors and matrices](mathematical-fundamentals/vectors-matrices.qmd)
+7.  [Linear regression](mathematical-fundamentals/linear-regression.qmd)
+8.  [Multiple regression and regularisation](mathematical-fundamentals/multiple-regression-regularisation.qmd)
 
 ## 3. Genomic prediction
 
 This section connects quantitative genetics with the marker-based models used to predict breeding values and rank selection candidates.
 
-1. [Quantitative genetics: from phenotype to breeding value](genomic-prediction/quantitative-genetics.qmd)
-2. [From markers to genomic prediction](genomic-prediction/markers-to-prediction.qmd)
+1.  [Quantitative genetics: from phenotype to breeding value](genomic-prediction/quantitative-genetics.qmd)
+2.  [From markers to genomic prediction](genomic-prediction/markers-to-prediction.qmd)

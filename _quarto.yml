@@ -34,8 +34,8 @@ website:
         text: Theory
       - href: installation/index.qmd
         text: Installation
-      - href: tasks/index.qmd
-        text: Task
+      - href: activities/index.qmd
+        text: Activities
       - href: input-data/index.qmd
         text: Input Data
       - text: Reference
@@ -64,6 +64,8 @@ website:
             - theory/biological-fundamentals/genetic-variation-markers.qmd
             - theory/biological-fundamentals/population-genetic-variation.qmd
             - theory/biological-fundamentals/linkage-recombination-ld.qmd
+            - theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.qmd
+            - theory/biological-fundamentals/pedigrees-relatedness-inbreeding.qmd
         - section: "2. Mathematical fundamentals"
           contents:
             - theory/mathematical-fundamentals/descriptive-statistics.qmd
@@ -86,26 +88,26 @@ website:
         - input-data/microhaplotypes.qmd
         - input-data/phenotype.qmd
         - input-data/pedigree.qmd
-    - title: "Tasks"
+    - title: "Activities"
       collapse-level: 1
       contents:
-        - tasks/index.qmd
+        - activities/index.qmd
         - section: "Genomic prediction"
-          href: tasks/genomic-prediction/index.qmd
+          href: activities/genomic-prediction/index.qmd
           contents:
             - text: "Overview"
-              href: tasks/genomic-prediction/index.qmd
-            - tasks/genomic-prediction/masreml.qmd
-            - tasks/genomic-prediction/masbayes.qmd
+              href: activities/genomic-prediction/index.qmd
+            - activities/genomic-prediction/masreml.qmd
+            - activities/genomic-prediction/masbayes.qmd
         - section: "GWAS"
-          href: tasks/gwas/index.qmd
+          href: activities/gwas/index.qmd
           contents:
             - text: "Overview"
-              href: tasks/gwas/index.qmd
-            - tasks/gwas/masreml.qmd
-            - tasks/gwas/masbayes.qmd
-        - tasks/marker-qtl-congruency.qmd
-        - tasks/forward-prediction.qmd
+              href: activities/gwas/index.qmd
+            - activities/gwas/masreml.qmd
+            - activities/gwas/masbayes.qmd
+        - activities/marker-qtl-congruency.qmd
+        - activities/forward-prediction.qmd
     - title: "Internals"
       collapse-level: 1
       contents:
