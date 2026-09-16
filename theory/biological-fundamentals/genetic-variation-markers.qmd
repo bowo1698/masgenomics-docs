@@ -176,6 +176,17 @@ pages will define allele frequency and numerical dosage. For now, the
 important point is that coding conventions must not be mistaken for
 biological conclusions.
 
+The usual SNP dosage is especially simple because one biallelic locus
+has two allele states, so a diploid genotype can count 0, 1, or 2 copies
+of a chosen allele. A **microhaplotype** is different: it combines the
+phased states of several nearby variants on one chromosome copy. The
+resulting local marker can have more than two observed haplotype
+alleles, but it is not a third allele at any one constituent SNP. The
+later page on [haplotypes, phasing, and
+microhaplotypes](haplotypes-phasing-microhaplotypes.qmd) explains how
+that multiallelic representation arises and why its usefulness depends
+on the population, phase quality, and local genomic context.
+
 ## Sequencing and genotyping measure variation differently
 
 [**DNA
