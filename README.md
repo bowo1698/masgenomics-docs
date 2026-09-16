@@ -15,7 +15,7 @@ Both R packages support **SNP** and **microhaplotype** genotypes natively
 and handle **continuous** and **binary** traits through a single unified
 API.
 
-**Live site:** https://bowo1698.github.io/masgenomics-docs/
+**Live site:** https://www.masgenomics.cc
 
 The site covers theory (mixed models, Bayesian alphabet), task tutorials
 (genomic prediction, GWAS), input data formats with bundled demo, function
