@@ -63,7 +63,7 @@ common ways to construct it from your own data. The thirteenth slot,
 `multigen`, holds a 3-generation forward-prediction extension
 (`gen1`, `gen2_snp`, `gen2_mh`, `gen3_snp`, `gen3_mh`, three
 `reference_structure_*` objects, plus an OCS log) used by
-[`tasks/forward-prediction.qmd`](../tasks/forward-prediction.qmd).
+[`activities/forward-prediction.qmd`](../activities/forward-prediction.qmd).
 Single-generation tasks are unaffected: legacy code that touches
 `d$snp` etc. ignores the nested `d$multigen` entirely.
 

@@ -258,12 +258,12 @@ estimates.
 ::: {.callout-tip}
 **`tbv_*` columns are ground truth, not input.** They are only useful
 for simulation: comparing $\widehat{u}$ against `tbv` is how the
-[Cross-validation](../tasks/genomic-prediction/masreml.qmd#cross-validation-cv_masreml) tutorial computes
+[Cross-validation](../activities/genomic-prediction/masreml.qmd#cross-validation-cv_masreml) tutorial computes
 accuracy. Never include `tbv_*` as a covariate.
 :::
 
 📐 **Related theory:** [Theory overview](../theory/index.qmd)
 
-🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd) ·
-[Binary trait — with masreml](../tasks/genomic-prediction/masreml.qmd#binary-trait) ·
-[Cross-validation — with masreml](../tasks/genomic-prediction/masreml.qmd#cross-validation-cv_masreml)
+🛠 **Used in:** [Genomic Prediction](../activities/genomic-prediction/index.qmd) ·
+[Binary trait — with masreml](../activities/genomic-prediction/masreml.qmd#binary-trait) ·
+[Cross-validation — with masreml](../activities/genomic-prediction/masreml.qmd#cross-validation-cv_masreml)

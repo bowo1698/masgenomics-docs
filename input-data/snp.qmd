@@ -173,5 +173,5 @@ uniformly drawn from `[0.1, 0.5]` so no filter is needed.
 
 📐 **Related theory:** [Theory overview](../theory/index.qmd)
 
-🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd) ·
-[GWAS](../tasks/gwas/index.qmd)
+🛠 **Used in:** [Genomic Prediction](../activities/genomic-prediction/index.qmd) ·
+[GWAS](../activities/gwas/index.qmd)

@@ -53,8 +53,8 @@ jobs:
         shell: Rscript {0}
 
       # NOTE: do NOT restore _freeze from actions/cache. The freeze cache is
-      # shipped via git (see CLAUDE.md: "Task tutorial chunks evaluate
-      # locally and ship outputs via the _freeze/tasks/ cache"). A
+      # shipped via git (see CLAUDE.md: "Activity tutorial chunks evaluate
+      # locally and ship outputs via the _freeze/activities/ cache"). A
       # stale actions/cache restore overwrites the committed cache and
       # forces re-execution, which fails because masbayes / masreml are
       # not installed in CI.

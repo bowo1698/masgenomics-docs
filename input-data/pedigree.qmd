@@ -189,4 +189,4 @@ or when you want to compare $A$ vs $G$ partitioning.
 
 📐 **Related theory:** [Theory overview](../theory/index.qmd)
 
-🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd)
+🛠 **Used in:** [Genomic Prediction](../activities/genomic-prediction/index.qmd)

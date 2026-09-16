@@ -252,5 +252,5 @@ for pipeline-level interop.
 
 📐 **Related theory:** [Theory overview](../theory/index.qmd)
 
-🛠 **Used in:** [Genomic Prediction](../tasks/genomic-prediction/index.qmd) ·
-[GWAS → GWABLUP](../tasks/gwas/masreml.qmd#step-6-gwas-assisted-prediction-gwablup)
+🛠 **Used in:** [Genomic Prediction](../activities/genomic-prediction/index.qmd) ·
+[GWAS → GWABLUP](../activities/gwas/masreml.qmd#step-6-gwas-assisted-prediction-gwablup)
