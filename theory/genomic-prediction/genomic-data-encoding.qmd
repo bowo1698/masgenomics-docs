@@ -81,12 +81,14 @@ colnames(mh_counts) <- as.character(alleles)
 mh_frequency <- colMeans(mh_counts) / 2
 baseline_allele <- names(which.max(mh_frequency))
 non_baseline <- setdiff(colnames(mh_counts), baseline_allele)
+stopifnot(length(non_baseline) > 0L)
 W_alpha_h <- sweep(
   mh_counts[, non_baseline, drop = FALSE],
   2,
   2 * mh_frequency[non_baseline],
   FUN = function(count, expected) expected - count
 )
+stopifnot(all(is.finite(W_alpha_h)))
 mh
 mh_counts
 mh_frequency

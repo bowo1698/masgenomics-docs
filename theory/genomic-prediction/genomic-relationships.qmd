@@ -89,6 +89,7 @@ colnames(counts) <- as.character(alleles)
 frequency <- colMeans(counts) / 2
 baseline <- names(which.max(frequency))
 non_baseline <- setdiff(colnames(counts), baseline)
+stopifnot(length(non_baseline) > 0L)
 W_alpha_h <- sweep(
   counts[, non_baseline, drop = FALSE],
   2,
@@ -96,9 +97,16 @@ W_alpha_h <- sweep(
   FUN = function(count, expected) expected - count
 )
 k_alpha_h <- mean(diag(tcrossprod(W_alpha_h)))
+stopifnot(is.finite(k_alpha_h), k_alpha_h > 0, all(is.finite(W_alpha_h)))
 G_mh <- tcrossprod(W_alpha_h) / k_alpha_h
+stopifnot(all(is.finite(G_mh)))
 round(G_mh, 3)
 ```
+
+For this six-animal teaching subset, allele 4 is the baseline and
+$k_{\alpha h}=0.278$. The mean diagonal of the displayed matrix is one by
+construction, so its off-diagonal values describe similarity relative to this
+scaled one-block representation.
 
 This construction respects the categorical nature of haplotype identifiers.
 It does not establish that equal microhaplotype states are IBD, that the block
