@@ -18,7 +18,7 @@ Quarto](https://img.shields.io/badge/Built%20with-Quarto-2780e3?style=flat-squar
 
 ::::: hero-cards
 ::: hero-card
-[![masbayes](assets/masbayes.svg)](reference/masbayes/index.qmd)
+[![masbayes](assets/masbayes.svg){width="180"}](reference/masbayes/index.qmd)
 
 <a href="https://github.com/bowo1698/masbayes/releases"><img src="https://img.shields.io/github/v/release/bowo1698/masbayes?label=release&amp;style=flat-square&amp;color=2780e3" alt="masbayes release"/></a>
 
@@ -26,7 +26,7 @@ Quarto](https://img.shields.io/badge/Built%20with-Quarto-2780e3?style=flat-squar
 :::
 
 ::: hero-card
-[![masreml](assets/masreml.svg)](reference/masreml/index.qmd)
+[![masreml](assets/masreml.svg){width="180"}](reference/masreml/index.qmd)
 
 <a href="https://github.com/bowo1698/masreml/releases"><img src="https://img.shields.io/github/v/release/bowo1698/masreml?label=release&amp;style=flat-square&amp;color=2780e3" alt="masreml release"/></a>
 
