@@ -24,7 +24,7 @@ In practice, however, we never know exactly where the QTLs are. They may be many
 
 Instead, we use genetic markers to point to QTLs. The most common markers are single-nucleotide polymorphisms (SNPs). A marker works because it sits physically close to a QTL on the chromosome. Because they are neighbours, the marker and the QTL tend to be inherited together as a package. This tendency is called linkage disequilibrium (LD).
 
-![Single Nucleotide Polymorphisms](../assets/SNP.png){fig-align="center" width="672" height="409"}
+![Single Nucleotide Polymorphisms](../assets/SNP.png){fig-align="center" width="672"}
 
 A marker is like a signpost on a road. The signpost is not the destination itself, but because it always stands right next to the destination, it tells us the destination is there. In the same way, a marker is not the QTL, but it tells us a QTL is nearby.
 

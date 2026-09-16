@@ -30,10 +30,10 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: theory/index.qmd
-        text: Theory
       - href: installation/index.qmd
         text: Installation
+      - href: theory/index.qmd
+        text: Theory
       - href: tutorials/index.qmd
         text: Tutorials
       - href: input-data/index.qmd
