@@ -5,23 +5,32 @@ editor:
     wrap: 72
 ---
 
-Two full siblings receive chromosomes from the same parents, yet their
-DNA sequences are usually not identical. The
-[meiosis](genetic-fundamentals.qmd#meiosis) explains how recombination
-reshuffles parental chromosomes. Recombination changes which existing
-alleles travel together, but it does not create those alleles. To
-understand why individuals carry different sequence versions in the
-first place, we need to examine the origin and forms of [**genomic
-variation**](https://www.genome.gov/about-genomics/educational-resources/fact-sheets/human-genomic-variation).
+Have you ever watched the *X-Men* movies? If so, you might wonder why a
+mere 1% genetic difference between humans can result in such significant
+variations in physical traits and individual uniqueness? especially
+given that humans actually share more than 99% of their genome.
+
+Two siblings can have different DNA sequences despite receiving
+chromosomes from the same parents. This phenomenon is the result of
+recombination during meiosis that reshuffles parental chromosomes and
+changes allelic variation. In this article, we are going to discuss why
+identical individuals can carry different DNA sequence versions even
+though they may be physically similar.
+
+![](https://static0.moviewebimages.com/wordpress/wp-content/uploads/article/hI8bA6YSnbbVEve5sLpaatUdiQcT4s.jpg?q=50&fit=crop&w=1120&h=630&dpr=1.5)
 
 ## Mutation creates new sequence variants
 
-A [**mutation**](https://www.genome.gov/genetics-glossary/Mutation) is a
-change in a DNA sequence. It may arise through an error during DNA
-replication, damage to DNA, or imperfect repair. Once a mutation has
-occurred, later DNA replication can copy the changed sequence. Mutation
-is therefore the original source of new sequence variants, whereas
-recombination and segregation redistribute variants that already exist.
+In the X-Men movies, we call gifted humans as mutants, which refers to a
+change in their DNA sequences compared to the overall population. We
+call changes in the DNA sequences as mutation, which may arise through
+an error during DNA replication, damage to DNA, or imperfect repair.
+Once a mutation has occurred, later DNA replication can copy the changed
+sequence and influence the creation of proteins. New protein variants
+can influence the behaviour of cells, and ultimately the individual
+traits. We know it as individual powers in the X-Men movies. Mutation is
+therefore the source of new sequence variants that are distributed by
+recombination and segregation events.
 
 ## From a base substitution to a population SNP
 
