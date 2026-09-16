@@ -104,7 +104,7 @@ both packages on Linux, macOS, and Windows.
 | You are... | Start here |
 |----|----|
 | Setting up for the first time | [Installation](installation/index.qmd) |
-| Looking for code examples | [Activities → Genomic Prediction](activities/genomic-prediction/index.qmd) |
+| Looking for code examples | [Tutorials → Genomic Prediction](tutorials/genomic-prediction/index.qmd) |
 | Learn more about genomic selection | [Theory](theory/index.qmd) |
 | Looking for input-data formats and the bundled demo | [Input Data](input-data/index.qmd) |
 | Looking for function docs | [Reference → masreml](reference/masreml/index.qmd) · [masbayes](reference/masbayes/index.qmd) |

@@ -34,8 +34,8 @@ website:
         text: Theory
       - href: installation/index.qmd
         text: Installation
-      - href: activities/index.qmd
-        text: Activities
+      - href: tutorials/index.qmd
+        text: Tutorials
       - href: input-data/index.qmd
         text: Input Data
       - text: Reference
@@ -90,26 +90,26 @@ website:
         - input-data/microhaplotypes.qmd
         - input-data/phenotype.qmd
         - input-data/pedigree.qmd
-    - title: "Activities"
+    - title: "Tutorials"
       collapse-level: 1
       contents:
-        - activities/index.qmd
+        - tutorials/index.qmd
         - section: "Genomic prediction"
-          href: activities/genomic-prediction/index.qmd
+          href: tutorials/genomic-prediction/index.qmd
           contents:
             - text: "Overview"
-              href: activities/genomic-prediction/index.qmd
-            - activities/genomic-prediction/masreml.qmd
-            - activities/genomic-prediction/masbayes.qmd
+              href: tutorials/genomic-prediction/index.qmd
+            - tutorials/genomic-prediction/masreml.qmd
+            - tutorials/genomic-prediction/masbayes.qmd
         - section: "GWAS"
-          href: activities/gwas/index.qmd
+          href: tutorials/gwas/index.qmd
           contents:
             - text: "Overview"
-              href: activities/gwas/index.qmd
-            - activities/gwas/masreml.qmd
-            - activities/gwas/masbayes.qmd
-        - activities/marker-qtl-congruency.qmd
-        - activities/forward-prediction.qmd
+              href: tutorials/gwas/index.qmd
+            - tutorials/gwas/masreml.qmd
+            - tutorials/gwas/masbayes.qmd
+        - tutorials/marker-qtl-congruency.qmd
+        - tutorials/forward-prediction.qmd
     - title: "Internals"
       collapse-level: 1
       contents:

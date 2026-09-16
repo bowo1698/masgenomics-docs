@@ -133,6 +133,6 @@ library(masreml)
 ```
 
 After both packages load without error, you are ready to follow the
-[Activity tutorials](../activities/index.qmd) or the [Input
+[Tutorials](../tutorials/index.qmd) or the [Input
 Data](../input-data/index.qmd) walkthroughs using the bundled demo
 dataset.
