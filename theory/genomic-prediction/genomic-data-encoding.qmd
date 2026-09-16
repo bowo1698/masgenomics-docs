@@ -50,10 +50,25 @@ them in a test set changes the fitted representation and can leak information.
 
 A phased microhaplotype records one local haplotype state on each chromosome
 copy. Its stored identifiers are category labels, not dosages: identifier 8 is
-not twice identifier 4. A useful representation first creates one column per
-observed allele, then counts its 0, 1, or 2 copies for every individual. This
-one-hot or allele-count design retains multiallelic states without inventing an
-order among them.
+not twice identifier 4. For block $b$ and allele $k$, let $c_{ibk}$ be the
+number of copies carried by individual $i$ and let $p_{bk}$ be its frequency.
+Following the additive haplotype coding of Da (2015), the column for a
+non-baseline allele is
+
+$$
+W^{\alpha h}_{ibk}=2p_{bk}-c_{ibk}=
+\begin{cases}
+-2(1-p_{bk}), & c_{ibk}=2,\\
+-(1-2p_{bk}), & c_{ibk}=1,\\
+2p_{bk}, & c_{ibk}=0.
+\end{cases}
+$$
+
+The most frequent allele at each block is omitted as a baseline, avoiding
+perfect multicollinearity; its contribution is represented by the intercept
+and the remaining allele columns. The sign is a coding convention. Reversing
+all columns changes effect signs but leaves a relationship matrix formed from
+$\mathbf W_{\alpha h}\mathbf W_{\alpha h}^{\mathsf T}$ unchanged.
 
 ```{r}
 #| label: encode-microhaplotype
@@ -62,13 +77,26 @@ mh <- d$mh[1:6, 5:6, drop = FALSE]
 colnames(mh) <- c("block_3_copy_1", "block_3_copy_2")
 alleles <- sort(unique(as.vector(mh)))
 mh_counts <- sapply(alleles, function(a) rowSums(mh == a))
+mh_frequency <- colMeans(mh_counts) / 2
+baseline_allele <- names(which.max(mh_frequency))
+W_alpha_h <- sweep(
+  mh_counts[, setdiff(colnames(mh_counts), baseline_allele), drop = FALSE],
+  2,
+  2 * mh_frequency[setdiff(names(mh_frequency), baseline_allele)],
+  FUN = function(count, expected) expected - count
+)
 mh
 mh_counts
+mh_frequency
+baseline_allele
+W_alpha_h
 ```
 
 The project representation contains labels 4, 7, and 8 in this block. The
 count matrix says how many copies of each label occur; it does not say that
-allele 8 is quantitatively larger than allele 4. The haplotype and
+allele 8 is quantitatively larger than allele 4. The displayed
+$\mathbf W_{\alpha h}$ uses all non-baseline allele columns for this one block;
+a full panel concatenates the corresponding columns across blocks. The haplotype and
 [microhaplotype input guide](../../input-data/microhaplotypes.qmd) explains
 how phase and compact input objects are obtained.
 

@@ -57,6 +57,53 @@ With only three markers, this example has rank at most three, so several
 eigenvalues are numerically zero. Practical GRMs use many markers and still
 need quality control and a population-appropriate frequency reference.
 
+## A microhaplotype relationship matrix
+
+For microhaplotypes, construct the additive matrix
+$\mathbf W_{\alpha h}$ by concatenating the Da-coded non-baseline allele
+columns across blocks. If it has $n$ rows, define its scale as
+
+$$
+k_{\alpha h}=\frac{1}{n}\operatorname{tr}
+\left(\mathbf W_{\alpha h}\mathbf W_{\alpha h}^{\mathsf T}\right),
+\qquad
+\mathbf G_{\mathrm{MH}}=
+\frac{\mathbf W_{\alpha h}\mathbf W_{\alpha h}^{\mathsf T}}
+{k_{\alpha h}}.
+$$
+
+This diagonal-mean scaling makes the average diagonal of the displayed
+relationship matrix one. It is distinct from the SNP VanRaden denominator
+above. The following one-block teaching calculation uses the same categorical
+labels and baseline rule as the encoding page; a production matrix must use
+all eligible blocks and frequencies from the chosen reference population.
+
+```{r}
+#| label: microhaplotype-grm
+#| code-fold: true
+d <- readRDS("../../demo-data/main/demo_data.rds")
+mh <- d$mh[1:6, 5:6, drop = FALSE]
+alleles <- sort(unique(as.vector(mh)))
+counts <- sapply(alleles, function(a) rowSums(mh == a))
+frequency <- colMeans(counts) / 2
+baseline <- names(which.max(frequency))
+W_alpha_h <- sweep(
+  counts[, setdiff(colnames(counts), baseline), drop = FALSE],
+  2,
+  2 * frequency[setdiff(names(frequency), baseline)],
+  FUN = function(count, expected) expected - count
+)
+k_alpha_h <- mean(diag(tcrossprod(W_alpha_h)))
+G_mh <- tcrossprod(W_alpha_h) / k_alpha_h
+round(G_mh, 3)
+```
+
+This construction respects the categorical nature of haplotype identifiers.
+It does not establish that equal microhaplotype states are IBD, that the block
+captures a causal variant, or that $\mathbf G_{\mathrm{MH}}$ will predict
+better than an SNP GRM. Those outcomes depend on phasing, marker density, LD,
+allele frequencies, genetic architecture, and the target population.
+
 ## Covariance is an assumption for prediction
 
 In a mixed model, a relationship template can enter as
