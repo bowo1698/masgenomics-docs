@@ -34,19 +34,19 @@ So instead of measuring the trait itself, we can genotype an individual's marker
 
 ## How does genomic selection actually work?
 
-Let's start with a simple case: a single marker.
+Let’s imagine a really simple example first.
 
-Consider two individuals. One carries the allele ATC, and the other carries AGC. The individual with ATC has very low resistance to a disease. The individual with AGC has very high resistance, and this pattern is consistent across the whole population.
+Suppose that we have two identical individuals: one has allele ATC and the other has AGC. The one who has ATC has a very low resistance to the disease, while the one with AGC has a very high resistance. Moreover, let’s suppose that this is true for all individuals in our population.
 
-From this, we can assume that any individual carrying AGC will resist the disease better than one that does not. So we can select AGC carriers as parents and pass that allele on to their offspring.
+This means that for any individual that we will encounter, having the AGC will make them more resistant to the disease. Which, in turn, means that we can select those individuals to be the candidate parents and increase the frequency of the AGC allele in subsequent generations.
 
-In reality, it is rare for a single allele to control a trait. Most production traits, such as disease resistance, growth rate, and meat quality, are driven by many QTLs at once. This means many markers are involved, and each one may have only a small effect.
+A single allele rarely controls a particular trait that we want. For most production animals, there are many QTLs that control some trait. This means that there are multiple alleles at different markers that contribute to that trait. So, we have to consider multiple markers, each of which may have only a minor impact.
 
-To handle this, we first need to learn how much each marker matters. We do this using a [**training population**](https://doi.org/10.3168/jds.2008-1646), a group of individuals for which we know both the marker genotypes and the actual measured traits. A statistical model studies the training population and estimates the effect of each marker within it.
+To build a model that can predict the values of a trait, we first need to train it on a certain population and find out the impact of each marker. Such a population is called a [training population](https://doi.org/10.3168/jds.2008-1646) and, obviously, for it, we know the values of the trait (response variable) and the marker genotypes (predictor variables). After the model has been built, we can use the marker genotypes for any population (which includes those that we have used for training) to predict the value of the trait for each individual.
 
-Once the model is trained, we can apply it to a population that has genotype data only. The model adds up the small effects of all its markers into a single score. This score is called the **genomic estimated breeding value (GEBV)**, and it is what we use to rank and select candidates.
+The model itself works by looking at the effects of the markers that were found during the training stage and sums up their small contributions to the overall effect. This total contribution of all markers is called **GEBV (genomic estimated breeding value),** and based on it, the individuals are selected.
 
-With a genome-based approach, we no longer have to wait for a trait to appear, slaughter an animal, or run a destructive disease test. We can read an individual's DNA at birth, obtain its SNP genotypes, and predict its future performance. That prediction then becomes the basis for selection.
+With such a model, we can estimate the value of a trait without waiting for it to develop, without killing animals or doing expensive dissections to look at the internal structure. All we need is to read the SNPs for the genotype of each individual at birth and estimate the values of the trait based on these values and the model created earlier.
 
 ## Why genomic selection matters
 
