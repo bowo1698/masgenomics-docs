@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Haplotypes, phasing, and microhaplotypes – masgenomics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../theory/biological-fundamentals/pedigrees-relatedness-inbreeding.html" rel="next">
+<link href="../../theory/biological-fundamentals/linkage-recombination-ld.html" rel="prev">
+<link href="../../assets/MBGs.svg" rel="icon" type="image/svg+xml">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-ebbd7925c026e5f35345f5eb496f355d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": true,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>html{ scroll-behavior: smooth; }</style>
+</head>
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="https://masgenomics.cc/" class="navbar-brand navbar-brand-logo">
+    <img src="../../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo light-content"><img src="../../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo dark-content"></a>
+    <a class="navbar-brand" href="https://masgenomics.cc/">
+    <span class="navbar-title">masgenomics</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../installation/index.html"> 
+<span class="menu-text">Installation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../theory/index.html" aria-current="page"> 
+<span class="menu-text">Theory</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials/index.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../input-data/index.html"> 
+<span class="menu-text">Input Data</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-reference" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Reference</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-reference">
+<li>
+    <a class="dropdown-item" href="../../reference/maspipeline/index.html">
+ <span class="dropdown-text">maspipeline</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../reference/masreml/index.html">
+ <span class="dropdown-text">masreml</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../reference/masbayes/index.html">
+ <span class="dropdown-text">masbayes</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../../internals/index.html"> 
+<span class="menu-text">Internals</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../theory/biological-fundamentals/genetic-fundamentals.html">1. Biological fundamentals</a></li><li class="breadcrumb-item"><a href="../../theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.html">Haplotypes, phasing, and microhaplotypes</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview of Selective Breeding</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">1. Biological fundamentals</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/genetic-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genetic Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/genetic-variation-markers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genetic variation and molecular markers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/population-genetic-variation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genetic variation in populations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/linkage-recombination-ld.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linkage, recombination, and linkage disequilibrium</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Haplotypes, phasing, and microhaplotypes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/pedigrees-relatedness-inbreeding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pedigrees, relatedness, and inbreeding</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">2. Mathematical fundamentals</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/descriptive-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descriptive statistics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/probability-random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Probability and random variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/probability-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Probability distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/sampling-uncertainty.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling and statistical uncertainty</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/covariance-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Covariance and correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/vectors-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vectors and matrices</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/multiple-regression-regularisation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple regression and regularisation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/statistical-models-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical models and estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/linear-mixed-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear mixed models</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">3. Genomic prediction</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/genomic-prediction/quantitative-genetics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Quantitative genetics: from phenotype to breeding value</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/genomic-prediction/markers-to-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From markers to genomic prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/genomic-prediction/genomic-data-encoding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genomic data encoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/genomic-prediction/genomic-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genomic relationships</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#a-genotype-is-not-always-a-phased-chromosome-pair" id="toc-a-genotype-is-not-always-a-phased-chromosome-pair" class="nav-link active" data-scroll-target="#a-genotype-is-not-always-a-phased-chromosome-pair">A genotype is not always a phased chromosome pair</a></li>
+  <li><a href="#blocks-summarise-local-haplotype-patterns" id="toc-blocks-summarise-local-haplotype-patterns" class="nav-link" data-scroll-target="#blocks-summarise-local-haplotype-patterns">Blocks summarise local haplotype patterns</a></li>
+  <li><a href="#a-compact-microhaplotype-view-from-the-simulated-data" id="toc-a-compact-microhaplotype-view-from-the-simulated-data" class="nav-link" data-scroll-target="#a-compact-microhaplotype-view-from-the-simulated-data">A compact microhaplotype view from the simulated data</a></li>
+  <li><a href="#what-phase-can-and-cannot-establish" id="toc-what-phase-can-and-cannot-establish" class="nav-link" data-scroll-target="#what-phase-can-and-cannot-establish">What phase can and cannot establish</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../theory/biological-fundamentals/genetic-fundamentals.html">1. Biological fundamentals</a></li><li class="breadcrumb-item"><a href="../../theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.html">Haplotypes, phasing, and microhaplotypes</a></li></ol></nav><div class="quarto-title">
+<h1 class="title">Haplotypes, phasing, and microhaplotypes</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><p>A SNP genotype says which two alleles an individual carries at one position, but it does not necessarily say which alleles occur together on either copy of a chromosome. That missing information matters when a breeder wants to follow a chromosome segment through a family, interpret a local association, or represent several nearby variants as one marker. The previous page showed how <a href="../../theory/biological-fundamentals/linkage-recombination-ld.html">recombination and linkage disequilibrium</a> shape associations between loci. This page follows the allele combinations on individual chromosome copies.</p>
+<section id="a-genotype-is-not-always-a-phased-chromosome-pair" class="level2"><h2 class="anchored" data-anchor-id="a-genotype-is-not-always-a-phased-chromosome-pair">A genotype is not always a phased chromosome pair</h2>
+<p>A <a href="https://www.genome.gov/genetics-glossary/haplotype"><strong>haplotype</strong></a> is the combination of alleles carried on one chromosome copy over a region. A diploid individual carries two haplotypes in that region. Its multilocus genotype records the two alleles at each locus, whereas its <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3217888/"><strong>phase</strong></a> records which alleles share a chromosome copy.</p>
+<p><a href="#fig-haplotype-illustration" class="quarto-xref">Figure&nbsp;1</a> shows this grouping across three SNP positions. The four displayed sequences contain two recurring allele combinations, <code>ATT</code> and <code>GAA</code>. Each combination is a haplotype in this short region. The reference sequence provides a comparison row, while the individual rows show which combination is observed. The figure is a conceptual population example, not a record from the simulated project data.</p>
+<div id="fig-haplotype-illustration" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-cap="Three nearby SNP positions can be considered jointly. In this conceptual example, the observed allele combinations are `ATT` and `GAA`, so the combinations, rather than each SNP in isolation, define the two displayed haplotypes. Amanda Simons, [source](https://rotel.pressbooks.pub/genetics1/chapter/haplotypes/), [CC BY-SA](https://creativecommons.org/licenses/by-sa/4.0/); unchanged." alt="A reference DNA sequence and sequences from four individuals show three highlighted SNP positions. The observed alleles form two repeated combinations, ATT and GAA, which are labelled as haplotypes.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-haplotype-illustration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../../assets/haplotypes-phasing/haplotypes-amanda-simons.jpg" class="img-fluid figure-img" data-fig-cap="Three nearby SNP positions can be considered jointly. In this conceptual example, the observed allele combinations are `ATT` and `GAA`, so the combinations, rather than each SNP in isolation, define the two displayed haplotypes. Amanda Simons, [source](https://rotel.pressbooks.pub/genetics1/chapter/haplotypes/), [CC BY-SA](https://creativecommons.org/licenses/by-sa/4.0/); unchanged." alt="A reference DNA sequence and sequences from four individuals show three highlighted SNP positions. The observed alleles form two repeated combinations, ATT and GAA, which are labelled as haplotypes.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-haplotype-illustration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: A reference genome sequence and four individual sequences are compared at three highlighted SNP positions. Green boxes connect the recurring <code>ATT</code> and <code>GAA</code> combinations to two haplotype labels. Amanda Simons, <a href="https://rotel.pressbooks.pub/genetics1/chapter/haplotypes/">source</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>; unchanged.
+</figcaption></figure>
+</div>
+<p>Consider an invented individual that is heterozygous at two loci, A and B. Both chromosome arrangements below give the same unphased genotype, <code>A/a, B/b</code>. They are not the same phased haplotype pair.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead><tr class="header">
+<th>Arrangement</th>
+<th>Chromosome copy 1</th>
+<th>Chromosome copy 2</th>
+<th>Unphased genotype</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Coupling phase</td>
+<td>
+<code>A</code> at locus 1, <code>B</code> at locus 2 (<code>AB</code>)</td>
+<td>
+<code>a</code> at locus 1, <code>b</code> at locus 2 (<code>ab</code>)</td>
+<td><code>A/a, B/b</code></td>
+</tr>
+<tr class="even">
+<td>Repulsion phase</td>
+<td>
+<code>A</code> at locus 1, <code>b</code> at locus 2 (<code>Ab</code>)</td>
+<td>
+<code>a</code> at locus 1, <code>B</code> at locus 2 (<code>aB</code>)</td>
+<td><code>A/a, B/b</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is phase ambiguity: genotype observations alone leave more than one haplotype pair possible. The difference is visible if the individual produces gametes. Without recombination between the loci, the coupling arrangement can transmit <code>AB</code> or <code>ab</code>, while the repulsion arrangement can transmit <code>Ab</code> or <code>aB</code>. A crossover between the loci can instead create the other combinations. Thus, parental haplotypes help trace transmission, but recombination means that a longer parental haplotype need not pass intact to every offspring.</p>
+<p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2692835/"><strong>Phasing</strong></a> is the process of assigning alleles to the two chromosome copies. Statistical phasing uses recurring allele combinations in a sample or reference population to choose likely haplotype pairs. Pedigree-assisted phasing also uses the alleles observed in parents, offspring, and other relatives to constrain what could have been transmitted. Both approaches depend on the information in the data: a small, unrelated, or poorly matched reference population can leave uncertainty, and a sparse or erroneous pedigree can limit family-based inference.</p>
+<p>A phasing error assigns part of a chromosome to the wrong haplotype copy. A common form is a switch error, where the assignment changes from one inferred copy to the other between adjacent positions. It can make a continuous haplotype appear to break, or create a combination that was not inherited as shown. Phased results are therefore estimates or observations with a method and an error rate, not automatic proof of parental origin.</p>
+</section><section id="blocks-summarise-local-haplotype-patterns" class="level2"><h2 class="anchored" data-anchor-id="blocks-summarise-local-haplotype-patterns">Blocks summarise local haplotype patterns</h2>
+<p>A <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC1857528/"><strong>haplotype block</strong></a> is a useful summary of a local region in which a limited set of haplotype patterns is observed or represented. Blocks are not immutable units marked on the genome. Their boundaries and the haplotypes retained depend on the population, marker set, sample size, LD criterion, and algorithm used to define them. Recombination history can make a block defined in one population less useful in another population or generation.</p>
+<p>A <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7427474/"><strong>microhaplotype</strong></a> is a short region (less than 150 bp) represented by the combination of nearby variant alleles on a chromosome copy. Because several component variants can form several local combinations, it is a multiallelic marker even when its individual SNPs are biallelic. This representation retains local co-occurrence information that separate unphased SNP genotypes can obscure. It can be informative when the local haplotype state distinguishes chromosome segments that have the same single-SNP summaries.</p>
+<p>That potential does not make microhaplotypes universally better than SNPs. Their observed diversity, phase quality, marker-QTL association, and transfer across populations depend on the region and population. A microhaplotype does not guarantee a stronger prediction, fewer markers, or an association that survives recombination and population change. This page describes the biological representation only; the <a href="../../input-data/microhaplotypes.html">microhaplotype input guide</a> defines the file layouts and software-ready objects.</p>
+</section><section id="a-compact-microhaplotype-view-from-the-simulated-data" class="level2"><h2 class="anchored" data-anchor-id="a-compact-microhaplotype-view-from-the-simulated-data">A compact microhaplotype view from the simulated data</h2>
+<p>The project data are simulated. In their compact representation, each block has two columns, one for each chromosome-copy haplotype. <code>block_3</code> spans 1.4 to 1.5 Mb on chromosome 1. The code extracts its map row and the two columns for the first six individuals.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"../../demo-data/main/demo_data.rds"</span><span class="op">)</span></span>
+<span><span class="va">block_3_map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">map_mh</span>, <span class="va">block_id</span> <span class="op">==</span> <span class="st">"block_3"</span><span class="op">)</span></span>
+<span><span class="va">block_3_columns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">mh</span>, <span class="st">"block_id"</span><span class="op">)</span> <span class="op">==</span> <span class="st">"block_3"</span><span class="op">)</span></span>
+<span><span class="va">block_3</span> <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="va">mh</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="va">block_3_columns</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">block_3</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"copy_1"</span>, <span class="st">"copy_2"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">block_3_map</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>  block_id chr start_pos end_pos n_snps
+3  block_3   1   1400000 1500000      2</code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">block_3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>       copy_1 copy_2
+IND001      8      4
+IND002      8      4
+IND003      7      4
+IND004      8      4
+IND005      8      4
+IND006      8      4</code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html">as.vector</a></span><span class="op">(</span><span class="va">block_3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 4 7 8</code></pre>
+</div>
+</div>
+<p>The map confirms chromosome 1 and the 1.4 to 1.5 Mb interval. In this six individual teaching view, the compact identifiers are 4, 7, and 8. They name three haplotype categories in this two-SNP block; 8 is not biologically larger, more favourable, or more frequent than 4. The <code>copy_1</code> and <code>copy_2</code> columns represent the two haplotype copies for each individual. Their column order is a storage convention here, not evidence that <code>copy_1</code> is paternal or that <code>copy_2</code> is maternal.</p>
+<p>The compact identifiers are convenient for the project data, but they do not by themselves reveal the component alleles. They should not be treated as a numeric measurement in an analysis. To inspect the component-SNP calls, encoding, or software inputs, use the linked input-data guide rather than inferring a schema from this teaching view.</p>
+</section><section id="what-phase-can-and-cannot-establish" class="level2"><h2 class="anchored" data-anchor-id="what-phase-can-and-cannot-establish">What phase can and cannot establish</h2>
+<p>Phase can show a proposed or observed arrangement of alleles on chromosome copies, helping to follow local transmission and represent multi-allelic markers. It does not establish that a haplotype causes a trait, that a block is permanent, or that one inferred copy has a parental origin when the data do not establish it. The next topic asks how chromosome segments are shared among relatives, where family records and inheritance paths add information that a single individual’s genotype cannot provide.</p>
+</section><section id="exercises" class="level2"><h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>An individual has unphased genotype <code>A/a, B/b</code>. Name the two haplotype pairs shown in the manual example that could produce this genotype.</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The coupling pair is <code>AB/ab</code>, and the repulsion pair is <code>Ab/aB</code>. Both have one <code>A</code> and one <code>a</code> allele at the first locus and one <code>B</code> and one <code>b</code> allele at the second locus, so the unphased genotype alone cannot distinguish them.</p>
+</div>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Why can recombination make an offspring’s haplotype different from either intact parental haplotype?</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>A crossover between loci can join one part of one parental chromosome copy to the corresponding part of the other copy. For example, a parent with <code>AB/ab</code> can produce <code>Ab</code> or <code>aB</code> when recombination occurs between the two loci.</p>
+</div>
+</div>
+</div>
+<ol start="3" type="1">
+<li>What do the identifiers 4, 7, and 8 mean in the <code>block_3</code> teaching view, and what would be an invalid interpretation of their order?</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>They are category labels for compactly encoded haplotype states in this two-SNP block. It would be invalid to treat 8 as a larger allele dosage, a better haplotype, or a value that can be averaged with 4 and 7.</p>
+</div>
+</div>
+</div>
+
+
+</section></main><!-- /main --><script>
+document.addEventListener('DOMContentLoaded', function () {
+  var brand = document.querySelectorAll('.navbar-brand-container a.navbar-brand');
+  brand.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var href = a.getAttribute('href');
+      if (!href) return;
+      e.preventDefault();
+      // Hard navigation bypasses any cached state.
+      window.location.assign(href);
+    });
+  });
+});
+</script><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/masgenomics\.cc\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../../theory/biological-fundamentals/linkage-recombination-ld.html" class="pagination-link" aria-label="Linkage, recombination, and linkage disequilibrium">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Linkage, recombination, and linkage disequilibrium</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../theory/biological-fundamentals/pedigrees-relatedness-inbreeding.html" class="pagination-link" aria-label="Pedigrees, relatedness, and inbreeding">
+        <span class="nav-page-text">Pedigrees, relatedness, and inbreeding</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Agus Wibowo · MIT License</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+</div>
+  </div>
+</footer>
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

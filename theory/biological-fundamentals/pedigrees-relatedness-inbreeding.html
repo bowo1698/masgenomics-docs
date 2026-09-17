@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Pedigrees, relatedness, and inbreeding – masgenomics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../theory/mathematical-fundamentals/descriptive-statistics.html" rel="next">
+<link href="../../theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.html" rel="prev">
+<link href="../../assets/MBGs.svg" rel="icon" type="image/svg+xml">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-ebbd7925c026e5f35345f5eb496f355d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": true,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><style>html{ scroll-behavior: smooth; }</style>
+</head>
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="https://masgenomics.cc/" class="navbar-brand navbar-brand-logo">
+    <img src="../../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo light-content"><img src="../../assets/MBGs.svg" alt="masgenomics logo" class="navbar-logo dark-content"></a>
+    <a class="navbar-brand" href="https://masgenomics.cc/">
+    <span class="navbar-title">masgenomics</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../installation/index.html"> 
+<span class="menu-text">Installation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../theory/index.html" aria-current="page"> 
+<span class="menu-text">Theory</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tutorials/index.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../input-data/index.html"> 
+<span class="menu-text">Input Data</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-reference" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Reference</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-reference">
+<li>
+    <a class="dropdown-item" href="../../reference/maspipeline/index.html">
+ <span class="dropdown-text">maspipeline</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../reference/masreml/index.html">
+ <span class="dropdown-text">masreml</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../reference/masbayes/index.html">
+ <span class="dropdown-text">masbayes</span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item">
+    <a class="nav-link" href="../../internals/index.html"> 
+<span class="menu-text">Internals</span></a>
+  </li>  
+</ul>
+<ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../theory/biological-fundamentals/genetic-fundamentals.html">1. Biological fundamentals</a></li><li class="breadcrumb-item"><a href="../../theory/biological-fundamentals/pedigrees-relatedness-inbreeding.html">Pedigrees, relatedness, and inbreeding</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview of Selective Breeding</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">1. Biological fundamentals</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/genetic-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genetic Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/genetic-variation-markers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genetic variation and molecular markers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/population-genetic-variation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genetic variation in populations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/linkage-recombination-ld.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linkage, recombination, and linkage disequilibrium</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Haplotypes, phasing, and microhaplotypes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/biological-fundamentals/pedigrees-relatedness-inbreeding.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Pedigrees, relatedness, and inbreeding</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">2. Mathematical fundamentals</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/descriptive-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descriptive statistics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/probability-random-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Probability and random variables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/probability-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Probability distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/sampling-uncertainty.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sampling and statistical uncertainty</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/covariance-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Covariance and correlation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/vectors-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vectors and matrices</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/multiple-regression-regularisation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multiple regression and regularisation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/statistical-models-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Statistical models and estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/mathematical-fundamentals/linear-mixed-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear mixed models</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">3. Genomic prediction</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/genomic-prediction/quantitative-genetics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Quantitative genetics: from phenotype to breeding value</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/genomic-prediction/markers-to-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From markers to genomic prediction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/genomic-prediction/genomic-data-encoding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genomic data encoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../theory/genomic-prediction/genomic-relationships.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Genomic relationships</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#pedigrees-describe-possible-transmission-paths" id="toc-pedigrees-describe-possible-transmission-paths" class="nav-link active" data-scroll-target="#pedigrees-describe-possible-transmission-paths">Pedigrees describe possible transmission paths</a></li>
+  <li><a href="#identical-copies-need-an-ancestry-statement" id="toc-identical-copies-need-an-ancestry-statement" class="nav-link" data-scroll-target="#identical-copies-need-an-ancestry-statement">Identical copies need an ancestry statement</a></li>
+  <li><a href="#the-principal-family-in-the-simulated-project-data" id="toc-the-principal-family-in-the-simulated-project-data" class="nav-link" data-scroll-target="#the-principal-family-in-the-simulated-project-data">The principal family in the simulated project data</a></li>
+  <li><a href="#inbreeding-and-homozygosity" id="toc-inbreeding-and-homozygosity" class="nav-link" data-scroll-target="#inbreeding-and-homozygosity">Inbreeding and homozygosity</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/theory/biological-fundamentals/pedigrees-relatedness-inbreeding.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../theory/biological-fundamentals/genetic-fundamentals.html">1. Biological fundamentals</a></li><li class="breadcrumb-item"><a href="../../theory/biological-fundamentals/pedigrees-relatedness-inbreeding.html">Pedigrees, relatedness, and inbreeding</a></li></ol></nav><div class="quarto-title">
+<h1 class="title">Pedigrees, relatedness, and inbreeding</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><p>Genotypes and haplotypes describe chromosome copies in an individual. A <a href="https://www.genome.gov/genetics-glossary/Pedigree"><strong>pedigree</strong></a> records the parentage links that explain how chromosome segments can pass among individuals. It lets a breeding programme distinguish a close relative from an unrelated candidate before any relationship matrix is calculated. The previous page described transmission within a family; this page follows those paths across a pedigree.</p>
+<section id="pedigrees-describe-possible-transmission-paths" class="level2"><h2 class="anchored" data-anchor-id="pedigrees-describe-possible-transmission-paths">Pedigrees describe possible transmission paths</h2>
+<p>A founder is an individual with no recorded parents in the pedigree. Its offspring form the next generation, and their descendants form later generations. Two relatives have a common ancestor when their pedigree paths meet at an earlier individual. A parent and offspring have one direct path; full siblings have both parents in common; half siblings have one parent in common.</p>
+<p>For an autosomal pedigree with non-inbred, unrelated founders, the expected proportion of genome shared by a parent and offspring is one-half. Full siblings also share one-half on average, whereas half siblings share one-quarter on average. These are expectations over meioses, not a claim that every pair has exactly that proportion at every region. Independent assortment and <a href="../../theory/biological-fundamentals/linkage-recombination-ld.html">recombination</a> make the realised chromosome segments inherited by particular relatives differ.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 30%">
+<col style="width: 39%">
+</colgroup>
+<thead><tr class="header">
+<th>Relationship</th>
+<th>Shared pedigree paths</th>
+<th style="text-align: right;">Expected autosomal sharing under the stated assumptions</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Parent and offspring</td>
+<td>One parent transmits one of two chromosome copies</td>
+<td style="text-align: right;">1/2</td>
+</tr>
+<tr class="even">
+<td>Full siblings</td>
+<td>The same two parents contribute to both offspring</td>
+<td style="text-align: right;">1/2</td>
+</tr>
+<tr class="odd">
+<td>Half siblings</td>
+<td>One parent contributes to both offspring</td>
+<td style="text-align: right;">1/4</td>
+</tr>
+</tbody>
+</table>
+<p>The <a href="https://pubmed.ncbi.nlm.nih.gov/11986874/"><strong>kinship coefficient</strong></a> uses a different scale from the expected sharing proportion. It is the probability that one allele sampled from each of two individuals is identical by descent. For these simple non-inbred relationships, kinship is one-quarter for a parent-offspring or full-sibling pair and one-eighth for a half-sibling pair. The corresponding expected sharing proportions are twice those values. This distinction matters because terms such as “relatedness” can otherwise refer to two different numerical scales.</p>
+</section><section id="identical-copies-need-an-ancestry-statement" class="level2"><h2 class="anchored" data-anchor-id="identical-copies-need-an-ancestry-statement">Identical copies need an ancestry statement</h2>
+<p>Two allele copies are <a href="https://pubmed.ncbi.nlm.nih.gov/11986874/"><strong>identical by descent (IBD)</strong></a> when both descend from the same ancestral allele copy through the pedigree. IBD is therefore a statement about inheritance history. Two copies are <strong>identical by state (IBS)</strong> when their observed allele states match, whether or not they came from the same ancestral copy. Common alleles can be IBS without being IBD, and sparse marker data can fail to reveal a shared ancestral segment.</p>
+<p>For the same reason, counting matching genotypes is not a kinship coefficient. Genotype matching depends on which markers were observed, their allele frequencies, coding, and chance. Kinship describes a probability of shared ancestry under a pedigree or genetic model. Genomic marker data can help estimate realised sharing, but the construction of pedigree and genomic relationship matrices belongs to <a href="../../theory/genomic-prediction/quantitative-genetics.html">Genomic prediction</a>, not this biological page.</p>
+</section><section id="the-principal-family-in-the-simulated-project-data" class="level2"><h2 class="anchored" data-anchor-id="the-principal-family-in-the-simulated-project-data">The principal family in the simulated project data</h2>
+<p>The project dataset is simulated. It contains 20 founders and 200 offspring in ten full-sib families. <code>SIRE01</code> and <code>DAM01</code> are the recorded parents of <code>IND001</code> through <code>IND020</code>. The code below derives these statements directly from the pedigree table, then displays the complete first family.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"../../demo-data/main/demo_data.rds"</span><span class="op">)</span></span>
+<span><span class="va">founders</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">pedigree</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">sire</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">dam</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">offspring</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">pedigree</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">sire</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">dam</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">family_1_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"SIRE01"</span>, <span class="st">"DAM01"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"IND%03d"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">family_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">pedigree</span>, <span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">family_1_ids</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>founders <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">founders</span><span class="op">)</span>, offspring <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">offspring</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code> founders offspring 
+       20       200 </code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">family_id</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>
+fam_01 fam_02 fam_03 fam_04 fam_05 fam_06 fam_07 fam_08 fam_09 fam_10 
+    20     20     20     20     20     20     20     20     20     20 </code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">family_1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>       id   sire   dam
+1  SIRE01   &lt;NA&gt;  &lt;NA&gt;
+11  DAM01   &lt;NA&gt;  &lt;NA&gt;
+21 IND001 SIRE01 DAM01
+22 IND002 SIRE01 DAM01
+23 IND003 SIRE01 DAM01
+24 IND004 SIRE01 DAM01
+25 IND005 SIRE01 DAM01
+26 IND006 SIRE01 DAM01
+27 IND007 SIRE01 DAM01
+28 IND008 SIRE01 DAM01
+29 IND009 SIRE01 DAM01
+30 IND010 SIRE01 DAM01
+31 IND011 SIRE01 DAM01
+32 IND012 SIRE01 DAM01
+33 IND013 SIRE01 DAM01
+34 IND014 SIRE01 DAM01
+35 IND015 SIRE01 DAM01
+36 IND016 SIRE01 DAM01
+37 IND017 SIRE01 DAM01
+38 IND018 SIRE01 DAM01
+39 IND019 SIRE01 DAM01
+40 IND020 SIRE01 DAM01</code></pre>
+</div>
+</div>
+<p><a href="#fig-principal-family" class="quarto-xref">Figure&nbsp;1</a> shows a readable subset of this recorded family. Every box is sex-neutral because the pedigree table records parent roles as <code>sire</code> and <code>dam</code> but has no separate sex field. The horizontal line joins the two recorded parents, and every vertical line shown leads to one of their offspring. The other 14 offspring have the same two recorded parents and are listed in the output above.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">display_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"SIRE01"</span>, <span class="st">"DAM01"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"IND%03d"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">family_display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html">subset</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">pedigree</span>, <span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">display_ids</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="va">family_display</span><span class="op">$</span><span class="va">sire</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span> <span class="op">==</span> <span class="st">"SIRE01"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html">all</a></span><span class="op">(</span><span class="va">family_display</span><span class="op">$</span><span class="va">dam</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span> <span class="op">==</span> <span class="st">"DAM01"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">offspring_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span></span>
+<span>  <span class="cn">NA</span>,</span>
+<span>  xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">6.6</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">2.6</span><span class="op">)</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">""</span>, ylab <span class="op">=</span> <span class="st">""</span>, xaxt <span class="op">=</span> <span class="st">"n"</span>, yaxt <span class="op">=</span> <span class="st">"n"</span>, bty <span class="op">=</span> <span class="st">"n"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/segments.html">segments</a></span><span class="op">(</span><span class="fl">3.05</span>, <span class="fl">2.1</span>, <span class="fl">3.95</span>, <span class="fl">2.1</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/segments.html">segments</a></span><span class="op">(</span><span class="fl">3.5</span>, <span class="fl">2.1</span>, <span class="fl">3.5</span>, <span class="fl">1.35</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/segments.html">segments</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.35</span>, <span class="fl">6</span>, <span class="fl">1.35</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/segments.html">segments</a></span><span class="op">(</span><span class="va">offspring_x</span>, <span class="fl">1.35</span>, <span class="va">offspring_x</span>, <span class="fl">0.81</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/rect.html">rect</a></span><span class="op">(</span><span class="fl">1.95</span>, <span class="fl">1.9</span>, <span class="fl">3.05</span>, <span class="fl">2.3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/rect.html">rect</a></span><span class="op">(</span><span class="fl">3.95</span>, <span class="fl">1.9</span>, <span class="fl">5.05</span>, <span class="fl">2.3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/rect.html">rect</a></span><span class="op">(</span><span class="va">offspring_x</span> <span class="op">-</span> <span class="fl">0.42</span>, <span class="fl">0.49</span>, <span class="va">offspring_x</span> <span class="op">+</span> <span class="fl">0.42</span>, <span class="fl">0.81</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/text.html">text</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2.5</span>, <span class="fl">4.5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2.1</span>, <span class="fl">2.1</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"SIRE01"</span>, <span class="st">"DAM01"</span><span class="op">)</span>, cex <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/text.html">text</a></span><span class="op">(</span><span class="va">offspring_x</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0.65</span>, <span class="fl">6</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"IND%03d"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>, cex <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details><div class="cell-output-display">
+<div id="fig-principal-family" class="quarto-float quarto-figure quarto-figure-center anchored" alt="A sex-neutral pedigree diagram. Boxes labelled SIRE01 and DAM01 are joined at the top. A shared descent line branches to six boxes labelled IND001 through IND006 below, showing that all six have the same two recorded parents.">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-principal-family-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="pedigrees-relatedness-inbreeding_files/figure-html/fig-principal-family-1.png" class="img-fluid figure-img" alt="A sex-neutral pedigree diagram. Boxes labelled SIRE01 and DAM01 are joined at the top. A shared descent line branches to six boxes labelled IND001 through IND006 below, showing that all six have the same two recorded parents." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-principal-family-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: A readable six-offspring subset of the simulated principal family. <code>SIRE01</code> and <code>DAM01</code> are the two recorded parents of <code>IND001</code> through <code>IND006</code>; the R output lists the remaining 14 offspring with the same parent pair. Boxes are intentionally sex-neutral because no sex field is supplied in <code>d$pedigree</code>.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The diagram records expected paths of descent, not the exact lengths of DNA segments that each offspring inherited. Full siblings share the same parents, but each receives a different realised mosaic of parental chromosome copies.</p>
+</section><section id="inbreeding-and-homozygosity" class="level2"><h2 class="anchored" data-anchor-id="inbreeding-and-homozygosity">Inbreeding and homozygosity</h2>
+<p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6304688/"><strong>Inbreeding</strong></a> occurs when the two allele copies in an individual are more likely to trace to the same ancestral copy because its parents are related. It increases expected <strong>homozygosity</strong>, the state of carrying matching alleles at a locus. A homozygous genotype need not be IBD, because the same allele state can occur independently in the population. Conversely, inbreeding is an ancestry-based probability that may be estimated using pedigree or genomic information.</p>
+<p>Increased homozygosity can expose recessive deleterious alleles that were masked in heterozygotes. The resulting average reduction in a trait associated with survival, fertility, growth, or another fitness-related measure is called <strong>inbreeding depression</strong>. It is a population-level possibility, not an automatic diagnosis for one individual with a related pedigree. Its magnitude depends on the trait, the population’s deleterious variation, its breeding and demographic history, and the environment.</p>
+<p>Pedigrees give a biological map of ancestry. The next page asks a different question: when a phenotype varies among relatives, how many loci and biological pathways may contribute to that variation?</p>
+</section><section id="exercises" class="level2"><h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Under the stated non-inbred pedigree assumptions, why can full siblings have the same expected sharing as a parent and offspring but different realised chromosome segments?</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Both relationships have expected autosomal sharing of one-half. A parent transmits a recombined chromosome copy to each offspring, and two full siblings receive separate meiotic samples from both shared parents. Their actual inherited segments can therefore differ despite the same expectation.</p>
+</div>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Two individuals have matching alleles at a marker. Why does this not by itself show that the copies are IBD or give their kinship coefficient?</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Matching observed states establish IBS at that marker. The match may arise without a shared ancestral copy, especially for a common allele. IBD and kinship require information or assumptions about ancestry, not only one matching genotype.</p>
+</div>
+</div>
+</div>
+<ol start="3" type="1">
+<li>What does the principal-family diagram establish, and what does it not establish about the six displayed offspring?</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>It establishes the recorded pedigree links: <code>SIRE01</code> and <code>DAM01</code> are parents of each displayed offspring. It does not show their exact realised genome sharing, the parental origin of every allele, or whether any individual has inbreeding depression.</p>
+</div>
+</div>
+</div>
+
+
+</section></main><!-- /main --><script>
+document.addEventListener('DOMContentLoaded', function () {
+  var brand = document.querySelectorAll('.navbar-brand-container a.navbar-brand');
+  brand.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var href = a.getAttribute('href');
+      if (!href) return;
+      e.preventDefault();
+      // Hard navigation bypasses any cached state.
+      window.location.assign(href);
+    });
+  });
+});
+</script><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/masgenomics\.cc\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../../theory/biological-fundamentals/haplotypes-phasing-microhaplotypes.html" class="pagination-link" aria-label="Haplotypes, phasing, and microhaplotypes">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Haplotypes, phasing, and microhaplotypes</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../theory/mathematical-fundamentals/descriptive-statistics.html" class="pagination-link" aria-label="Descriptive statistics">
+        <span class="nav-page-text">Descriptive statistics</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Agus Wibowo · MIT License</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/bowo1698/masgenomics-docs/edit/main/theory/biological-fundamentals/pedigrees-relatedness-inbreeding.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bowo1698/masgenomics-docs/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+<li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bowo1698/masgenomics-docs">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+</div>
+  </div>
+</footer>
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
